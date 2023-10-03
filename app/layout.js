@@ -16,9 +16,11 @@ export default function RootLayout({ children }) {
         <div className="flex flex-col min-h-screen">
           <Header />
 
-          <main className="flex flex-col flex-1 w-full transition-all duration-300 ease-in-out">
-            {children}
-          </main>
+          <div className="flex-1">
+            <div className="container relative">
+              {children}
+            </div>
+          </div>
         </div>
       </body>
     </html>
