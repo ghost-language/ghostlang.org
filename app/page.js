@@ -1,4 +1,3 @@
-import { Title } from '@/components/ui/title'
 import { BoxIcon, FilterIcon, SquareDashedBottomCode } from 'lucide-react'
 
 export default function Home() {

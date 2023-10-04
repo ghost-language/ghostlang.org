@@ -1,0 +1,40 @@
+{
+  "links": {
+    "Introduction": {
+      "Getting Started": ""
+    },
+    "Language": {
+      "Syntax": "/docs/syntax",
+      "Values": "/docs/values",
+      "Variables": "/docs/variables",
+      "Operators": "/docs/operators",
+      "Control Flow": "/docs/control-flow",
+      "Functions": "/docs/funcions",
+      "Error Handling": "/docs/error-handling",
+      "Classes": "/docs/classes",
+      "Method Calls": "/docs/method-calls",
+      "Modules": "/docs/modules"
+    },
+    "Standard Objects": {
+      "Lists": "/docs/lists",
+      "Maps": "/docs/maps",
+      "Strings": "/docs/strings",
+      "Numbers": "/docs/numbers"
+    },
+    "Standard Library": {
+      "Console": "/docs/consoles",
+      "Ghost": "/docs/ghost",
+      "HTTP": "/docs/http",
+      "IO": "/docs/io",
+      "Math": "/docs/math",
+      "OS": "/docs/os"
+    },
+    "Lumen": {
+      "Getting Started": "/docs/lumen",
+      "Audio": "/docs/audio",
+      "Graphics": "/docs/graphics",
+      "Input": "/docs/input",
+      "Window": "/docs/window"
+    }
+  }
+}
