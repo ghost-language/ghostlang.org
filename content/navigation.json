@@ -31,7 +31,7 @@
     },
     "Lumen": {
       "Getting Started": "/docs/lumen",
-      "Game Loop:": "/docs/game-loop",
+      "Game Loop": "/docs/game-loop",
       "Audio": "/docs/audio",
       "Font": "/docs/font",
       "Graphics": "/docs/graphics",
