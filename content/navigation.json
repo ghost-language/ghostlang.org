@@ -31,9 +31,14 @@
     },
     "Lumen": {
       "Getting Started": "/docs/lumen",
+      "Game Loop:": "/docs/game-loop",
       "Audio": "/docs/audio",
+      "Font": "/docs/font",
       "Graphics": "/docs/graphics",
-      "Input": "/docs/input",
+      "Image": "/docs/image",
+      "Joystick": "/docs/joystick",
+      "Keyboard": "/docs/keyboard",
+      "Mouse": "/docs/mouse",
       "Window": "/docs/window"
     }
   }
