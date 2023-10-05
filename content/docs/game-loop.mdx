@@ -3,4 +3,48 @@ title: "Game Loop"
 section: "Lumen"
 ---
 
-...
+At the heart of every Lumen game, the game loop drives the lifecycle of the application. This looping mechanism is responsible for setting the initial state, collecting and processing input, updating state, and rendering graphics to the screen. 
+
+In the context of Lumen's game loop, the sequence is as follows:
+
+1. `load()`
+2. `update()`
+3. `draw()`
+
+## `load()`
+Lumen begins with the `load` function, which is invoked once at the very start. Primarily, this function is used to set the initial state of the game. For example, you might load assets, initialize variables, or set the screen size.
+
+```typescript
+function load() {
+  state.player = {
+    "x": 0,
+    "y": 0,
+    "speed": 5,
+    "sprite": graphics.newImage('player.png')
+  }
+}
+```
+
+## `update()`
+After initializing the game state, `update()` is consistently executed per game frame. This function should handle game logic controlling character behaviors, AI progress, physics, and other progression-related tasks.
+
+```typescript
+function update() {
+  if (keyboard.isDown('right')) {
+    state.player.x += state.player.speed
+  }
+}
+```
+
+## `draw()`
+The `draw()` function is the final part of the cycle, executed after `update()`. The sole purpose of `draw()` is rendering; all calls to render the _current_ game state onto the screen should be done here.
+
+```typescript
+function draw() {
+  graphics.draw(state.player.sprite, state.player.x, state.player.y)
+}
+```
+
+After `draw()` is executed, the game loop returns to `update()` and the cycle repeats until the game is closed. These three functions are the core of Lumen's game loop, and are the only functions that are required to be defined in a Lumen game.
+
+By following the rule of using `load()` for initialization, `update()` for processing game logic, and `draw()` for rendering, you'll keep your games organized, scalable and maintainable.
