@@ -1,15 +1,21 @@
 import Link from 'next/link'
-import { TriangleIcon } from 'lucide-react'
+import { ConstructionIcon, TriangleIcon } from 'lucide-react'
 
 export function Header() {
   const navigation = [
     { name: 'Documentation', href: '/docs' },
-    { name: 'Download', href: '/download' },
-    { name: 'Blog', href: '/blog' },
+    // { name: 'Download', href: '/download' },
+    // { name: 'Blog', href: '/blog' },
   ]
 
   return (
     <header className="supports-backdrop-blue:bg-background/60 sticky top-0 z-50 w-full border-b border-gray-200/60 bg-background/95 backdrop-blur">
+      <div className="h-10 bg-foreground text-background text-sm flex items-center justify-center space-x-3">
+        <ConstructionIcon className="w-5 h-5" />
+        <span>website is under construction</span>
+        <ConstructionIcon className="w-5 h-5" />
+      </div>
+
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex w-full">
           <Link href="/" className="mr-6 flex items-center space-x-2">
