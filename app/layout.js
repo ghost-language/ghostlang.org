@@ -1,6 +1,7 @@
-import { Header } from '@/components/header'
-import { Inter } from 'next/font/google'
 import '@/styles/globals.css'
+import { Inter } from 'next/font/google'
+import { Header } from '@/components/header'
+import 'highlight.js/styles/tokyo-night-dark.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
