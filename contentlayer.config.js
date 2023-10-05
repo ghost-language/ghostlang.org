@@ -1,4 +1,6 @@
+import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
+import remarkMath from 'remark-math'
 import GithubSlugger from 'github-slugger'
 import { defineDocumentType, makeSource} from 'contentlayer/source-files'
 
@@ -31,8 +33,6 @@ export const Doc = defineDocumentType(() => ({
           }
         )
 
-        console.log({ headings })
-
         return headings
       }
     },
@@ -55,6 +55,7 @@ export default makeSource({
   contentDirPath: 'content',
   documentTypes: [Doc, Navigation],
   mdx: {
+    remarkPlugins: [remarkGfm, remarkMath],
     rehypePlugins: [rehypeSlug],
   }
 })
