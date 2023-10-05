@@ -12,8 +12,7 @@ export default function X({ params: { slug } }) {
 
   return (
     <>
-      <meta name="go-import" hid="go-import" content={`ghostlang.org/x/${slug} git ${repositories[slug]}`} />
-      ...
+      <meta name="go-import" hid="go-import" content={`ghostlang.org/x/${slug} git ${repositories[slug]}.git`} />
     </>
   )
 }
