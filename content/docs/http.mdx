@@ -1,0 +1,26 @@
+---
+title: "HTTP"
+section: "Standard Library"
+---
+
+## Methods
+
+### `http.handle()`
+
+Registers a new handler for the given pattern.
+
+```typescript
+http.handle("/", function(request) {
+    print("hello world")
+})
+```
+
+### `http.listen()`
+
+Starts an HTTP server with the given address. Executes the provided callback if successful.
+
+```typescript
+http.listen(3000, function() {
+    print("Server started at http://localhost:3000 🌱")
+})
+```

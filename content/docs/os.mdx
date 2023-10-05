@@ -1,0 +1,55 @@
+---
+title: "OS"
+section: "Standard Library"
+---
+
+## Methods
+
+### `os.args()`
+
+Returns a list of command line arguments passed to a Ghost script. The first element `[0]` is the script name.
+
+```typescript
+os.args()
+```
+
+### `os.clock()`
+
+Returns the number of nanoseconds elapsed since January 1, 1970 UTC.
+
+<callout>
+January 1st, 1970 at 00:00:00 UTC is referred to as the Unix epoch. Early Unix engineers picked that date arbitrarily because they needed to set a uniform date for the start of time, and New Year's Day, 1970, seemed most convenient.
+</callout>
+
+```typescript
+os.clock()
+
+// expected value: 1643344902998773000
+```
+
+### `os.exit()`
+
+Causes the current program to exit with the given status code and optional message. Conventionally, code zero indicates success, non-zero an error. The program terminates immediately.
+
+For portability, the status code should be in the range `[0, 125]`.
+
+```typescript
+os.exit(0, "Process completed successfully")
+
+// expected outout: Process completed successfully
+```
+
+## Properties
+
+### `os.name`
+
+Returns the name of the current operating system:
+- `darwin` (macos)
+- `linux`
+- `windows`
+
+```typescript
+os.name
+
+// expected value: darwin
+```

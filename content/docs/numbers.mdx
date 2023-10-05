@@ -1,0 +1,101 @@
+---
+title: "Numbers"
+section: "Standard Objects"
+---
+
+Ghost has a single numberic type; arbitrary-precision fixed-point decimals. While most other languages contain representations for integers, floats, doubles, etc., we found that having just a single number type was easier to use even at the slight cost of performance.
+
+Because Ghost uses an arbitrary-precision fixed-point decimal system, it is extremely accurate. Number values look like you expect from other languages:
+
+```typescript
+0
+1234
+-5678
+0.001
+3.14159
+12.34
+-1.76
+```
+
+## Precision
+
+Float point numbers (or any binary floating point type) can't represent fractional decimals (`0.1`) precisely. When adding and subtracting them repeatedly will cause rounding errors.
+
+For example, let's consider this code in Go:
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    var n float64 = 0
+
+    for i := 0; i < 1000; i++ {
+        n += .01
+    }
+
+    fmt.Println(n)
+}
+```
+
+You might expect it to print `10`, but it in fact prints `9.999999999999831`. This may not be so much of an issue, but if you were having to calculate with extreme precision (such as money), you could find yourself short a few dollars in some extreme cases.
+
+If you were to run the same program above in Ghost, you'd find that the result does come out to exactly `10`:
+
+```typescript
+value = 0
+
+for (i = 0; i < 1000; i = i + 1) {
+    value = value + 0.01
+}
+
+print(value)
+
+// expected value: 10
+```
+
+<callout>
+Numbers in Ghost can only represent numbers with a maximum of 2^31 digits after the decimal point.
+</callout>
+
+## Scientific Notation
+
+Numeric values can be represented in scientific notation by using `e`. This returns a value multiplied by the specified power of `10`.
+
+```typescript
+1.1    // expected value: 1.1
+1.1e0  // expected value: 1.1
+1.1e1  // expected value: 11.0
+1.1e2  // expected value: 110.0
+1.1e3  // expected value: 1100.0
+8e-2   // expected value: 0.08
+```
+
+## Methods
+
+### `round()`
+
+The `round()` method rounds the given number to the nearest integer to the specified precision.
+
+```typescript
+value = 123.4.round()
+
+// expected value: 123
+```
+
+```typescript
+value = 123.456.round(1)
+
+// expected value: 123.5
+```
+
+### `toString()`
+
+The `toString()` method returns the given number as a string.
+
+```typescript
+value = 3.141592.toString()
+
+// expected value: "3.141592"
+```

@@ -1,0 +1,114 @@
+---
+title: "Math"
+section: "Standard Library"
+---
+
+## Methods
+
+### `math.abs()`
+
+Returns the absolute, or non-negative value, of a given value.
+
+```typescript
+math.abs(-100)
+
+// expected value: 100
+```
+
+### `math.cos()`
+
+Returns the cosine of the radian argument.
+
+```typescript
+math.cos(math.pi / 2).round()
+
+// expected value: 0
+```
+
+### `math.isNegative()`
+
+Determines if the specified value is negative.
+
+```typescript
+math.isNegative(-100)
+
+// expected value: true
+```
+
+### `math.isPositive()`
+
+Determines if the specified value is positive.
+
+```typescript
+math.isPositive(100)
+
+// expected value: true
+```
+
+### `math.isZero()`
+
+Determines if the specified value is zero.
+
+```typescript
+math.isZero(5)
+
+// expected value: false
+```
+
+### `math.sin()`
+
+Returns the sine of the radian argument.
+
+```typescript
+math.sin(math.pi).round()
+
+// expected value: 0
+```
+
+### `math.tan()`
+
+Returns the tangent of the radian argument.
+
+```typescript
+math.tan(0).round()
+
+// expected value: 0
+```
+
+## Properties
+
+### `math.pi`
+The mathematical constant π = 3.141592…, use the `round()` method to round down to the desired precision.
+
+```typescript
+math.pi.round(2)
+
+// expected value: 3.14
+```
+
+### `math.e`
+The mathematical constant e = 2.718281…, use the `round()` method to round down to the desired precision.
+
+```typescript
+math.e.round(2)
+
+// expected value: 2.72
+```
+
+### `math.epsilon`
+The mathematical constant 𝜀 = 2.220446049250e-16, represents the smallest value that a float can have different from zero.
+
+```typescript
+math.epsilon
+
+// expected value: 0.00000000000000022204460492503130808472633361816
+```
+
+### `math.tau`
+The mathematical constant τ = 6.283185…, use the `round()` method to round down to the desired precision.
+
+```typescript
+math.tau.round(2)
+
+// expected value: 6.28
+```

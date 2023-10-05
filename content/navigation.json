@@ -1,7 +1,7 @@
 {
   "links": {
     "Introduction": {
-      "Getting Started": ""
+      "Getting Started": "/docs"
     },
     "Language": {
       "Syntax": "/docs/syntax",
@@ -9,7 +9,7 @@
       "Variables": "/docs/variables",
       "Operators": "/docs/operators",
       "Control Flow": "/docs/control-flow",
-      "Functions": "/docs/funcions",
+      "Functions": "/docs/functions",
       "Error Handling": "/docs/error-handling",
       "Classes": "/docs/classes",
       "Method Calls": "/docs/method-calls",
@@ -22,7 +22,7 @@
       "Numbers": "/docs/numbers"
     },
     "Standard Library": {
-      "Console": "/docs/consoles",
+      "Console": "/docs/console",
       "Ghost": "/docs/ghost",
       "HTTP": "/docs/http",
       "IO": "/docs/io",
