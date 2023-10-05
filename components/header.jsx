@@ -3,9 +3,9 @@ import { TriangleIcon } from 'lucide-react'
 
 export function Header() {
   const navigation = [
-    { name: 'Blog', href: '/blog' },
     { name: 'Documentation', href: '/docs' },
     { name: 'Download', href: '/download' },
+    { name: 'Blog', href: '/blog' },
   ]
 
   return (

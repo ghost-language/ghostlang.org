@@ -1,14 +1,36 @@
-import { BoxIcon, FilterIcon, SquareDashedBottomCode } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { BoxIcon, FilterIcon, SquareDashedBottomCode, BlocksIcon } from 'lucide-react'
 
 export default function Home() {
   return (
     <>
       <section className="py-12">
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-8">
           <div>
-            <h3 className="text-3xl font-extrabold tracking-tight sm:text-4xl">A small, class-based programming language that's a joy to use.</h3>
+            <Label className="mb-3">
+              {/* <BlocksIcon className="w-4 h-4 text-foreground/70" /> */}
+              <span>🌸</span>
+              <span>Currently in Beta</span>
+            </Label>
+            
+            <h3 className="text-3xl font-extrabold tracking-tight sm:text-4xl">A small, object-oriented programming language that's a joy to use.</h3>
 
             <ul className="mt-10 list-none space-y-8">
+            <li>
+                <div className="flex space-x-4">
+                  <div className="flex-shrink-0 h-12 w-12 bg-foreground text-background rounded-md rounded-es-2xl rounded-se-2xl flex items-center justify-center">
+                    <FilterIcon />
+                  </div>
+
+                  <div>
+                    <h4 className="mb-2 text-lg font-bold leading-none">Small</h4>
+                    <p className="leading-6 p-0 text-foreground/80">
+                      Ghost maintains a small footprint (less than 10 MB), making it portable and great for single-board computers.
+                    </p>
+                  </div>
+                </div>
+              </li>
+
               <li>
                 <div className="flex space-x-4">
                   <div className="flex-shrink-0 h-12 w-12 bg-foreground text-background rounded-md rounded-es-2xl rounded-se-2xl flex items-center justify-center">
@@ -27,28 +49,13 @@ export default function Home() {
               <li>
                 <div className="flex space-x-4">
                   <div className="flex-shrink-0 h-12 w-12 bg-foreground text-background rounded-md rounded-es-2xl rounded-se-2xl flex items-center justify-center">
-                    <FilterIcon />
-                  </div>
-
-                  <div>
-                    <h4 className="mb-2 text-lg font-bold leading-none">Small</h4>
-                    <p className="leading-6 p-0 text-foreground/80">
-                      Ghost maintains a small footprint (less than 10 MB), making it portable and great for single-board computers.
-                    </p>
-                  </div>
-                </div>
-              </li>
-
-              <li>
-                <div className="flex space-x-4">
-                  <div className="flex-shrink-0 h-12 w-12 bg-foreground text-background rounded-md rounded-es-2xl rounded-se-2xl flex items-center justify-center">
                     <BoxIcon />
                   </div>
 
                   <div>
-                    <h4 className="mb-2 text-lg font-bold leading-none">Class-based</h4>
+                    <h4 className="mb-2 text-lg font-bold leading-none">Object-oriented</h4>
                     <p className="leading-6 p-0 text-foreground/80">
-                      Ghost places classes front and center, fully embracing object-oriented programming.
+                      In Ghost's little universe, the atoms that make up all matter are objects, fully equipped with their own methods and properties.
                     </p>
                   </div>
                 </div>
