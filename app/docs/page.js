@@ -1,5 +1,8 @@
+'use client'
+
 import { notFound } from 'next/navigation'
 import { allDocs } from 'contentlayer/generated'
+import { OnThisPage } from '@/components/on-this-page'
 import { useMDXComponent } from 'next-contentlayer/hooks'
 
 export default function DocIndex() {
@@ -33,9 +36,7 @@ export default function DocIndex() {
           <div className="sticky top-16 -mt-10 pt-4">
             <div className="relative overflow-hidden pb-10">
               <div className="sticky top-16 -mt-10 h-[calc(100vh-3.5rem)] py-12">
-                <div className="space-y-2">
-                  <p className="font-medium">On This Page</p>
-                </div>
+                <OnThisPage headings={page.headings} />
               </div>
             </div>
           </div>

@@ -1,3 +1,5 @@
+import rehypeSlug from 'rehype-slug'
+import GithubSlugger from 'github-slugger'
 import { defineDocumentType, makeSource} from 'contentlayer/source-files'
 
 export const Doc = defineDocumentType(() => ({
@@ -9,7 +11,32 @@ export const Doc = defineDocumentType(() => ({
     section: { type: 'string', required: true },
   },
   computedFields: {
-    slug: { type: 'string', resolve: (log) => log._raw.sourceFileName.replace('.mdx', '') },
+    headings: {
+      type: 'json',
+      resolve: async (doc) => {
+        const headingsRegex = /\n(?<flag>#{1,6})\s+(?<content>.+)/g
+        const slugger = new GithubSlugger
+        const headings = Array.from(doc.body.raw.matchAll(headingsRegex)).map(
+          ({ groups }) => {
+            const flag = groups?.flag
+            const content = groups?.content
+
+            return {
+              level: flag.length == 1 ? 'one'
+                : flag?.length == 2 ? 'two'
+                : 'three',
+              text: content,
+              slug: content ? slugger.slug(content) : undefined,
+            }
+          }
+        )
+
+        console.log({ headings })
+
+        return headings
+      }
+    },
+    slug: { type: 'string', resolve: (doc) => doc._raw.sourceFileName.replace('.mdx', '') },
     url: { type: 'string', resolve: (doc) => `/docs/${doc.slug}`}
   }
 }))
@@ -24,4 +51,10 @@ export const Navigation = defineDocumentType(() => ({
   isSingleton: true
 }))
 
-export default makeSource({ contentDirPath: 'content', documentTypes: [Doc, Navigation] })
+export default makeSource({
+  contentDirPath: 'content',
+  documentTypes: [Doc, Navigation],
+  mdx: {
+    rehypePlugins: [rehypeSlug],
+  }
+})
