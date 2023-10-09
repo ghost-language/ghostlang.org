@@ -3,4 +3,44 @@ title: "Graphics"
 section: "Lumen"
 ---
 
-...
+The graphics module provides methods for drawing colors, images and various shapes to the screen.
+
+## Setting Colors
+You may set the color of the graphics module using the `setColor` method. The first parameter is the red component of the color, the second parameter is the green component of the color, and the third parameter is the blue component of the color. Each component should be a number between 0 and 255.
+
+```typescript
+graphics.setColor(255, 255, 255)
+```
+
+## Drawing Shapes
+
+### Rectangles
+You may draw a rectangle to the screen using the `rectangle` method. The first two parameters are the `x` and `y` coordinates of the top-left corner of the rectangle. The third and fourth parameters are the width and height of the rectangle.
+
+```typescript
+graphics.setColor(255, 255, 255)
+graphics.rectangle(10, 10, 100, 100)
+```
+
+You may also draw a filled rectangle using the `filledRectangle` method. It accepts the same parameters as the `rectangle` method.
+
+```typescript
+graphics.setColor(255, 255, 255)
+graphics.filledRectangle(10, 10, 100, 100)
+```
+
+### Lines
+You may draw a line to the screen using the `line` method. The first two parameters are the `x` and `y` coordinates of the start of the line. The third and fourth parameters are the `x` and `y` coordinates of the end of the line.
+
+```typescript
+graphics.setColor(255, 255, 255)
+graphics.line(10, 10, 100, 100)
+```
+
+### Pixels
+You may draw a pixel to the screen using the `pixel` method. The first two parameters are the `x` and `y` coordinates of the pixel.
+
+```typescript
+graphics.setColor(255, 255, 255)
+graphics.pixel(10, 10)
+```
