@@ -6,10 +6,22 @@ section: "Lumen"
 The graphics module provides methods for drawing colors, images and various shapes to the screen.
 
 ## Setting Colors
-You may set the color of the graphics module using the `setColor` method. The first parameter is the red component of the color, the second parameter is the green component of the color, and the third parameter is the blue component of the color. Each component should be a number between 0 and 255.
+In Lumen, colors must be set before drawing any basic shapes to the screen. You may set the color using the `setColor` method. This method accepts three parameters for the red, green and blue values. Each value must be between `0` and `255`.
 
 ```typescript
 graphics.setColor(255, 255, 255)
+```
+
+Once the color has been set, you may draw shapes to the screen using the `graphics` module. The color will remain set until you call the `setColor` method again.
+
+```typescript
+graphics.setColor(255, 255, 255)
+graphics.rectangle(10, 10, 100, 100)
+graphics.rectangle(120, 10, 100, 100)
+
+graphics.setColor(255, 0, 0)
+graphics.rectangle(10, 120, 100, 100)
+graphics.rectangle(120, 120, 100, 100)
 ```
 
 ## Drawing Shapes
