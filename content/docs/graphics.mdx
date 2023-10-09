@@ -7,10 +7,16 @@ The graphics module provides methods for drawing colors, images and various shap
 
 ## Coordinate System
 <div className="flex justify-center m-0 p-0">
-  <Image src="/coords_example.png" width={168} height={168} />
+  <Image src="/sprite_coord.gif" width={168} height={168} />
 </div>
 
 Lumen's coordinate system is based on the **Cartesian coordinate system**. The `x` axis increases from left to right, and the `y` axis increases from top to bottom. The origin of the coordinate system is located at the top-left corner of the screen.
+
+So when you draw a shape to the screen, the `x` and `y` coordinates represent the top-left corner of the shape. For example, if you draw a rectangle at `x: 10` and `y: 10`, the top-left corner of the rectangle will be located at `x: 10` and `y: 10` from the top-left corner of the screen.
+
+<div className="flex justify-center m-0 p-0">
+  <Image src="/screen_coord.gif" width={400} height={300} />
+</div>
 
 ## Setting Colors
 In Lumen, colors must be set before drawing any basic shapes to the screen. You may set the color using the `setColor` method. This method accepts three parameters for the red, green and blue values. Each value must be between `0` and `255`.
