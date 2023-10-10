@@ -47,4 +47,8 @@ function draw() {
 
 After `draw()` is executed, the game loop returns to `update()` and the cycle repeats until the game is closed. These three functions are the core of Lumen's game loop, and are the only functions that are required to be defined in a Lumen game.
 
+<div className="flex justify-center m-0 p-0">
+  <Image src="/update_draw_loop.gif" width={512} height={192} />
+</div>
+
 By following the rule of using `load()` for initialization, `update()` for processing game logic, and `draw()` for rendering, you'll keep your games organized, scalable and maintainable.
