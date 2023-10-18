@@ -27,8 +27,9 @@
       "HTTP": "/docs/http",
       "IO": "/docs/io",
       "Math": "/docs/math",
+      "OS": "/docs/os",
       "Random": "/docs/random",
-      "OS": "/docs/os"
+      "Time": "/docs/time"
     },
     "Lumen": {
       "Getting Started": "/docs/lumen",
