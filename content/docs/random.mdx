@@ -1,0 +1,43 @@
+---
+title: "Random"
+section: "Standard Library"
+---
+
+The `random` module provides methods for generating random numbers.
+
+## Methods
+
+### `random.seed()`
+Initialize the random number generator. This method accepts an optional seed value. If no seed is provided, the current time is used. If you wish to use the same sequence of random numbers in multiple runs of your program, you should provide a seed value.
+
+```typescript
+random.seed()
+```
+
+### `random.random()`
+Returns a random floating point number between 0 and 1.
+
+```typescript
+random.random()
+```
+
+You may optionally provide a minimum and maximum value. The returned value will be between the minimum and maximum values, inclusive.
+
+```typescript
+random.random(0, 10)
+```
+
+If you provide a single number, it will be used as the maximum value, and the minimum value will be 0.
+
+```typescript
+random.random(10)
+```
+
+## Properties
+
+### `random.seed`
+The current seed value of the random number generator.
+
+```typescript
+random.seed
+```

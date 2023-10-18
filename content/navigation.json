@@ -27,6 +27,7 @@
       "HTTP": "/docs/http",
       "IO": "/docs/io",
       "Math": "/docs/math",
+      "Random": "/docs/random",
       "OS": "/docs/os"
     },
     "Lumen": {
