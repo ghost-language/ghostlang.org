@@ -1,5 +1,8 @@
 import Link from 'next/link'
-import { ConstructionIcon, TriangleIcon } from 'lucide-react'
+import { navigation as docNavigation } from 'contentlayer/generated'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Sheet, SheetTrigger, SheetContent, SheetClose } from '@/components/ui/sheet'
+import { ConstructionIcon, TriangleIcon, PanelLeftIcon } from 'lucide-react'
 
 export function Header() {
   const navigation = [
@@ -17,7 +20,7 @@ export function Header() {
       </div>
 
       <div className="container flex h-14 items-center">
-        <div className="mr-4 flex w-full">
+        <div className="hidden mr-4 md:flex w-full">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <TriangleIcon className="w-6 h-6" />
 
@@ -33,7 +36,45 @@ export function Header() {
           </nav>
         </div>
 
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+        {/* Mobile navigation */}
+        <Sheet>
+          <SheetTrigger className="md:hidden inline-flex items-center justify-center rounded-md font-medium transition-colors">
+            <PanelLeftIcon className="w-6 h-6" />
+          </SheetTrigger>
+
+          <SheetContent side="left">
+            <Link href="/" className="mr-6 flex items-center space-x-2">
+              <TriangleIcon className="w-6 h-6" />
+
+              <span className="font-bold inline-block uppercase text-sm tracking-wide">Ghost</span>
+            </Link>
+
+            <ScrollArea className="relative overflow-hidden h-full py-6 pl-8 pr-6 lg:py-8">
+              {Object.keys(docNavigation.links).map((section, idx) => (
+                <div key={idx} className="pb-4">
+                  <h4 className="mb-1 rounded-md px-2 py-1 text-sm font-semibold">
+                    {section}
+                  </h4>
+
+                  <div className="grid grid-flow-row auto-rows-max text-sm">
+                    {Object.keys(docNavigation.links[section]).map((name, idx) => {
+                      const slug = docNavigation.links[section][name]
+
+                      return (
+                        <SheetClose asChild key={idx}>
+                          <Link href={`${slug}`} className="group flex w-full items-center rounded-md border border-transparent px-2 py-1 hover:underline text-muted-foreground">{name}</Link>
+                        </SheetClose>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </ScrollArea>
+
+          </SheetContent>
+        </Sheet>
+
+        <div className="flex flex-1 items-center space-x-2 justify-end">
           {/* Search component placeholder */}
 
           <nav className="flex items-center">
