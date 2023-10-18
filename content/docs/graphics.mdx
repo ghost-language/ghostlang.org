@@ -42,6 +42,10 @@ graphics.rectangle(120, 120, 100, 100)
 ### Rectangles
 You may draw a rectangle to the screen using the `rectangle` method. The first two parameters are the `x` and `y` coordinates of the top-left corner of the rectangle. The third and fourth parameters are the width and height of the rectangle.
 
+<div className="flex justify-center m-0 p-0">
+  <Image src="/graphics_rectangle.gif" width={128} height={128} />
+</div>
+
 ```typescript
 graphics.setColor(255, 255, 255)
 graphics.rectangle(10, 10, 100, 100)
@@ -49,13 +53,44 @@ graphics.rectangle(10, 10, 100, 100)
 
 You may also draw a filled rectangle using the `filledRectangle` method. It accepts the same parameters as the `rectangle` method.
 
+<div className="flex justify-center m-0 p-0">
+  <Image src="/graphics_filled_rectangle.gif" width={128} height={128} />
+</div>
+
 ```typescript
 graphics.setColor(255, 255, 255)
 graphics.filledRectangle(10, 10, 100, 100)
 ```
 
+### Circles
+You may draw a circle to the screen using the `circle` method. The first two parameters are the `x` and `y` coordinates of the center radius of the circle. The third parameter is the radius of the circle.
+
+<div className="flex justify-center m-0 p-0">
+  <Image src="/graphics_circle.gif" width={128} height={128} />
+</div>
+
+```typescript
+graphics.setColor(255, 255, 255)
+graphics.circle(100, 100, 25)
+```
+
+You may also draw a filled circle using the `filledCircle` method. It accepts the same parameters as the `circle` method.
+
+<div className="flex justify-center m-0 p-0">
+  <Image src="/graphics_filled_circle.gif" width={128} height={128} />
+</div>
+
+```typescript
+graphics.setColor(255, 255, 255)
+graphics.filledCircle(100, 100, 25)
+```
+
 ### Lines
 You may draw a line to the screen using the `line` method. The first two parameters are the `x` and `y` coordinates of the start of the line. The third and fourth parameters are the `x` and `y` coordinates of the end of the line.
+
+<div className="flex justify-center m-0 p-0">
+  <Image src="/graphics_line.gif" width={128} height={128} />
+</div>
 
 ```typescript
 graphics.setColor(255, 255, 255)
@@ -64,6 +99,10 @@ graphics.line(10, 10, 100, 100)
 
 ### Points
 You may draw a point on the screen using the `point` method. The first two parameters are the `x` and `y` coordinates of the pixel.
+
+<div className="flex justify-center m-0 p-0">
+  <Image src="/graphics_point.gif" width={128} height={128} />
+</div>
 
 ```typescript
 graphics.setColor(255, 255, 255)
