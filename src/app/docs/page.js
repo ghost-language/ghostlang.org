@@ -38,14 +38,6 @@ export default function DocIndex() {
         </div>
 
         <OnThisPage headings={page.headings} />
-        {/* <div className="hidden text-sm xl:block">
-          <div className="sticky top-14 -mt-18 pt-18">
-            <div className="relative overflow-hidden pb-18">
-              <div className="sticky top-14 -mt-10 h-[calc(100vh-3.5rem)] py-12">
-              </div>
-            </div>
-          </div>
-        </div> */}
     </>
   )
 }
