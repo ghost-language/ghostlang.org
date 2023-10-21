@@ -29,7 +29,7 @@ print(1 or 2)
 
 A conditional statement is a set of commands that executes if a specified condition is true.
 
-## If Statements
+### If Statements
 
 The simplest conditional statement, `if` lets you conditionally skip a chunk of code. It looks like this:
 
@@ -81,7 +81,7 @@ while (condition) {
 
 The condition test occurs _before_ the block is executed. If the condition returns `true`, the block is executed and the condition is tested again. If the condition returns `false`, execution stops, and control is passed to the statement following `while`.
 
-#### Example 1
+---
 
 The following `while` loop iterates as long as `n` is less than `3`:
 
@@ -103,7 +103,7 @@ With each iteration, the loop increments `n` and adds that value to `x`. Therefo
 
 After completing the third pass, the condition `n < 3` is no longer `true`, so the loop terminates.
 
-#### Example 2
+---
 
 Generally you'll want to avoid infinite loops (there are very few cases where an infinite loops are utilized, such as in game development). These are loops where the condition never evaluates to `false`. The following example will loop forever because the condition is always `true`:
 
@@ -132,3 +132,48 @@ When a `for` loop executes, the following occurs:
 3. The block executes.
 4. The increment expression is executed.
 5. Control returns to step 2 until the condition expression evaluates to `false`.
+
+### Break Statement
+The `break` statement terminates the current loop statement and transfers program control back to the state following the terminated statement.
+
+A `break` statement cannot be used at the top level of a script, module, function, or class.
+
+As an example, the following function has a `break` statement that terminates the `while` loop when `i` is `3`, and then returns the value `3 * x` from the function:
+
+```typescript
+function testBreak(x) {
+  i = 0
+
+  while (i < 6) {
+    if (i == 3) {
+      break
+    }
+
+    i + i + 1
+  }
+
+  return i * x
+}
+```
+
+### Continue Statement
+The `continue` statement terminates execution of the statements in the current iteration of the current or labeled loop, and continues execution of the loop with the next iteration.
+
+Much like `break`, a `continue` statement cannot be used at the top level of a script, module, function, or class.
+
+As an example, the following example shows a `while` loop that has a `continue` statement that executes when the value of `i` is `3`. Thus, `n` takes on the values `1`, `3`, `7`, and `12`.
+
+```typescript
+i = 0
+n = 0
+
+while (i < 5) {
+  i = i + 1
+
+  if (i == 3) {
+    continue
+  }
+
+  n = n + 1
+}
+```
