@@ -35,15 +35,7 @@ export default function DocPage({ params: { slug } }) {
           </div>
         </div>
 
-        <div className="hidden text-sm xl:block">
-          <div className="sticky top-16 -mt-10 pt-4">
-            <div className="relative overflow-hidden pb-10">
-              <div className="sticky top-16 -mt-10 h-[calc(100vh-3.5rem)] py-12">
-                <OnThisPage headings={page.headings} />
-              </div>
-            </div>
-          </div>
-        </div>
+        <OnThisPage headings={page.headings} />
     </>
   )
 }

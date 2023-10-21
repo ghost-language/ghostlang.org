@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 export default function DocsLayout({ children }) {
   return (
     <div className="flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
-      <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block">
+      <aside className="fixed top-14 -mt-10 pt-10 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block">
         <ScrollArea className="relative overflow-hidden h-full py-6 pl-8 pr-6 lg:py-8">
           {Object.keys(navigation.links).map((section, idx) => (
             <div key={idx} className="pb-4">
