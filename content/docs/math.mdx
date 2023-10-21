@@ -3,9 +3,23 @@ title: "Math"
 section: "Standard Library"
 ---
 
+The `math` module provides a set of mathematical functions and constants.
+
 ## Methods
 
-### `math.abs()`
+<Collection>
+  <p>[abs](#abs)</p>
+  <p>[cos](#cos)</p>
+  <p>[isNegative](#isnegative)</p>
+  <p>[isPositive](#ispositive)</p>
+  <p>[isZero](#iszero)</p>
+  <p>[max](#max)</p>
+  <p>[min](#min)</p>
+  <p>[sin](#sin)</p>
+  <p>[tan](#tan)</p>
+</Collection>
+
+### `abs()`
 
 Returns the absolute, or non-negative value, of a given value.
 
@@ -15,7 +29,7 @@ math.abs(-100)
 // expected value: 100
 ```
 
-### `math.cos()`
+### `cos()`
 
 Returns the cosine of the radian argument.
 
@@ -25,7 +39,7 @@ math.cos(math.pi / 2).round()
 // expected value: 0
 ```
 
-### `math.isNegative()`
+### `isNegative()`
 
 Determines if the specified value is negative.
 
@@ -35,7 +49,7 @@ math.isNegative(-100)
 // expected value: true
 ```
 
-### `math.isPositive()`
+### `isPositive()`
 
 Determines if the specified value is positive.
 
@@ -45,7 +59,7 @@ math.isPositive(100)
 // expected value: true
 ```
 
-### `math.isZero()`
+### `isZero()`
 
 Determines if the specified value is zero.
 
@@ -55,7 +69,27 @@ math.isZero(5)
 // expected value: false
 ```
 
-### `math.sin()`
+### `max()`
+
+Returns the largest of two numbers.
+
+```typescript
+math.max(100, 200)
+
+// expected value: 200
+```
+
+### `min()`
+
+Returns the smallest of two numbers.
+
+```typescript
+math.min(100, 200)
+
+// expected value: 100
+```
+
+### `sin()`
 
 Returns the sine of the radian argument.
 
@@ -65,7 +99,7 @@ math.sin(math.pi).round()
 // expected value: 0
 ```
 
-### `math.tan()`
+### `tan()`
 
 Returns the tangent of the radian argument.
 
@@ -77,17 +111,15 @@ math.tan(0).round()
 
 ## Properties
 
-### `math.pi`
-The mathematical constant π = 3.141592…, use the `round()` method to round down to the desired precision.
+<Collection>
+  <p>[e](#e)</p>
+  <p>[epsilon](#epsilon)</p>
+  <p>[pi](#pi)</p>
+  <p>[tau](#tau)</p>
+</Collection>
 
-```typescript
-math.pi.round(2)
-
-// expected value: 3.14
-```
-
-### `math.e`
-The mathematical constant e = 2.718281…, use the `round()` method to round down to the desired precision.
+### `e`
+The mathematical constant `e = 2.718281…`, use the `round()` method to round down to the desired precision.
 
 ```typescript
 math.e.round(2)
@@ -95,8 +127,8 @@ math.e.round(2)
 // expected value: 2.72
 ```
 
-### `math.epsilon`
-The mathematical constant 𝜀 = 2.220446049250e-16, represents the smallest value that a float can have different from zero.
+### `epsilon`
+The mathematical constant `𝜀 = 2.220446049250e-16`, represents the smallest value that a float can have different from zero.
 
 ```typescript
 math.epsilon
@@ -104,8 +136,17 @@ math.epsilon
 // expected value: 0.00000000000000022204460492503130808472633361816
 ```
 
-### `math.tau`
-The mathematical constant τ = 6.283185…, use the `round()` method to round down to the desired precision.
+### `pi`
+The mathematical constant `π = 3.141592…`, use the `round()` method to round down to the desired precision.
+
+```typescript
+math.pi.round(2)
+
+// expected value: 3.14
+```
+
+### `tau`
+The mathematical constant `τ = 6.283185…`, use the `round()` method to round down to the desired precision.
 
 ```typescript
 math.tau.round(2)

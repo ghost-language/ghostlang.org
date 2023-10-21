@@ -3,7 +3,7 @@ title: "Classes"
 section: "Language"
 ---
 
-Classes define an objects _behavior_ and _state_. Behavior is defined by [methods](/docs/1.0/method-calls) which live in the class. Every object of the same class supports the same methods. State is defined in fields, whose values are stored in each instance.
+Classes define an objects _behavior_ and _state_. Behavior is defined by [methods](/docs/1.0/method-calls) which live in the class. Every object of the same class supports the same methods. State is defined in properties, whose values are stored in each instance.
 
 ## Defining A Class
 
@@ -15,7 +15,7 @@ class CoffeeMaker {
 }
 ```
 
-This creates a class named `CoffeeMaker` with no methods or fields.
+This creates a class named `CoffeeMaker` with no methods or properties.
 
 ## Methods
 
@@ -115,11 +115,11 @@ frenchPress = CoffeeMaker.new("very course", "202")
 
 Note that we didn't need to call the `constructor` method directly. A constructor is actually a method on the class. When we reference a class using `new()`, Ghost creates the new instance, then it invokes the _constructor_ on that instance. This is where the constructor body you defined gets run.
 
-This distinction is important because it means inside the body of the constructor, you can access `this`, assign fields, etc.
+This distinction is important because it means inside the body of the constructor, you can access `this`, assign properties, etc.
 
-## Fields
+## Properties
 
-All state stored in instances are stored in _fields_. Each field has a name, are bound to `this`, and act the same as variables.
+All state stored in instances are stored in _properties_. Each property has a name, are bound to `this`, and act the same as variables.
 
 ```typescript
 class CoffeeMaker {
