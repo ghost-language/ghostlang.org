@@ -27,3 +27,99 @@ print(vocabulary[1]) // >> propogate
 print(vocabulary[2]) // >> execute
 print(vocabulary[3]) // >> initialize
 ```
+
+## Methods
+For the remainder of this documentation, we'll discuss each method available on lists.
+
+<Collection>
+  <p>[first](#first)</p>
+  <p>[join](#join)</p>
+  <p>[last](#last)</p>
+  <p>[length](#length)</p>
+  <p>[pop](#pop)</p>
+  <p>[push](#push)</p>
+  <p>[tail](#tail)</p>
+  <p>[toString](#toString)</p>
+</Collection>
+
+### `first()`
+The `first` method returns the first element in the list. If the list is empty, it returns `null`:
+
+```typescript
+[1, 2, 3, 4].first()
+
+// 1
+```
+
+### `join()`
+The `join` method joins the items in a list. It takes a single argument, the string to use as the "glue" between the items in the list.
+
+```typescript
+[1, 2, 3, 4].join('-')
+
+// 1-2-3-4
+```
+
+### `last()`
+The `last` method returns the last element in the list. If the list is empty, it returns `null`:
+
+```typescript
+[1, 2, 3, 4].last()
+
+// 4
+```
+
+### `length()`
+The `length` method returns the number of elements in the list:
+
+```typescript
+[1, 2, 3, 4].length()
+
+// 4
+```
+
+### `pop()`
+The `pop` method removes the last element from the list and returns it:
+
+```typescript
+list = [1, 2, 3, 4]
+
+list.pop()
+
+// 4
+
+print(list)
+
+// [1, 2, 3]
+```
+
+### `push()`
+The `push` method adds an element to the end of the list:
+
+```typescript
+list = [1, 2, 3, 4]
+
+list.push(5)
+
+print(list)
+
+// [1, 2, 3, 4, 5]
+```
+
+### `tail()`
+The `tail` method returns a new list containing all but the first element of the list:
+
+```typescript
+[1, 2, 3, 4].tail()
+
+// [2, 3, 4]
+```
+
+### `toString()`
+The `toString` method returns a string representation of the list:
+
+```typescript
+[1, 2, 3, 4].toString()
+
+// [1, 2, 3, 4]
+```

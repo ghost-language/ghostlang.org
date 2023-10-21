@@ -1,5 +1,7 @@
-import Image from 'next/image'
+'use client'
+
 import { notFound } from 'next/navigation'
+import { components } from '@/components/mdx'
 import { allDocs } from 'contentlayer/generated'
 import { OnThisPage } from '@/components/on-this-page'
 import { useMDXComponent } from 'next-contentlayer/hooks'
@@ -27,11 +29,7 @@ export default function DocPage({ params: { slug } }) {
           </div>
 
           <div className="pb-12 pt-8 prose max-w-none">
-            <MDXContent components={{
-              Image: ({ ...props }) => (
-                <Image {...props} className="p-0 m-0" />
-              )
-            }}/>
+            <MDXContent components={components} />
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 'use client'
 
-import Image from 'next/image'
 import { notFound } from 'next/navigation'
+import { components } from '@/components/mdx'
 import { allDocs } from 'contentlayer/generated'
 import { OnThisPage } from '@/components/on-this-page'
 import { useMDXComponent } from 'next-contentlayer/hooks'
@@ -29,11 +29,7 @@ export default function DocIndex() {
           </div>
 
           <div className="pb-12 pt-8 prose max-w-none">
-            <MDXContent components={{
-              image: ({ src, alt }) => (
-                <Image src={src} alt={alt} />
-              )
-            }}/>
+            <MDXContent components={components} />
           </div>
         </div>
 
