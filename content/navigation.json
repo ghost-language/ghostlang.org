@@ -37,6 +37,7 @@
       "Audio": "/docs/audio",
       "Font": "/docs/font",
       "Graphics": "/docs/graphics",
+      "Colors": "/docs/colors",
       "Image": "/docs/image",
       "Joystick": "/docs/joystick",
       "Keyboard": "/docs/keyboard",

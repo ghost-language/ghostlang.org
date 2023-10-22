@@ -19,20 +19,20 @@ So when you draw a shape to the screen, the `x` and `y` coordinates represent th
 </div>
 
 ## Setting Colors
-In Lumen, colors must be set before drawing any basic shapes to the screen. You may set the color using the `setColor` method. This method accepts three parameters for the red, green and blue values. Each value must be between `0` and `255`.
+In Lumen, colors must be set before drawing any basic shapes to the screen. You may set the color using the `setColor` method. This method accepts a [color](/docs/colors) object.
 
 ```typescript
-graphics.setColor(255, 255, 255)
+graphics.setColor(color.white)
 ```
 
 Once the color has been set, you may draw shapes to the screen using the `graphics` module. The color will remain set until you call the `setColor` method again.
 
 ```typescript
-graphics.setColor(255, 255, 255)
+graphics.setColor(color.white)
 graphics.rectangle(10, 10, 100, 100)
 graphics.rectangle(120, 10, 100, 100)
 
-graphics.setColor(255, 0, 0)
+graphics.setColor(color.red)
 graphics.rectangle(10, 120, 100, 100)
 graphics.rectangle(120, 120, 100, 100)
 ```
@@ -47,7 +47,7 @@ You may draw a rectangle to the screen using the `rectangle` method. The first t
 </div>
 
 ```typescript
-graphics.setColor(255, 255, 255)
+graphics.setColor(color.white)
 graphics.rectangle(10, 10, 100, 100)
 ```
 
@@ -58,7 +58,7 @@ You may also draw a filled rectangle using the `filledRectangle` method. It acce
 </div>
 
 ```typescript
-graphics.setColor(255, 255, 255)
+graphics.setColor(color.white)
 graphics.filledRectangle(10, 10, 100, 100)
 ```
 
@@ -70,7 +70,7 @@ You may draw a circle to the screen using the `circle` method. The first two par
 </div>
 
 ```typescript
-graphics.setColor(255, 255, 255)
+graphics.setColor(color.white)
 graphics.circle(100, 100, 25)
 ```
 
@@ -81,7 +81,7 @@ You may also draw a filled circle using the `filledCircle` method. It accepts th
 </div>
 
 ```typescript
-graphics.setColor(255, 255, 255)
+graphics.setColor(color.white)
 graphics.filledCircle(100, 100, 25)
 ```
 
@@ -93,7 +93,7 @@ You may draw a line to the screen using the `line` method. The first two paramet
 </div>
 
 ```typescript
-graphics.setColor(255, 255, 255)
+graphics.setColor(color.white)
 graphics.line(10, 10, 100, 100)
 ```
 
@@ -105,6 +105,6 @@ You may draw a point on the screen using the `point` method. The first two param
 </div>
 
 ```typescript
-graphics.setColor(255, 255, 255)
+graphics.setColor(color.white)
 graphics.point(10, 10)
 ```
