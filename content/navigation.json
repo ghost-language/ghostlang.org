@@ -31,6 +31,9 @@
       "Random": "/docs/random",
       "Time": "/docs/time"
     },
+    "Digging Deeper": {
+      "Scanning": "/docs/scanning"
+    },
     "Lumen": {
       "Getting Started": "/docs/lumen",
       "Game Loop": "/docs/game-loop",
