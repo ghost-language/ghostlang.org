@@ -5,6 +5,36 @@ section: "Lumen"
 
 The `color` module provides a set of color methods and properties for use in your games when drawing to the screen. Lumen comes with a pre-defined color palette for your convenience, but you can also define your own colors.
 
+## Creating Colors
+You can create a new color by using either the `rgb` or `hex` methods.
+
+### RGB
+The `rgb` method accepts three parameters: `red`, `green`, and `blue`. Each parameter should be a number between 0 and 255.
+
+```typescript
+color.rgb(255, 0, 0) // Red
+```
+
+You can also pass in a fourth parameter, `alpha`, to set the transparency of the color. This should also be a value between 0 and 255.
+
+```typescript
+color.rgb(255, 0, 0, 128) // Red with 50% transparency
+```
+
+### Hex
+The `hex` method accepts a single parameter: `hex`. This should be a string containing a hexadecimal color value. It accepts both 3 and 6 character hex values.
+
+```typescript
+color.hex('#FFF') // White
+color.hex('#FF0000') // Red
+```
+
+You can also pass in a hex value that contains an alpha channel.
+
+```typescript
+color.hex('#FF000080') // Red with 50% transparency
+```
+
 ## Built-in Palette
 <div class="grid grid-cols-2 lg:grid-cols-4 py-4 gap-6">
   <div>
