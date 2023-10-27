@@ -1,0 +1,32 @@
+---
+title: "JSON"
+section: "Standard Library"
+---
+
+The `JSON` module provides methods for decoding from and encoding values to _JavaScript Object Notation_ (JSON).
+
+JSON is a syntax for serializing maps, lists, numbers, strings, booleans, and null. It is based on and popularized by JavaScript, but is language independent. JSON is a common format for data exchange between applications.
+
+## Methods
+
+### `encode()`
+Encodes a value to a JSON string. The value must be a map or list.
+
+```typescript
+json.encode({ foo: 'bar' })
+// '{"foo":"bar"}'
+
+json.encode([1, 2, 3])
+// '[1,2,3]'
+```
+
+### `decode()`
+Decodes a JSON string to a value. The string must be valid JSON.
+
+```typescript
+json.decode('{"foo":"bar"}')
+// { foo: 'bar' }
+
+json.decode('[1,2,3]')
+// [1, 2, 3]
+```
