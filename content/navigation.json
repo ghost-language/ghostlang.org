@@ -32,6 +32,9 @@
       "Random": "/docs/random",
       "Time": "/docs/time"
     },
+    "Embedding": {
+      "Embedding": "/docs/embedding"
+    },
     "Digging Deeper": {
       "Scanning": "/docs/scanning"
     },

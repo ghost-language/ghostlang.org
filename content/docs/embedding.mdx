@@ -1,0 +1,115 @@
+---
+title: "Embedding"
+section: "Embedding"
+---
+
+Ghost was not only designed to be a standalone general-purpose programming language, but also to be a scripting language that can be embedded into other applications.
+
+## Installing Ghost
+To get started, simply `go get` the latest version of Ghost. Make sure your project has already been initialized with `go mod init`.
+
+```bash
+go get ghostlang.org/x/ghost
+```
+
+## Creating a Ghost VM
+The first step to embedding Ghost is to create a new Ghost VM. This is the instance that will be used to execute Ghost code. To start, simply create a new Ghost VM.
+
+```go
+vm := ghost.New()
+```
+
+From here we need to configure and set a couple of things before we can execute any Ghost code.
+
+### Setting the Root Directory
+The root directory is the directory that Ghost will use to resolve relative imports from your code. For example, if you have a file called `foo.ghost` in the root directory, you can import it like this anywhere in your code:
+
+```typescript
+import Foo from 'foo'
+```
+
+To set the root directory, simply call the `SetDirectory` method on the Ghost VM.
+
+```go
+vm.SetDirectory("/path/to/root/directory")
+```
+
+If you are embedding Ghost into an application, you can use the `os.Executable` function to get the path to the executable file, and then use the `filepath.Dir` function to get the directory that the executable is in.
+
+```go
+executable, err := os.Executable()
+
+if err != nil {
+  panic(err)
+}
+
+vm.SetDirectory(filepath.Dir(executable))
+```
+
+### Setting the Source Code
+The next step is to set the source code that you want to execute. This can be done by calling the `SetSource` method on the Ghost VM.
+
+```go
+vm.SetSource(`print('Hello, universe!')`)
+```
+
+## Executing Ghost Code
+Once you have set the source code, you can execute it by calling the `Execute` method on the Ghost VM. This will return a Ghost object that you can use to get the result of the execution.
+
+```go
+result := vm.Execute()
+```
+
+The result will be a Ghost object. If the execution was successful, the result will be the value of the last expression in the source code. If the execution failed, the result will be an error object.
+
+```go
+// Check if the result is an error
+if _, ok := result.(*object.Error); ok {
+  // Handle the error
+  os.Exit(1)
+}
+```
+
+And that's the basics! You can now embed Ghost into your application. But there's more you can do; realistically you will want to do more than execute "hello universe" in your application. In the other sections of this documentation, we will cover how to load and execute Ghost scripts, how to pass data between Ghost and Go, and how to create and use Ghost modules.
+
+## A Complete Example
+Below is a complete example of what we have covered so far. It's a simple program that creates a Ghost VM, loads a script, and executes it.
+
+```go
+package main
+
+import (
+	"os"
+	"path/filepath"
+
+	"ghostlang.org/x/ghost/ghost"
+	"ghostlang.org/x/ghost/object"
+)
+
+func main() {
+	// Create a new Ghost VM
+	vm := ghost.New()
+
+	// Set the root directory
+	// Ghost will use this to resolve imports from your code
+	executable, err := os.Executable()
+
+	if err != nil {
+		panic(err)
+	}
+
+	vm.SetDirectory(filepath.Dir(executable))
+
+	// Set the source code to execute
+	vm.SetSource(`print('Hello, universe!')`)
+
+	// Execute the source code
+	// The result will be a ghost object
+	result := vm.Execute()
+
+	// Check if the result is an error
+	if _, ok := result.(*object.Error); ok {
+		os.Exit(1)
+	}
+}
+```
