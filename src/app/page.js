@@ -26,7 +26,7 @@ export default function Home() {
                   <div>
                     <h4 className="mb-2 text-lg font-bold leading-none">Small</h4>
                     <p className="leading-6 p-0 text-foreground/80">
-                      Ghost maintains a small footprint (less than 10 MB), making it portable and great for single-board computers.
+                      Ghost maintains a small footprint, making it portable and great for single-board computers.
                     </p>
                   </div>
                 </div>
