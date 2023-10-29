@@ -52,9 +52,48 @@ export const Navigation = defineDocumentType(() => ({
   isSingleton: true
 }))
 
+export const Post = defineDocumentType(() => ({
+  name: 'Post',
+  contentType: 'mdx',
+  filePathPattern: 'posts/**/*.mdx',
+  fields: {
+    title: { type: 'string', required: true },
+    date: { type: 'date', required: true },
+    summary: { type: 'mdx', required: true },
+    version: { type: 'string', required: false },
+  },
+  computedFields: {
+    headings: {
+      type: 'json',
+      resolve: async (post) => {
+        const headingsRegex = /\n(?<flag>#{1,6})\s+(?<content>.+)/g
+        const slugger = new GithubSlugger
+        const headings = Array.from(post.body.raw.matchAll(headingsRegex)).map(
+          ({ groups }) => {
+            const flag = groups?.flag
+            const content = groups?.content
+
+            return {
+              level: flag.length == 1 ? 'one'
+                : flag?.length == 2 ? 'two'
+                : 'three',
+              text: content,
+              slug: content ? slugger.slug(content) : undefined,
+            }
+          }
+        )
+
+        return headings
+      }
+    },
+    url: { type: 'string', resolve: (post) => `/blog/${post._raw.flattenedPath.split('/')[1]}` },
+    slug: { type: 'string', resolve: (post) => post._raw.flattenedPath.split('/')[1] },
+  }
+}))
+
 export default makeSource({
   contentDirPath: 'content',
-  documentTypes: [Doc, Navigation],
+  documentTypes: [Doc, Navigation, Post],
   mdx: {
     remarkPlugins: [remarkGfm, remarkMath],
     rehypePlugins: [rehypeHighlight, rehypeSlug],

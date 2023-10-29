@@ -1,5 +1,7 @@
 import { Label } from '@/components/ui/label'
-import { BoxIcon, FilterIcon, SquareDashedBottomCode, BlocksIcon } from 'lucide-react'
+import { Title } from '@/components/ui/title'
+import { MostRecentPosts } from '@/components/most-recent-posts'
+import { BoxIcon, FilterIcon, SquareDashedBottomCode } from 'lucide-react'
 
 export default function Home() {
   return (
@@ -8,9 +10,8 @@ export default function Home() {
         <div className="grid lg:grid-cols-2 gap-8">
           <div>
             <Label className="mb-3">
-              {/* <BlocksIcon className="w-4 h-4 text-foreground/70" /> */}
               <span>🌸</span>
-              <span>Currently in Beta</span>
+              <span>Currently in Development</span>
             </Label>
             
             <h3 className="text-3xl font-extrabold tracking-tight sm:text-4xl">A small, object-oriented programming language that's a joy to use.</h3>
@@ -67,6 +68,14 @@ export default function Home() {
             example code <span className="ml-2 cursor-default animate-pulse">▍</span>
           </div>
         </div>
+      </section>
+
+      <section className="py-12">
+        <div className="mb-6">
+          <Title>From the blog</Title>
+        </div>
+
+        <MostRecentPosts />
       </section>
     </>
   )

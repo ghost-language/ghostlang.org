@@ -1,0 +1,36 @@
+---
+title: "v0.21.0 Released"
+date: 2023-10-26 01:00:00
+summary: "A new pre-release is available for download. Check out the changelog to see what's new."
+---
+
+## Overview
+v0.21.0 is now available for download. This is a pre-release that contains a few new features to the core language. The most notable of these is
+
+## Changelog
+
+### Added
+- Added the `JSON` module to the standard library. The following methods are available:
+  - `json.encode` [[Documentation](/docs/json#encode)]
+  - `json.decode` [[Documentation](/docs/json#decode)]
+
+### Changed
+- Changed the string output of `map` objects. Maps will now output the contents of their keys and values in a JSON-like format.
+
+## Updating
+### Brew
+If you're on mac and used `homebrew` to install Ghost, you can update to the latest version using the following command:
+
+```bash
+brew upgrade ghost
+```
+
+### Go Install
+If you used `go install` to install Ghost, you can update to the latest version using the following command:
+
+```bash
+go install ghostlang.org/x/ghost@latest
+```
+
+### Direct Download
+You may always download the latest version of Ghost from our GitHub [releases](https://github.com/ghost-language/ghost/releases) page.

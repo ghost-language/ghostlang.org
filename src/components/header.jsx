@@ -8,7 +8,7 @@ export function Header() {
   const navigation = [
     { name: 'Documentation', href: '/docs' },
     // { name: 'Download', href: '/download' },
-    // { name: 'Blog', href: '/blog' },
+    { name: 'Blog', href: '/blog' },
   ]
 
   return (
