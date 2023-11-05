@@ -150,3 +150,41 @@ class Bar extends foo {
 ```
 
 This declares a new class Bar that inherits from Foo.
+
+## Traits
+
+In addition to class inheritance, Ghost supports _traits_. Traits are like classes, but they can't be instantiated. Instead, they're used to share methods and properties between classes.
+
+```typescript
+trait Brewable {
+  function brew() {
+    print("Your coffee is now brewing.")
+  }
+}
+```
+
+This defines a trait named `Brewable` with a `brew` method. To use it, you use the `use` keyword when declaring your class:
+
+```typescript
+class CoffeeMaker {
+  use Brewable
+}
+```
+
+This declares a class `CoffeeMaker` that inherits from `Brewable`. It's as if you had written:
+
+```typescript
+class CoffeeMaker {
+  function brew() {
+    print("Your coffee is now brewing.")
+  }
+}
+```
+
+You can use multiple traits by separating them with commas:
+
+```typescript
+class CoffeeMaker {
+  use Brewable, Cleanable
+}
+```
