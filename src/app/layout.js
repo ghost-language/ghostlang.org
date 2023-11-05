@@ -1,6 +1,7 @@
 import '@/styles/globals.css'
 import { Inter } from 'next/font/google'
 import { Header } from '@/components/header'
+import { Footer } from '@/components/footer'
 import 'highlight.js/styles/tokyo-night-dark.css'
 import { Analytics } from '@vercel/analytics/react'
 
@@ -24,6 +25,8 @@ export default function RootLayout({ children }) {
             </div>
           </div>
         </div>
+
+        <Footer />
 
         <Analytics />
       </body>
