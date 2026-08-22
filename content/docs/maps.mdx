@@ -9,9 +9,18 @@ Maps — sometimes called _associative arrays_, _hashes_, or _dictionaries_ in o
 {
     "name": "Ghost",
     "value": 57.3,
-    "handler": function(x) { return x * x}
+    "handler": function(x) { return x * x }
 }
 ```
+
+A key written as a bare identifier is taken as a string, so these two are the same map:
+
+```typescript
+{ "name": "Ghost" }
+{ name: "Ghost" }
+```
+
+Strings, numbers, and booleans can all be used as keys.
 
 ## Accessing Elements
 
@@ -21,12 +30,61 @@ You can access any element in a map by calling the subscript operator on it with
 people = { Artemis: 35, Rabbit: 37, Orion: 43 }
 
 print(people["Artemis"]) // >> 35
-print(people["Rabbit"]) // >> 35
-print(people["Orion"]) // >> 35
+print(people["Rabbit"])  // >> 37
+print(people["Orion"])   // >> 43
+```
+
+A key that is a valid identifier can also be reached with a `.`:
+
+```typescript
+print(people.Artemis) // >> 35
 ```
 
 Calling a key that does not exist will return a `null` value.
 
+```typescript
+print(people["Arasaka"]) // >> null
 ```
-print(people["Arasuka"])  // >> null
+
+## Adding and Changing Elements
+
+Assigning through either form adds the key if it isn't there, and replaces the value if it is. Maps are mutable and are held by reference, so a map passed into a function and changed there stays changed afterwards — which makes a map the usual home for state a function needs to update.
+
+```typescript
+people["Arasaka"] = 12
+people.Orion = 44
+
+print(people["Arasaka"]) // >> 12
+print(people.Orion)      // >> 44
 ```
+
+## Iterating
+
+`for ... in` walks a map. With one name you get each value; with two, the key and the value.
+
+```typescript
+for (value in people) {
+  print(value)
+}
+
+for (name, age in people) {
+  print(name + " is " + age.toString())
+}
+```
+
+Maps are unordered: the pairs come back in no particular order, and that order can differ between runs.
+
+## Nesting
+
+Values can be maps themselves, and the access forms chain:
+
+```typescript
+config = {
+  window: { width: 1280, height: 720 },
+  title: "Ghost"
+}
+
+print(config.window.width) // >> 1280
+```
+
+<callout>Maps carry no methods of their own — there is no `length()`, `keys()`, or `remove()` yet. Counting or collecting keys means walking the map with `for ... in`.</callout>

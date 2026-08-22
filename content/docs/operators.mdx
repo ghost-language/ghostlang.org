@@ -11,23 +11,30 @@ Operators can be grouped according to the number of values they take. Unary oper
 
 The precedence of an operator specifies how "tightly" it binds two expressions together. For example, in the expression `1 + 5 * 3`, the answer is `16` and not `18` because the multiplication (`*`) operator has a higher precedence than the addition (`+`) operator. Parentheses may be used to force precedence, if necessary. For example, `(1 + 5) * 3` evaluates to `18`.
 
-When operators have equal precedence their associativity decides how the operators are grouped. For example, `=` is left-associative, so `1 - 2 - 3` is grouped as `(1 - 2) - 3` and evaluates to `-4`. `=` on the other hand is right-associative, so `a = b = c` is grouped as `a = (b = c)`.
+When operators have equal precedence their associativity decides how the operators are grouped. `-` is left-associative, so `1 - 2 - 3` is grouped as `(1 - 2) - 3` and evaluates to `-4`.
 
 Use of parentheses, even when not strictly necessary, can often increase readability of the code by making grouping explicit rather than relying on the implicit operator precedence and associativity.
 
 The following table summarizes the operator precedence in Ghost, from highest to lowest. Operators in the same box have the same precedence.
 
-| Precedence | Operator          | Description              | Associates |
-| ---------- | ----------------- | ------------------------ | ---------- |
-| 1          | `()` `.`          | Grouping, Method call    | Left       |
-| 2          | `-`               | Negate                   | Right      |
-| 3          | `*` `/` `%`       | Multiply, Divide, Modulo | Left       |
-| 4          | `+` `-`           | Add, Subtract            | Left       |
-| 5          | `<` `<=` `>` `>=` | Comparison               | Left       |
-| 6          | `==` `!=`         | Equals, Not equal        | Left       |
-| 7          | `and`             | Logical and              | Left       |
-| 8          | `or`              | Logical or               | Left       |
-| 9          | `=`               | Assignment               | Right      |
+| Precedence | Operator            | Description                       | Associates |
+| ---------- | ------------------- | --------------------------------- | ---------- |
+| 1          | `.` `[]`            | Property access, Subscript        | Left       |
+| 2          | `()`                | Call                              | Left       |
+| 3          | `-` `!`             | Negate, Logical not               | Right      |
+| 4          | `%`                 | Modulo                            | Left       |
+| 5          | `*` `/` `*=` `/=`   | Multiply, Divide                  | Left       |
+| 6          | `+` `-` `+=` `-=`   | Add, Subtract                     | Left       |
+| 7          | `<` `<=` `>` `>=`   | Comparison                        | Left       |
+| 8          | `==` `!=`           | Equals, Not equal                 | Left       |
+| 9          | `..`                | Range                             | Left       |
+| 10         | `? :`               | Ternary                           | —          |
+| 11         | `and`               | Logical and                       | Left       |
+| 12         | `or`                | Logical or                        | Left       |
+
+<callout>Two of these differ from what C-like languages usually do. `%` binds **tighter** than `*` and `/`, so `2 * 3 % 4` is `2 * (3 % 4)` and evaluates to `6`. And `..` binds looser than the comparisons, so a range built from compared values needs parentheses. When in doubt, parenthesize.</callout>
+
+Assignment (`=`) is not in the table: it is a statement rather than an expression, so `a = b = c` is not valid Ghost.
 
 ## Arithmetic Operators
 
@@ -42,6 +49,8 @@ Remember basic arithmetic from school? These work just like those.
 | `a / b` | Division       | Quotient of `a` and `b`.         |
 | `a % b` | Modulo         | Remainder of `a` divided by `b`. |
 
+Division always produces a decimal, even when both operands are whole: `10 / 4` is `2.5`, not `2`. Use [`math.floor()`](/docs/math) if you want the whole part.
+
 The result of the modulo operator (`%`) has the same sign as the dividend - that is, the result of `a % b` will have the same sign as `a`. For example:
 
 ```typescript
@@ -50,6 +59,14 @@ print(5 % -3) // >> 2
 print(-5 % 3) // >> -2
 print(-5 % -3) // >> -2
 ```
+
+`+` also concatenates two strings:
+
+```typescript
+print("Hello, " + "world!") // >> Hello, world!
+```
+
+Both operands have to be the same type. Adding a number to a string is a type mismatch error — call [`toString()`](/docs/numbers#tostring) on the number first.
 
 ## Assignment Operator
 
@@ -60,6 +77,40 @@ message = "Hello, world!"
 
 print(message) // >> Hello, world!
 ```
+
+## Compound Assignment
+
+The compound operators apply an arithmetic operation to a variable and assign the result back to it.
+
+| Example  | Equivalent to |
+| -------- | ------------- |
+| `a += b` | `a = a + b`   |
+| `a -= b` | `a = a - b`   |
+| `a *= b` | `a = a * b`   |
+| `a /= b` | `a = a / b`   |
+
+```typescript
+total = 10
+total += 5
+
+print(total) // >> 15
+```
+
+## Increment and Decrement
+
+`++` and `--` are postfix operators that add or subtract one.
+
+```typescript
+count = 0
+
+count++
+count++
+count--
+
+print(count) // >> 1
+```
+
+They are most at home in the increment clause of a [`for` loop](/docs/control-flow#for-statement).
 
 ## Comparison Operators
 
@@ -73,3 +124,71 @@ Comparison operators, as their name implies, allow you to compare two values.
 | `a > b`  | Greater than             | `true` if `a` is greater than `b`.             |
 | `a <= b` | Less than or equal to    | `true` if `a` is less than or equal to `b`.    |
 | `a >= b` | Greater than or equal to | `true` if `a` is greater than or equal to `b`. |
+
+Numbers, strings, and booleans compare by value. Comparing two values of different types is a type mismatch error — except against `null`, which any value may be compared to, and which is how you test whether something is set:
+
+```typescript
+if (result == null) {
+  // nothing came back
+}
+```
+
+Two class instances compare by _identity_: two instances of the same class holding equal fields are still two different objects, and `==` reports `false`.
+
+## Logical Operators
+
+| Example   | Name        | Result                                     |
+| --------- | ----------- | ------------------------------------------ |
+| `!a`      | Logical not | `true` if `a` is `false`, and vice versa.  |
+| `a and b` | Logical and | `true` if both `a` and `b` are `true`.     |
+| `a or b`  | Logical or  | `true` if either `a` or `b` is `true`.     |
+
+<callout>**`and` and `or` do not short-circuit.** Both sides are evaluated before the operator is applied, so a test on the left cannot guard the expression on the right. See [Control Flow](/docs/control-flow#logical-operators).</callout>
+
+## Range Operator
+
+`..` builds a list of the whole numbers from its left operand up to and including its right one.
+
+```typescript
+print(1 .. 5) // >> [1, 2, 3, 4, 5]
+```
+
+It is mostly used to drive a `for ... in` loop:
+
+```typescript
+for (i in 1 .. 3) {
+  print(i)
+}
+```
+
+If the start is greater than the end, the result is an empty list — ranges do not count backwards.
+
+## Ternary Operator
+
+`condition ? ifTrue : ifFalse` evaluates to one of two expressions depending on a condition.
+
+```typescript
+label = count == 1 ? "item" : "items"
+```
+
+Ternary expressions cannot be nested directly inside one another. Parenthesize the inner one, or use an `if` statement:
+
+```typescript
+size = width > 100 ? (width > 500 ? "huge" : "large") : "small"
+```
+
+## Subscript and Property Access
+
+`[]` reads an element from a list, a character from a string, or a value from a map by key. `.` reads a property of a map or an instance, or calls a method.
+
+```typescript
+list = [1, 2, 3]
+map = { name: "Ghost" }
+
+print(list[0])     // >> 1
+print("Ghost"[0])  // >> G
+print(map["name"]) // >> Ghost
+print(map.name)    // >> Ghost
+```
+
+An index that is out of range, and a map key that is not present, both read as `null` rather than raising an error.

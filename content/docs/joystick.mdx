@@ -3,4 +3,72 @@ title: "Joystick"
 section: "Lumen"
 ---
 
-_Coming soon._
+The `joystick` module reads game controllers. Controllers are numbered from **1**, and `joystick.count` reports how many are plugged in.
+
+```typescript
+function update(dt) {
+  if (joystick.count == 0) {
+    return
+  }
+
+  x = joystick.getAxis(1, 'leftx')
+
+  game.player.x = game.player.x + x * 180 * dt
+
+  if (joystick.wasPressed(1, 'a')) {
+    jump()
+  }
+}
+```
+
+Checking a controller that is not plugged in reads as "not pressed" rather than raising an error, so a game does not have to guard every read.
+
+## Methods
+
+| Method | What it does |
+| --- | --- |
+| `isDown(index, button)` | The button is held down right now. |
+| `isUp(index, button)` | The button is not held down. |
+| `wasPressed(index, button)` | The button went down this frame. |
+| `wasReleased(index, button)` | The button came up this frame. |
+| `getAxis(index, axis, [deadZone])` | The axis position. |
+| `getName(index)` | The controller's name. |
+| `isConnected(index)` | Whether that controller is plugged in. |
+| `vibrate(index, strength, [strength2], [seconds])` | Rumble, strengths 0 to 1. |
+
+## Properties
+
+| Property | Value |
+| --- | --- |
+| `joystick.count` | How many controllers are connected. |
+
+## Buttons
+
+Buttons use SDL's game-controller names:
+
+`'a'`, `'b'`, `'x'`, `'y'`, `'start'`, `'back'`, `'guide'`, `'leftshoulder'`, `'rightshoulder'`, `'leftstick'`, `'rightstick'`, `'dpup'`, `'dpdown'`, `'dpleft'`, `'dpright'`.
+
+These are the positions on an Xbox-style pad. SDL maps other controllers onto the same names, so `'a'` is the bottom face button whatever the hardware calls it.
+
+## Axes
+
+`'leftx'`, `'lefty'`, `'rightx'`, `'righty'`, `'triggerleft'`, `'triggerright'`.
+
+Sticks report -1 to 1, triggers 0 to 1. A dead zone of 0.15 is applied by default, so a stick at rest reads as exactly zero rather than drifting; pass a third argument to `getAxis` to use a different one.
+
+```typescript
+x = joystick.getAxis(1, 'leftx')       // 0.15 dead zone
+x = joystick.getAxis(1, 'leftx', 0.25) // a larger one, for a worn stick
+```
+
+## Connecting and Disconnecting
+
+The [`joystickadded(count)` and `joystickremoved(count)` callbacks](/docs/game-loop#event-callbacks) fire when a controller is plugged in or unplugged, each carrying the new total — enough to show "controller disconnected" and pause.
+
+```typescript
+function joystickremoved(count) {
+  if (count == 0) {
+    game.paused = true
+  }
+}
+```

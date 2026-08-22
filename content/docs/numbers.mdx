@@ -3,9 +3,7 @@ title: "Numbers"
 section: "Standard Objects"
 ---
 
-Ghost has a single numberic type; arbitrary-precision fixed-point decimals. While most other languages contain representations for integers, floats, doubles, etc., we found that having just a single number type was easier to use even at the slight cost of performance.
-
-Because Ghost uses an arbitrary-precision fixed-point decimal system, it is extremely accurate. Number values look like you expect from other languages:
+Ghost has a single numeric type, `number`. There are no separate integer, float, or double types to declare, convert between, or keep straight.
 
 ```typescript
 0
@@ -17,66 +15,77 @@ Because Ghost uses an arbitrary-precision fixed-point decimal system, it is extr
 -1.76
 ```
 
-## Precision
+## Whole Numbers and Decimals
 
-Float point numbers (or any binary floating point type) can't represent fractional decimals (`0.1`) precisely. When adding and subtracting them repeatedly will cause rounding errors.
+Underneath the single type, a number holds either a 64-bit integer or a 64-bit float, and Ghost chooses as it goes:
 
-For example, let's consider this code in Go:
+- A literal without a decimal point or exponent is an integer.
+- Arithmetic between two integers stays an integer — exactly, with no rounding, anywhere in the 64-bit range.
+- Anything involving a decimal produces a decimal.
+- **Division always produces a decimal**, even when it divides evenly: `10 / 4` is `2.5`, and `10 / 5` is `2`.
 
-```go
-package main
+Both are the same `number` type to your code — [`type()`](/docs/globals#type) reports `number` for either, and they mix freely in arithmetic and comparisons.
 
-import "fmt"
-
-func main() {
-    var n float64 = 0
-
-    for i := 0; i < 1000; i++ {
-        n += .01
-    }
-
-    fmt.Println(n)
-}
+```typescript
+print(2 + 2)     // >> 4
+print(2 + 2.5)   // >> 4.5
+print(10 / 4)    // >> 2.5
 ```
 
-You might expect it to print `10`, but it in fact prints `9.999999999999831`. This may not be so much of an issue, but if you were having to calculate with extreme precision (such as money), you could find yourself short a few dollars in some extreme cases.
+## Precision
 
-If you were to run the same program above in Ghost, you'd find that the result does come out to exactly `10`:
+Decimals are IEEE 754 binary floats, which is the same representation used by Go's `float64`, JavaScript's numbers, and C's `double`. That representation cannot express fractions like `0.1` exactly, and the tiny errors accumulate when you add many of them together:
 
 ```typescript
 value = 0
 
-for (i = 0; i < 1000; i = i + 1) {
-    value = value + 0.01
+for (i = 0; i < 1000; i++) {
+  value = value + 0.01
 }
 
 print(value)
 
-// expected value: 10
+// >> 9.999999999999831
 ```
 
-<callout>
-Numbers in Ghost can only represent numbers with a maximum of 2^31 digits after the decimal point.
-</callout>
+<callout>Do not use decimals for money or for anything else that has to be exact. Count in the smallest whole unit instead — cents rather than dollars — so the arithmetic stays on the integer side, which is exact.</callout>
+
+The same caution applies to comparing decimals. `0.1 + 0.2 == 0.3` is `false`; compare the difference against a small tolerance instead.
 
 ## Scientific Notation
 
-Numeric values can be represented in scientific notation by using `e`. This returns a value multiplied by the specified power of `10`.
+Numeric values can be represented in scientific notation by using `e`. This returns a value multiplied by the specified power of `10`, and always produces a decimal.
 
 ```typescript
 1.1    // expected value: 1.1
 1.1e0  // expected value: 1.1
-1.1e1  // expected value: 11.0
-1.1e2  // expected value: 110.0
-1.1e3  // expected value: 1100.0
+1.1e1  // expected value: 11
+1.1e2  // expected value: 110
+1.1e3  // expected value: 1100
 8e-2   // expected value: 0.08
 ```
 
 ## Methods
 
+<Collection>
+  <p>[floor](#floor)</p>
+  <p>[round](#round)</p>
+  <p>[toString](#tostring)</p>
+</Collection>
+
+### `floor()`
+
+The `floor()` method returns the largest whole number less than or equal to the given number.
+
+```typescript
+value = 3.7.floor()
+
+// expected value: 3
+```
+
 ### `round()`
 
-The `round()` method rounds the given number to the nearest integer to the specified precision.
+The `round()` method rounds the given number to the nearest whole number, or to the number of decimal places given as an argument.
 
 ```typescript
 value = 123.4.round()
@@ -92,10 +101,16 @@ value = 123.456.round(1)
 
 ### `toString()`
 
-The `toString()` method returns the given number as a string.
+The `toString()` method returns the given number as a string. Ghost will not concatenate a number onto a string on its own, so this is what you reach for when building a message.
 
 ```typescript
 value = 3.141592.toString()
 
 // expected value: "3.141592"
+
+print("pi is " + 3.14.toString())
+
+// >> pi is 3.14
 ```
+
+<callout>Lumen adds more to numbers' neighbouring [`math`](/docs/math) module — `ceil`, `sqrt`, `clamp`, `lerp`, and others. See [Math (Lumen)](/docs/game-math).</callout>

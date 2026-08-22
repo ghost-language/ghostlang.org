@@ -1,0 +1,46 @@
+---
+title: "Globals"
+section: "Standard Library"
+---
+
+Two functions are available everywhere without a module in front of them.
+
+## Methods
+
+### `print()`
+
+Writes its arguments to standard output followed by a newline. Multiple arguments are joined with a single space, and each is converted to its string form first — unlike the `+` operator, `print()` is happy to mix types.
+
+```typescript
+print("Hello, world!")     // >> Hello, world!
+print("count:", 3, true)   // >> count: 3 true
+print()                    // >> (a blank line)
+```
+
+Inside an [`http.handle()`](/docs/http#httphandle) callback, `print()` writes to the response body rather than the terminal.
+
+For output with a label, or output without the trailing newline, see the [`console`](/docs/console) module.
+
+### `type()`
+
+Returns the type of the given value as a lowercase string.
+
+```typescript
+print(type(1))          // >> number
+print(type(3.14))       // >> number
+print(type("Ghost"))    // >> string
+print(type(true))       // >> boolean
+print(type(null))       // >> null
+print(type([1, 2]))     // >> list
+print(type({ a: 1 }))   // >> map
+print(type(print))      // >> library_function
+```
+
+Functions report `function`, classes report `class`, and an instance of any class reports `instance` — `type()` names the kind of value, not the class it came from.
+
+```typescript
+class Dog {}
+
+print(type(Dog))         // >> class
+print(type(new Dog()))   // >> instance
+```

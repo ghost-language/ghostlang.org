@@ -46,71 +46,92 @@ Tokens themselves are nothing more than constants defined within Go. In Ghost, a
 ```go
 const (
 	// single-character tokens
-	COLON        = ":"
-	COMMA        = ","
-	LEFTBRACE    = "{"
-	LEFTBRACKET  = "["
-	LEFTPAREN    = "("
-	MINUS        = "-"
-	PLUS         = "+"
-	QUESTION     = "?"
-	RIGHTBRACE   = "}"
-	RIGHTBRACKET = "]"
-	RIGHTPAREN   = ")"
-	SEMICOLON    = ";"
-	SLASH        = "/"
-	STAR         = "*"
-	PERCENT      = "%"
+	COLON Type = iota
+	COMMA
+	LEFTBRACE
+	LEFTBRACKET
+	LEFTPAREN
+	MINUS
+	PLUS
+	QUESTION
+	RIGHTBRACE
+	RIGHTBRACKET
+	RIGHTPAREN
+	SEMICOLON
+	SLASH
+	STAR
+	PERCENT
 
 	// one or two character tokens
-	BANG         = "!"
-	BANGEQUAL    = "!="
-	DOT          = "."
-	DOTDOT       = ".."
-	EQUAL        = "="
-	EQUALEQUAL   = "=="
-	GREATER      = ">"
-	GREATEREQUAL = ">="
-	LESS         = "<"
-	LESSEQUAL    = "<="
-	PLUSEQUAL    = "+="
-	MINUSEQUAL   = "-="
-	STAREQUAL    = "*="
-	SLASHEQUAL   = "/="
+	BANG
+	BANGEQUAL
+	DOT
+	DOTDOT
+	EQUAL
+	EQUALEQUAL
+	GREATER
+	GREATEREQUAL
+	LESS
+	LESSEQUAL
+	PLUSEQUAL
+	PLUSPLUS
+	MINUSEQUAL
+	MINUSMINUS
+	STAREQUAL
+	SLASHEQUAL
 
 	// literals
-	IDENTIFIER = "IDENTIFIER"
-	STRING     = "STRING"
-	NUMBER     = "NUMBER"
+	IDENTIFIER
+	STRING
+	NUMBER
 
 	// keywords
-	AND      = "and"
-	AS       = "as"
-	BREAK    = "break"
-	CASE     = "case"
-	CLASS    = "class"
-	CONTINUE = "continue"
-	ELSE     = "else"
-	EXTENDS  = "extends"
-	FALSE    = "false"
-	FOR      = "for"
-	FROM     = "from"
-	FUNCTION = "function"
-	IF       = "if"
-	IMPORT   = "import"
-	IN       = "in"
-	NULL     = "null"
-	OR       = "or"
-	PRINT    = "print"
-	RETURN   = "return"
-	SUPER    = "super"
-	SWITCH   = "switch"
-	THIS     = "this"
-	TRUE     = "true"
-	WHILE    = "while"
-	EOF      = "eof"
-	INVALID  = "__INVALID__"
+	AND
+	AS
+	BREAK
+	CASE
+	CLASS
+	CONTINUE
+	DEFAULT
+	ELSE
+	EXTENDS
+	FALSE
+	FOR
+	FROM
+	FUNCTION
+	IF
+	IMPORT
+	IN
+	NEW
+	NULL
+	OR
+	PRINT
+	RETURN
+	SUPER
+	SWITCH
+	THIS
+	TRAIT
+	TRUE
+	USE
+	WHILE
+	EOF
+	INVALID
 )
+```
+
+Each constant is an integer rather than a string. That is a deliberate choice: the parser looks up a token's precedence and the evaluator dispatches on its operator many times per line of source, and comparing integers lets those switches compile to jump tables instead of string comparisons. A separate table maps each type back to its source spelling, which is what error messages print:
+
+```go
+var typeNames = [...]string{
+	COLON:     ":",
+	COMMA:     ",",
+	LEFTBRACE: "{",
+	// ...
+	AND:       "and",
+	AS:        "as",
+	BREAK:     "break",
+	// ...
+}
 ```
 
 ## Token Struct
@@ -140,9 +161,9 @@ The `Lexeme` property holds the _value_ of the token in **string** format. This 
 
 ### Literal
 
-The `Literal` property holds the _value_ of the token in its native format. For example, if we have a `NUMBER` token, it's Literal value would be an `int64`.
+The `Literal` property holds the _value_ of the token in its native format. A `STRING` token, for instance, carries the Go `string` with its surrounding quotes already stripped.
 
-<callout>In Ghost, we make use of a decimal package to add arbitrary-precision fixed-point decimal numbers. The scope of this is way beyond this post, but in short this gives us the ability to cleanly evaluate things like `2.3 + 2.3 == 2.6`.</callout>
+<callout>Numbers are the exception: a `NUMBER` token carries only the raw text it was read from. Deciding whether `42` is an `int64` and `4.2` a `float64` is left to the parser, which splits on whether the lexeme contains a `.` or an `e` — the same split [numbers](/docs/numbers) keep at runtime.</callout>
 
 ### Line
 
@@ -181,4 +202,4 @@ The `File` property holds the filename the token is found in. This is particular
 | Lexical Grammar   | A lexical grammar is a formal grammar defining the syntax of tokens.                                                                                                          |
 | Lexical Structure | The lexical structure is the set of basic rules that governs how programs are written.                                                                                        |
 | Lexeme            | Lexemes are the raw substrings of scanned source code. Lexemes are used to create tokens.                                                                                     |
-| Literal           | Literals are the literal representation of the lexeme in the "parent" language (e.g. 5 represented as an int64 in Go). These can be used in the interpreter at a later stage. |
+| Literal           | Literals are the literal representation of the lexeme in the "parent" language (e.g. a quoted string represented as a Go string). These can be used in the interpreter at a later stage. |

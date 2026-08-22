@@ -5,6 +5,14 @@ section: "Language"
 
 In Ghost's little universe, the atoms that make up all matter are the built-in object types. All values are _objects_, and may contain any number of methods to further work with their data. Below we'll briefly introduce each.
 
+You can ask any value what it is with the built-in [`type()`](/docs/globals#type) function.
+
+```typescript
+print(type("Ghost")) // >> string
+print(type(3.14))    // >> number
+print(type([1, 2]))  // >> list
+```
+
 ## Booleans
 
 A boolean value represents truthy or falsy states. There are two boolean values, `true` and `false`.
@@ -31,7 +39,7 @@ Maps — sometimes called _associative arrays_, _hashes_, or _dictionaries_ in o
 {
     "name": "Ghost",
     "value": 57.3,
-    "handler": function(x) { x * x}
+    "handler": function(x) { return x * x }
 }
 ```
 
@@ -41,24 +49,33 @@ Ghost, like many languages, has a special value `null`. It functions a bit like 
 
 ## Numbers
 
-While some languages contain different representations for numbers such as integers, floats, doubles, etc... Ghost has a single numeric type: decimals.
+Ghost has a single numeric type, `number`, which covers whole numbers and decimals alike. There is no separate integer type to declare or convert to.
 
-It's true that decimals have a very small performance hit over using something like pure integers or floats. However, having a single numeric type makes working with numbers in Ghost straight forward and simple.
-
-Furthermore, because Ghost uses an arbitrary-precision fixed-point decimal system, it is extremely accurate. Number values look like you expect from other languages:
+Underneath, a number holds either a 64-bit integer or a 64-bit float, and Ghost picks between them as it goes: whole-number arithmetic stays exact, and anything that produces a fraction — division included — becomes a float. Both are the same `number` type as far as your code is concerned.
 
 ```typescript
 0
-1234 - 5678
+1234
+-5678
 3.14159
-1.0 - 12.34
+12.34
 ```
+
+See [Numbers](/docs/numbers) for what that means for precision.
 
 ## Strings
 
-A string value is a (possibly empty) sequence of bytes. The number of bytes is called the length of the string and is never negative. String values can be surrounded in either double or single quotes, and can store unicode text.
+A string value is a (possibly empty) sequence of bytes. String values can be surrounded in either double or single quotes, and can store unicode text.
 
 ```typescript
 string1 = "Hello, world!"
 string2 = "こんにちは、世界"
 ```
+
+## Functions
+
+Functions are values. They can be stored in variables, passed to other functions, and returned from them. See [Functions](/docs/functions).
+
+## Classes, Traits, and Instances
+
+A `class` declaration creates a class value, `new` creates an _instance_ of one, and a `trait` is a bundle of methods a class can adopt. See [Classes](/docs/classes).

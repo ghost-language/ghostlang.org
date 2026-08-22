@@ -7,7 +7,7 @@ section: "Standard Library"
 
 ### `os.args()`
 
-Returns a list of command line arguments passed to a Ghost script. The first element `[0]` is the script name.
+Returns a list of the command line arguments the interpreter was given, as strings. The first element `[0]` is the path of the script being run; anything after it is what the caller passed along.
 
 ```typescript
 os.args()
@@ -36,8 +36,10 @@ For portability, the status code should be in the range `[0, 125]`.
 ```typescript
 os.exit(0, "Process completed successfully")
 
-// expected outout: Process completed successfully
+// expected output: Process completed successfully
 ```
+
+The message is optional; `os.exit(1)` exits quietly.
 
 ## Properties
 

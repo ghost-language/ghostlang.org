@@ -22,6 +22,7 @@
       "Numbers": "/docs/numbers"
     },
     "Standard Library": {
+      "Globals": "/docs/globals",
       "Console": "/docs/console",
       "Ghost": "/docs/ghost",
       "HTTP": "/docs/http",
@@ -41,15 +42,20 @@
     "Lumen": {
       "Getting Started": "/docs/lumen",
       "Game Loop": "/docs/game-loop",
-      "Audio": "/docs/audio",
-      "Font": "/docs/font",
-      "Graphics": "/docs/graphics",
+      "Canvas": "/docs/canvas",
       "Colors": "/docs/colors",
       "Image": "/docs/image",
-      "Joystick": "/docs/joystick",
+      "Font": "/docs/font",
+      "Audio": "/docs/audio",
       "Keyboard": "/docs/keyboard",
       "Mouse": "/docs/mouse",
-      "Window": "/docs/window"
+      "Joystick": "/docs/joystick",
+      "Window": "/docs/window",
+      "Timer": "/docs/timer",
+      "Filesystem": "/docs/filesystem",
+      "System": "/docs/system",
+      "Math": "/docs/game-math",
+      "Shipping a Game": "/docs/shipping"
     }
   }
 }

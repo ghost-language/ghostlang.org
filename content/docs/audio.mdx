@@ -3,4 +3,76 @@ title: "Audio"
 section: "Lumen"
 ---
 
-_Coming soon._
+The `audio` module plays sound effects and music. WAV, OGG, and MP3 are supported, and paths resolve relative to your game's entry file.
+
+## Methods
+
+### `audio.newSource()`
+
+Loads a sound and returns a [Source](#source).
+
+```typescript
+function load() {
+  game.hit = audio.newSource('resources/hit.wav')
+  game.music = audio.newSource('resources/theme.ogg', 'stream')
+}
+```
+
+The second argument picks how the sound is decoded:
+
+| Mode | Behaviour |
+| --- | --- |
+| `'static'` (the default) | Decodes the whole sound up front. Can overlap with itself. Use it for effects. |
+| `'stream'` | Decodes while playing. Use it for music. |
+
+### Module-level control
+
+| Method | What it does |
+| --- | --- |
+| `play(source)` | Plays a source. |
+| `stop([source])` | Stops one source, or everything if none is given. |
+| `pause()` / `resume()` | Pauses and resumes all audio. |
+| `setVolume(0-1)` / `getVolume()` | The master volume. |
+
+```typescript
+audio.setVolume(0.6)
+audio.play(game.music)
+```
+
+## Source
+
+Each loaded sound is a Source, with its own controls.
+
+| Method | What it does |
+| --- | --- |
+| `play()` / `stop()` / `pause()` / `resume()` | Playback control. |
+| `isPlaying()` / `isPaused()` | State. |
+| `setLooping(bool)` / `isLooping()` | Whether it repeats. |
+| `setVolume(0-1)` / `getVolume()` | This source's volume, under the master. |
+| `fadeIn(seconds)` / `fadeOut(seconds)` | Fades. |
+| `clone()` | A copy with independent playback. |
+| `setPanning(left, right)` | A volume per speaker, each 0 to 1. |
+| `setPosition(angle, distance)` | Places the sound: angle in degrees, 0 ahead and 90 to the right; distance 0 to 1. |
+| `clearEffects()` | Removes panning and positioning. |
+
+```typescript
+function load() {
+  game.music = audio.newSource('resources/theme.ogg', 'stream')
+  game.music.setLooping(true)
+  game.music.fadeIn(2)
+}
+```
+
+`setPanning(1, 0)` is hard left. `setPosition` is the convenient form for a sound with a place in the world:
+
+```typescript
+angle = math.degrees(math.atan2(enemy.y - player.y, enemy.x - player.x))
+distance = math.min(1, math.distance(player.x, player.y, enemy.x, enemy.y) / 600)
+
+game.growl.setPosition(angle, distance)
+game.growl.play()
+```
+
+<callout>Panning and positioning apply to `'static'` sources only. SDL_mixer places channels, and music does not play on one.</callout>
+
+A sound that cannot find a free channel is dropped rather than raising an error. In a loud moment the least important effect should go missing, not the frame that triggered it.

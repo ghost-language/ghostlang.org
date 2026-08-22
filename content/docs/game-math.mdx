@@ -1,0 +1,84 @@
+---
+title: "Math"
+section: "Lumen"
+---
+
+A game needs square roots, rounding, angles between points, and random numbers in a range on nearly every frame. Rather than introduce a second, competing module, Lumen adds these to the [`math`](/docs/math) module Ghost already provides. Ghost's own `abs`, `cos`, `sin`, `tan`, `min`, `max`, `isZero`, `isPositive`, `isNegative`, `pi`, `e`, `tau`, and `epsilon` are untouched and still there.
+
+## Rounding
+
+| Method | Returns |
+| --- | --- |
+| `math.floor(n)` | The largest whole number less than or equal to `n`. |
+| `math.ceil(n)` | The smallest whole number greater than or equal to `n`. |
+| `math.round(n)` | `n` rounded to the nearest whole number. |
+
+```typescript
+tileX = math.floor(player.x / tileSize)
+```
+
+## Arithmetic
+
+| Method | Returns |
+| --- | --- |
+| `math.sqrt(n)` | The square root. |
+| `math.pow(base, exponent)` | `base` raised to `exponent`. |
+| `math.exp(n)` | e raised to `n`. |
+| `math.log(n)` | The natural logarithm. |
+| `math.sign(n)` | `-1`, `0`, or `1`. |
+
+## Angles
+
+| Method | Returns |
+| --- | --- |
+| `math.asin(n)` / `math.acos(n)` / `math.atan(n)` | Inverse trigonometry, in radians. |
+| `math.atan2(y, x)` | The angle to a point, in radians, correct in all four quadrants. |
+| `math.degrees(radians)` | Radians converted to degrees. |
+| `math.radians(degrees)` | Degrees converted to radians. |
+
+Lumen's rotations are all in radians. `degrees()` is there for the places a game thinks in degrees — [`source.setPosition()`](/docs/audio#source), for one.
+
+```typescript
+angle = math.atan2(target.y - player.y, target.x - player.x)
+
+bullet.vx = math.cos(angle) * speed
+bullet.vy = math.sin(angle) * speed
+```
+
+## Game Helpers
+
+| Method | Returns |
+| --- | --- |
+| `math.clamp(value, low, high)` | `value`, held between `low` and `high`. |
+| `math.lerp(from, to, amount)` | A value between `from` and `to`, at `amount` from 0 to 1. |
+| `math.distance(x1, y1, x2, y2)` | The distance between two points. |
+| `math.angle(x1, y1, x2, y2)` | The angle from the first point to the second, in radians. |
+
+`clamp` keeps a camera inside its map and a health bar between empty and full. `lerp` is how a camera follows smoothly rather than snapping:
+
+```typescript
+function update(dt) {
+  camera.x = math.lerp(camera.x, player.x - window.width / 2, 8 * dt)
+  camera.x = math.clamp(camera.x, 0, map.pixelWidth - window.width)
+}
+```
+
+## Randomness
+
+| Method | Returns |
+| --- | --- |
+| `math.random()` | A decimal between 0 and 1. |
+| `math.random(n)` | A whole number from 1 to `n`. |
+| `math.random(low, high)` | A whole number from `low` to `high`. |
+| `math.randomSeed(n)` | Seeds the generator. |
+| `math.noise(x, [y])` | Smooth noise for the given coordinate, between 0 and 1. |
+
+Lumen's generator is separate from Ghost's [`random`](/docs/random) module, so seeding it for reproducible level generation cannot be disturbed by anything else in the program.
+
+`noise()` is the one to reach for when you want variation that is smooth rather than jittery — terrain height, cloud cover, a torch flicker. Neighbouring inputs give neighbouring outputs, which is exactly what `random()` does not do, and the same input always gives the same result.
+
+```typescript
+math.randomSeed(1234) // the same world every run
+
+height = math.noise(x * 0.05) * 40
+```

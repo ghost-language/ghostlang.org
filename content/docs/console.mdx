@@ -3,44 +3,96 @@ title: "Console"
 section: "Standard Library"
 ---
 
+The `console` module writes to and reads from the terminal. The logging methods each prefix their output with a label, which is what separates them from the plain [`print()`](/docs/globals#print) function.
+
 ## Methods
 
-### `console.debug()`
+<Collection>
+  <p>[clear](#clear)</p>
+  <p>[error](#error)</p>
+  <p>[info](#info)</p>
+  <p>[log](#log)</p>
+  <p>[newLine](#newline)</p>
+  <p>[print](#print)</p>
+  <p>[read](#read)</p>
+  <p>[warn](#warn)</p>
+</Collection>
 
-Outputs a debug message to the console.
+Every output method accepts any number of values, and joins them with a single space.
+
+### `console.clear()`
+
+Clears the terminal.
 
 ```typescript
-console.debug("This is a debug message")
+console.clear()
 ```
 
 ### `console.error()`
 
-Outputs an error message to the console.
+Outputs an error message to the console, prefixed with `error:`.
 
 ```typescript
 console.error("This is an error message")
+
+// >> error: This is an error message
 ```
 
 ### `console.info()`
 
-Outputs an informative message to the console.
+Outputs an informative message to the console, prefixed with `info:`.
 
 ```typescript
 console.info("This is an info message")
+
+// >> info: This is an info message
 ```
 
 ### `console.log()`
 
-Outputs a message to the console for general logging information.
+Outputs a message to the console for general logging information, followed by a newline. Unlike the other logging methods it adds no prefix.
 
 ```typescript
 console.log("This is a log message")
+
+// >> This is a log message
+```
+
+### `console.newLine()`
+
+Outputs a single blank line.
+
+```typescript
+console.newLine()
+```
+
+### `console.print()`
+
+Outputs values without a trailing newline, so the next write continues on the same line.
+
+```typescript
+console.print("Loading")
+console.print("...")
+
+// >> Loading...
+```
+
+### `console.read()`
+
+Reads one line from standard input and returns it as a string, without the newline. If a string is passed, it is written first as a prompt. At end of input it returns `null`.
+
+```typescript
+name = console.read("What is your name? ")
+
+console.log("Hello, " + name)
 ```
 
 ### `console.warn()`
 
-Outputs a warning message to the console.
+Outputs a warning message to the console, prefixed with `warning:`.
 
 ```typescript
 console.warn("This is a warning message")
+
+// >> warning: This is a warning message
 ```

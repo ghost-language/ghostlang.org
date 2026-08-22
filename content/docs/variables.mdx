@@ -17,23 +17,76 @@ technology = "Micromachines"
 print(technology) // >> Micromachines
 ```
 
+Reading a name that has never been defined is an error, and Ghost reports it as soon as it reaches that line:
+
+```typescript
+print(mystery) // Error: unknown identifier: mystery
+```
+
 ## Scope
 
-Ghost has true block scope: a variable exists from the point where it is defined until the end of the block where that definition appears.
+**Functions introduce a scope. Blocks do not.** A variable first assigned inside an `if`, `while`, or `for` body belongs to the scope that surrounds the loop or branch, and is still there after it ends:
+
+```typescript
+if (true) {
+  message = "assigned inside the block"
+}
+
+print(message) // >> assigned inside the block
+```
+
+A function body is different. Everything assigned inside it lives and dies with the call:
 
 ```typescript
 function foobar() {
-  print(a) // Error: "a" doesn't exist yet.
-
   a = 123
 
   print(a) // >> 123
 }
 
-print(a) // Error: "a" doesn't exist anymore.
+foobar()
+
+print(a) // Error: unknown identifier: a
 ```
 
-Variables defined at the top level of a script are _top-level_, or _global_. All other variables are _local_. Declaring a variable in an inner scope with the same name as an outer one is called _shadowing_ and is not an error.
+Variables defined at the top level of a script are _top-level_, or _global_. All other variables are _local_.
+
+### Assignment inside a function is always local
+
+This is the rule that catches people out. `=` inside a function creates or updates a variable **in that function**; it never reaches back out to reassign one from an enclosing scope.
+
+```typescript
+count = 0
+
+function bump() {
+  count = count + 1 // reads the outer `count`, writes a new local one
+}
+
+bump()
+
+print(count) // >> 0
+```
+
+A function can _read_ a variable from an enclosing scope, so the right-hand side above sees `0`. The assignment then defines a local `count` that disappears when the call returns.
+
+To have a function change state that outlives it, put the state on a map or a class instance and assign through a property. Property assignment mutates the object itself, and every reference to it sees the change:
+
+```typescript
+state = { count: 0 }
+
+function bump() {
+  state.count = state.count + 1
+}
+
+bump()
+bump()
+
+print(state.count) // >> 2
+```
+
+### Shadowing
+
+Declaring a variable in an inner scope with the same name as an outer one is called _shadowing_ and is not an error.
 
 ```typescript
 a = "outer"
@@ -41,8 +94,23 @@ a = "outer"
 function foobar() {
   a = "inner"
 
-  print(a) // inner
+  print(a) // >> inner
 }
 
-print(a) // outer
+foobar()
+
+print(a) // >> outer
+```
+
+### Loop variables
+
+The counter of a `for` loop, and the key and value of a `for ... in` loop, belong to the loop. When the loop finishes, they are removed again — and if the name was already in use, its previous value is put back.
+
+```typescript
+for (i = 0; i < 3; i++) {
+  last = i
+}
+
+print(last) // >> 2
+print(i)    // Error: unknown identifier: i
 ```

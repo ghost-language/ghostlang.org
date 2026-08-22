@@ -15,13 +15,13 @@ random.seed()
 ```
 
 ### `random.random()`
-Returns a random floating point number between 0 and 1.
+Returns a random decimal between 0 and 1.
 
 ```typescript
 random.random()
 ```
 
-You may optionally provide a minimum and maximum value. The returned value will be between the minimum and maximum values, inclusive.
+You may optionally provide a minimum and maximum value. The returned value falls between them.
 
 ```typescript
 random.random(0, 10)
@@ -33,10 +33,12 @@ If you provide a single number, it will be used as the maximum value, and the mi
 random.random(10)
 ```
 
+The result is always a decimal — use [`floor()`](/docs/numbers#floor) or [`round()`](/docs/numbers#round) if you want a whole number. A maximum of zero or less falls back to a value between 0 and 1.
+
 ## Properties
 
 ### `random.seed`
-The current seed value of the random number generator.
+The current seed value of the random number generator. Reading `random.seed` gives the seed; calling `random.seed(n)` sets it — the module carries both a property and a method under that name.
 
 ```typescript
 random.seed

@@ -5,6 +5,8 @@ section: "Standard Library"
 
 The `math` module provides a set of mathematical functions and constants.
 
+<callout>[Lumen](/docs/lumen) adds a good deal more to this same module — `floor`, `ceil`, `sqrt`, `clamp`, `lerp`, and others. See [Math (Lumen)](/docs/game-math).</callout>
+
 ## Methods
 
 <Collection>
@@ -71,7 +73,7 @@ math.isZero(5)
 
 ### `max()`
 
-Returns the largest of two numbers.
+Returns the larger of two numbers. Extra arguments beyond the first two are ignored.
 
 ```typescript
 math.max(100, 200)
@@ -81,7 +83,7 @@ math.max(100, 200)
 
 ### `min()`
 
-Returns the smallest of two numbers.
+Returns the smaller of two numbers. Extra arguments beyond the first two are ignored.
 
 ```typescript
 math.min(100, 200)
@@ -128,13 +130,16 @@ math.e.round(2)
 ```
 
 ### `epsilon`
-The mathematical constant `𝜀 = 2.220446049250e-16`, represents the smallest value that a float can have different from zero.
+The smallest positive value a decimal can hold that is still distinguishable from zero (`5e-324`).
 
 ```typescript
 math.epsilon
 
-// expected value: 0.00000000000000022204460492503130808472633361816
+// the smallest positive decimal, 5e-324
+// (printing it writes the value out in full)
 ```
+
+<callout>This is the smallest representable decimal, not the machine epsilon (`2.22e-16`) that some languages give this name to. For "are these two decimals close enough", pick a tolerance that suits your numbers rather than using this.</callout>
 
 ### `pi`
 The mathematical constant `π = 3.141592…`, use the `round()` method to round down to the desired precision.

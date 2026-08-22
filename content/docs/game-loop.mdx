@@ -3,52 +3,110 @@ title: "Game Loop"
 section: "Lumen"
 ---
 
-At the heart of every Lumen game, the game loop drives the lifecycle of the application. This looping mechanism is responsible for setting the initial state, collecting and processing input, updating state, and rendering graphics to the screen. 
+At the heart of every Lumen game, the game loop drives the lifecycle of the application. This looping mechanism is responsible for setting the initial state, collecting and processing input, updating state, and rendering graphics to the screen.
 
-In the context of Lumen's game loop, the sequence is as follows:
+Lumen calls `load()` once, then `update(dt)` and `draw()` every frame until the game quits.
 
 1. `load()`
-2. `update()`
+2. `update(dt)`
 3. `draw()`
 
 ## `load()`
-Lumen begins with the `load` function, which is invoked once at the very start. Primarily, this function is used to set the initial state of the game. For example, you might load assets, initialize variables, or set the screen size.
+
+Runs once, before the first frame. Load assets and build initial state here.
 
 ```typescript
+game = {}
+
 function load() {
-  state.player = {
-    'x': 0,
-    'y': 0,
-    'speed': 5,
-    'sprite': image.load('player.png')
+  window.setTitle('My Game')
+
+  game.player = {
+    x: 0,
+    y: 0,
+    speed: 180,
+    sprite: image.load('player.png')
   }
 }
 ```
 
-## `update()`
-After initializing the game state, `update()` is consistently executed per game frame. This function should handle game logic controlling character behaviors, AI progress, physics, and other progression-related tasks.
+If `load()` raises an error, Lumen reports it and exits, rather than running a game whose state was never finished.
+
+## `update(dt)`
+
+After initializing the game state, `update()` runs once per frame. This is where game logic goes: character behaviour, AI, physics, and other progression-related tasks.
+
+`dt` is how many seconds the previous frame took. **Scale anything that moves by it.** A speed written as pixels-per-frame changes with the frame rate; a speed written as pixels-per-second does not.
 
 ```typescript
-function update() {
-  if (keyboard.isDown('right')) {
-    state.player.x += state.player.speed
+function update(dt) {
+  if (keyboard.isDown('right', 'd')) {
+    game.player.x = game.player.x + game.player.speed * dt
   }
 }
 ```
+
+`dt` is capped at 0.25 seconds, so a frame that stalls — a breakpoint, a window drag, a machine going to sleep — cannot teleport everything through a wall.
+
+A game that ignores the argument still works: Ghost drops arguments a function does not declare, so `function update()` is valid. Anything that moves will then run at whatever speed the machine happens to manage.
+
+<callout>Remember that [assignment inside a function is local](/docs/variables#assignment-inside-a-function-is-always-local). `x = x + 1` inside `update()` creates a new local every frame and changes nothing. Keep state on a map or class instance and assign through a property, as above.</callout>
 
 ## `draw()`
-The `draw()` function is the final part of the cycle, executed after `update()`. The sole purpose of `draw()` is rendering; all calls to render the _current_ game state onto the screen should be done here.
+
+The `draw()` function is the final part of the cycle, executed after `update()`. Its sole purpose is rendering the _current_ game state onto the screen.
 
 ```typescript
 function draw() {
-  graphics.draw(state.player.sprite, state.player.x, state.player.y)
+  game.player.sprite.draw(game.player.x, game.player.y)
 }
 ```
 
-After `draw()` is executed, the game loop returns to `update()` and the cycle repeats until the game is closed. These three functions are the core of Lumen's game loop, and are the only functions that are required to be defined in a Lumen game.
+The draw state — transform, color, line width, blend mode, scissor — is reset to its defaults before `draw()` runs, so each frame is self-contained and nothing leaks from the last one. The current font is the exception: it is a choice a game makes once and keeps.
+
+After `draw()` is executed, the game loop returns to `update()` and the cycle repeats until the game is closed.
 
 <div className="flex justify-center m-0 p-0">
   <Image src="/update_draw_loop.gif" width={512} height={192} />
 </div>
 
-By following the rule of using `load()` for initialization, `update()` for processing game logic, and `draw()` for rendering, you'll keep your games organized, scalable and maintainable.
+## Event Callbacks
+
+Beyond the three above, Lumen calls a callback when something happens. Every one is optional; define the ones your game needs.
+
+| Callback | When |
+| --- | --- |
+| `keypressed(key, isRepeat)` | a key goes down |
+| `keyreleased(key)` | a key comes up |
+| `textinput(text)` | text is typed, between [`keyboard.startTextInput()`](/docs/keyboard#text-input) and `stopTextInput()` |
+| `mousepressed(x, y, button, clicks)` | a mouse button goes down |
+| `mousereleased(x, y, button)` | a mouse button comes up |
+| `mousemoved(x, y, dx, dy)` | the pointer moves |
+| `wheelmoved(x, y)` | the wheel turns |
+| `resize(width, height)` | the window is resized |
+| `focus(hasFocus)` | the window gains or loses focus |
+| `joystickadded(count)` | a controller is plugged in |
+| `joystickremoved(count)` | a controller is unplugged |
+| `quit()` | the window is closed; return `true` to cancel |
+
+Use `keypressed` rather than `keyboard.isDown` for menus and dialogue: it fires once per physical press, where `isDown` is true on every frame the key is held.
+
+```typescript
+function keypressed(key, isRepeat) {
+  if (key == 'escape') {
+    lumen.quit()
+  }
+}
+
+function quit() {
+  if (game.unsaved) {
+    game.showSavePrompt = true
+
+    return true // cancel the quit
+  }
+}
+```
+
+## Errors During the Loop
+
+A runtime error inside `update()` or `draw()` is reported and that frame is abandoned; the game keeps running. Repeated identical errors are collapsed rather than filling the terminal a thousand times a second. An error in `load()` is fatal, as described above.

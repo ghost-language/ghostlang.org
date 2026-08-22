@@ -26,3 +26,43 @@ Ghost executes a method call like so:
 1. Evaluate the receiver and arguments from left to right.
 2. Look up the method on the receiver's object.
 3. Invoke it, passing in the argument values.
+
+## Methods On Built-in Values
+
+Methods aren't only for class instances. Every built-in type carries its own set, and they're called the same way:
+
+```typescript
+"ghost".toUpperCase()  // >> GHOST
+[3, 1, 2].length()     // >> 3
+3.14159.round(2)       // >> 3.14
+```
+
+See [Strings](/docs/strings), [Lists](/docs/lists), and [Numbers](/docs/numbers) for what each type offers.
+
+## Properties
+
+The same `.` also reads a value rather than calling something — a field on an instance, a key on a map, or a property on a library module:
+
+```typescript
+dog.name      // a field
+config.debug  // a map key
+math.pi       // a module property
+```
+
+The difference is the parentheses: `math.pi` is a property, `math.abs(-1)` is a method call.
+
+## Chaining
+
+A method call is an expression, so its result can be the receiver of the next call:
+
+```typescript
+"  Ghost  ".trim().toUpperCase() // >> GHOST
+```
+
+## Missing Methods
+
+Calling a method a value doesn't have is a [runtime error](/docs/error-handling#runtime-errors), reported the moment the call is reached:
+
+```
+9:4:example.ghost: runtime error: undefined method someRandomMethod for class Foo
+```

@@ -3,11 +3,15 @@ title: "HTTP"
 section: "Standard Library"
 ---
 
+The `http` module runs a small HTTP server: register handlers for paths, then start listening.
+
 ## Methods
 
 ### `http.handle()`
 
-Registers a new handler for the given pattern.
+Registers a handler for the given path pattern. The handler is a function taking one argument — a map describing the request.
+
+Inside a handler, [`print()`](/docs/globals#print) writes to the response body instead of the terminal. Whatever the handler prints is what the client receives.
 
 ```typescript
 http.handle("/", function(request) {
@@ -15,12 +19,36 @@ http.handle("/", function(request) {
 })
 ```
 
+The request map holds:
+
+| Key             | Description                                            |
+| --------------- | ------------------------------------------------------ |
+| `method`        | The HTTP method, e.g. `GET`.                           |
+| `host`          | The host the request was addressed to.                 |
+| `contentLength` | The length of the request body, in bytes.              |
+| `protocol`      | The protocol version, e.g. `HTTP/1.1`.                 |
+| `protocolMajor` | The major protocol version number.                     |
+| `protocolMinor` | The minor protocol version number.                     |
+| `body`          | The request body as a string.                          |
+
+```typescript
+http.handle("/echo", function(request) {
+    print(request.method + " " + request.body)
+})
+```
+
+Patterns follow Go's `net/http` rules: a pattern ending in `/` matches every path beneath it, and `/` on its own matches everything not matched by something more specific.
+
 ### `http.listen()`
 
-Starts an HTTP server with the given address. Executes the provided callback if successful.
+Starts the server on the given port, and runs the optional callback once it is up. This call blocks — nothing after it runs until the server stops.
 
 ```typescript
 http.listen(3000, function() {
     print("Server started at http://localhost:3000 🌱")
 })
 ```
+
+The server shuts down gracefully on `Ctrl + C`, giving in-flight requests up to 30 seconds to finish.
+
+<callout>The module is deliberately minimal: there is no routing beyond Go's path patterns, no way to set a status code or response headers, and no client for making outbound requests.</callout>

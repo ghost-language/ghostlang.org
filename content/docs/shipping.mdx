@@ -1,0 +1,48 @@
+---
+title: "Shipping a Game"
+section: "Lumen"
+---
+
+A game is a folder with a `main.ghost` in it. To hand it to someone who does not have Lumen, build it.
+
+```bash
+lumen build mygame -o mygame         # a standalone executable; players just run it
+lumen package mygame -o mygame.lumen # one file; players run `lumen mygame.lumen`
+```
+
+## `lumen build`
+
+Appends an archive of your game to a copy of the Lumen binary, so the result is one file with both the engine and the game in it. Players run it like any other program — no Lumen install, no separate assets folder.
+
+<callout>**Builds are per-platform.** Lumen links SDL2 through cgo, so `lumen build` produces a binary for the machine that ran it and only that. There is no way to build a Windows executable from a Mac. Shipping to three platforms means building on three platforms.</callout>
+
+`lumen fuse` is an older name for the same command and still works.
+
+### macOS signing
+
+On macOS a built binary is re-signed with an ad-hoc signature as the last step, because appending anything to an executable invalidates its existing signature and the system kills a binary whose signature does not match its contents.
+
+That needs `codesign`, which arrives with the Xcode command line tools. Shipping to other people's machines wants a real identity and notarisation on top of that.
+
+## `lumen package`
+
+Produces a `.lumen` file: a zip of the game's sources and assets with `main.ghost` at the root. It is much smaller than a built executable, but players need Lumen installed to run it.
+
+```bash
+lumen mygame.lumen
+```
+
+### How a packaged game runs
+
+A packaged game is unpacked into a cache directory the first time it runs, and run from there.
+
+That is deliberate rather than incidental. Ghost resolves `import` and its own [`io`](/docs/io) module against the real filesystem, so serving Lumen's loaders out of the zip while Ghost's imports still needed real paths would give a game two disagreeing views of its own files.
+
+Unpacking costs a moment on first launch and keeps every path in the system pointing at the same thing. Archives are keyed by a hash of their contents, so a second launch reuses what is there, and a changed game never reads a stale mixture.
+
+## Before You Ship
+
+- **Set an identity.** [`filesystem.setIdentity('my-game')`](/docs/filesystem#where-saves-go) in `load()`, so saves land in the player's data directory under your game's name rather than under `lumen`.
+- **Set the window up in `load()`.** Title, size, and icon — see [Window](/docs/window).
+- **Check your asset paths.** They resolve relative to the entry file's directory, which is what a packaged game recreates. Anything reached with `..` from there will not survive packaging.
+- **Read shipped data with [`filesystem.readAsset()`](/docs/filesystem#reading-shipped-data)** rather than `io.read()`, so it resolves against wherever the game actually landed.

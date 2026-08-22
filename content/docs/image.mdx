@@ -3,4 +3,142 @@ title: "Image"
 section: "Lumen"
 ---
 
-_Coming soon._
+The `image` module loads images and cuts them into sprites. Everything it hands back — images, spritesheets, animations, quads — is an object with methods on it, and drawing happens through those objects rather than through the module.
+
+Paths resolve relative to the directory your game's entry file is in.
+
+## Methods
+
+### `image.load()`
+
+Loads an image from a path and returns an [Image](#image-1).
+
+```typescript
+function load() {
+  game.player = image.load('resources/player.png')
+}
+```
+
+Loading the same path twice hands back the image already in memory rather than uploading a second copy of it, so loading a shared sheet from two places costs one texture.
+
+Load in `load()`, not in `draw()`. PNG, JPEG, and the other formats SDL2_image supports all work.
+
+### `image.newQuad()`
+
+Creates a [Quad](#quad) — a rectangle of a texture.
+
+```typescript
+quad = image.newQuad(0, 0, 16, 16)
+```
+
+### `image.newSpritesheet()`
+
+Cuts an image into a grid of equally sized frames and returns a [Spritesheet](#spritesheet).
+
+```typescript
+sheet = image.newSpritesheet('characters.png', 16)     // square frames
+sheet = image.newSpritesheet('characters.png', 16, 24) // 16 wide, 24 tall
+```
+
+The first argument may also be an image that is already loaded, which is how two sheets get cut from one file at different frame sizes.
+
+## Image
+
+Returned by `image.load()`.
+
+| Method | What it does |
+| --- | --- |
+| `draw(x, y, [rotation, sx, sy, ox, oy])` | Draws the image. |
+| `drawQuad(quad, x, y, [rotation, sx, sy, ox, oy])` | Draws one region of it. |
+| `clip(x, y, size)` or `clip(x, y, w, h)` | Returns a lightweight view onto part of the image. |
+| `getWidth()` / `getHeight()` | Dimensions in pixels. |
+| `getDimensions()` | Both, as `[width, height]`. |
+| `getPixel(x, y)` | The [color](/docs/colors) of one pixel of the source image. |
+| `setFilter('nearest'\|'linear')` | How the image is sampled when scaled. |
+
+Rotation is in radians, applied about the origin offset `(ox, oy)`. Negative scale flips:
+
+```typescript
+sprite.draw(x, y)                  // plain
+sprite.draw(x, y, 0, 2, 2)         // double size
+sprite.draw(x, y, 0, -1, 1)        // mirrored horizontally
+sprite.draw(x, y, angle, 1, 1, 8, 8) // rotated about its own centre, for a 16x16 sprite
+```
+
+`clip()` is how one spritesheet becomes many sprites, and it reuses the view it made for a region last time, so reaching for the same region every frame allocates nothing.
+
+`getPixel()` reads from the source image rather than the screen, which lets collision or spawn data be baked into a map image.
+
+`setFilter('nearest')` is what pixel art wants — `'linear'` blurs it.
+
+## Spritesheet
+
+One image cut into a grid of equally sized frames, numbered left to right and top to bottom from zero.
+
+| Method | What it does |
+| --- | --- |
+| `draw(frame, x, y, [rotation, sx, sy, ox, oy])` | Draws one frame. |
+| `newAnimation(frames, secondsPerFrame, [mode])` | Builds an [Animation](#animation) from a list of frame numbers. |
+| `getQuad(frame)` | The [Quad](#quad) for a frame. |
+| `getImage()` | The underlying [Image](#image-1). |
+| `getCount()` | How many frames the sheet holds. |
+| `getColumns()` / `getRows()` | The grid's shape. |
+| `getFrameWidth()` / `getFrameHeight()` | Frame size in pixels. |
+| `getFrameDimensions()` | Both, as `[width, height]`. |
+
+```typescript
+sheet = image.newSpritesheet('characters.png', 16)
+
+sheet.draw(4, x, y)
+```
+
+The quads are built once, when the sheet is made, so drawing a frame never allocates.
+
+## Animation
+
+A sequence of a sheet's frames played against a clock.
+
+```typescript
+walk = sheet.newAnimation([4, 5, 6, 7], 0.16)
+
+function update(dt) {
+  walk.update(dt) // or walk.update() to use the last frame's time
+}
+
+function draw() {
+  walk.draw(x, y)
+}
+```
+
+| Method | What it does |
+| --- | --- |
+| `update([dt])` | Advances the playhead. |
+| `draw(x, y, [rotation, sx, sy, ox, oy])` | Draws the current frame. |
+| `play()` / `pause()` / `resume()` / `stop()` / `reset()` | Playback control. |
+| `seek(seconds)` | Jumps to a point in the sequence. |
+| `clone()` | A copy with its own playhead. |
+| `isPlaying()` / `isPaused()` / `isFinished()` | State. |
+| `getFrame()` / `getFrameCount()` | Which frame, and how many. |
+| `getElapsed()` / `getLength()` | Time into the sequence, and its total. |
+| `getSheet()` | The [Spritesheet](#spritesheet) it came from. |
+| `getDuration()` / `setDuration(n)` | Seconds per frame. |
+| `getSpeed()` / `setSpeed(n)` | Playback rate; `-1` runs it backwards. |
+| `getMode()` / `setMode(name)` | `'loop'` (the default), `'once'`, or `'pingpong'`. |
+
+<callout>**The clock is time, not frames drawn.** `secondsPerFrame` is what it says, so a walk cycle runs at the same speed on a machine managing 30 FPS as on one managing 144. Counting draws instead is the obvious version of this, and is wrong.</callout>
+
+A duration of `0` holds the first frame, which is how a still pose is written. `'once'` stops on the last frame and sets `isFinished()`; `'loop'` and `'pingpong'` never finish.
+
+Each animation carries its own playhead, so two characters showing the same walk cycle need one each — `clone()` is the cheap way to get one. A game that already keeps its own clock can skip `update()` and call `seek(elapsed)` instead.
+
+## Quad
+
+A rectangle of a texture.
+
+| Method | What it does |
+| --- | --- |
+| `getX()` / `getY()` | Position within the texture. |
+| `getWidth()` / `getHeight()` | Size of the region. |
+| `setViewport(x, y, w, h)` | Moves the region. |
+
+Building one per animation frame up front and reusing it beats allocating one per draw.

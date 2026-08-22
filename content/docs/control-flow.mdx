@@ -7,23 +7,51 @@ Control flow is used to determine which blocks of code are executed and how many
 
 ## Truthiness
 
+Anywhere Ghost wants a condition — an `if`, a `while`, a ternary — it accepts any value and asks whether it is _truthy_.
+
+| Value            | Truthy? |
+| ---------------- | ------- |
+| `false`          | no      |
+| `null`           | no      |
+| `""`             | no      |
+| `true`           | yes     |
+| any other number | yes     |
+| any other string | yes     |
+| list, map, instance, function | yes |
+
+`0` and `[]` are **truthy**. Test them explicitly (`count == 0`, `list.length() == 0`) rather than leaning on the condition.
+
 ### Logical Operators
 
-Unlike most other operators in Ghost which are just a special syntax for method calls, the `and` and `or` operators are special. This is because they only conditionally evaluate right operand--they short-circuit.
-
-An `and` ("logical and") expression evaluates the left-hand argument. If it's false, it returns that value. Otherwise it evaluates and returns the right-hand argument.
+`and` and `or` combine two booleans. Both operands must be booleans — `false and 1` is a type mismatch error, not `false`.
 
 ```typescript
-print(false and 1)
-print(1 and 2)
+print(true and false) // >> false
+print(true or false)  // >> true
 ```
 
-An `or` ("logical or") expression is reversed. If the left-hand argument is _true_, it's returned, otherwise the right-hand argument is evaluated and returned:
+<callout>**Neither operator short-circuits.** Ghost evaluates both sides before applying the operator, so unlike in most C-like languages a test on the left cannot protect the expression on the right.</callout>
+
+This is the shape that goes wrong:
 
 ```typescript
-print(false or 1)
-print(1 or 2)
+// `list[i]` is read even when `i` is out of range
+if (i >= 0 and list[i].found) {
+  //
+}
 ```
+
+Write it as nested `if` statements instead, so the second test only runs when the first passed:
+
+```typescript
+if (i >= 0) {
+  if (list[i].found) {
+    //
+  }
+}
+```
+
+Reading a list index that doesn't exist gives `null` rather than an error, so the failure above shows up further along as an error about a property of `null`.
 
 ## Conditional Statements
 
@@ -39,9 +67,9 @@ if (condition) {
 }
 ```
 
-This evaluates the parenthesized expression after `if`. If it's `true`, then the block after the condition is evaluated. Otherwise it is skipped. The condition can be any expression that evaluates to `true` or `false`.
+This evaluates the parenthesized expression after `if`. If it's truthy, then the block after the condition is evaluated. Otherwise it is skipped.
 
-You may also provide an `else` branch. It will be executed if the condition is `false`:
+You may also provide an `else` branch. It will be executed if the condition is falsy:
 
 ```typescript
 if (condition) {
@@ -63,6 +91,14 @@ if (firstCondition) {
 } else {
   // Do something else
 }
+```
+
+### Ternary Expressions
+
+When both branches produce a value, the [ternary operator](/docs/operators#ternary-operator) says the same thing in one line:
+
+```typescript
+label = count == 1 ? "item" : "items"
 ```
 
 ### Switch Statements
@@ -194,12 +230,56 @@ When a `for` loop executes, the following occurs:
 4. The increment expression is executed.
 5. Control returns to step 2 until the condition expression evaluates to `false`.
 
+```typescript
+for (i = 0; i < 5; i++) {
+  print(i)
+}
+```
+
+The three clauses are separated by semicolons — the only place a semicolon appears in Ghost. The increment clause may be an assignment (`i = i + 1`), a compound assignment (`i += 1`), or an increment or decrement (`i++`, `i--`).
+
+The counter belongs to the loop: once the loop ends, the name is gone again.
+
+### For ... In Statement
+
+`for ... in` walks a list or a map without you having to manage an index.
+
+```typescript
+for (name in ["Artemis", "Rabbit", "Orion"]) {
+  print(name)
+}
+```
+
+Give it two names and the first receives the key — the index for a list, the key for a map:
+
+```typescript
+for (index, name in ["Artemis", "Rabbit", "Orion"]) {
+  print(index.toString() + ": " + name)
+}
+
+for (key, value in { name: "Ghost", type: "language" }) {
+  print(key + " = " + value)
+}
+```
+
+Maps have no defined order, so the pairs come out in whatever order they come out in.
+
+Combined with the [range operator](/docs/operators#range-operator), `for ... in` also counts:
+
+```typescript
+for (i in 1 .. 5) {
+  print(i)
+}
+```
+
+Lists and maps are the only things Ghost knows how to iterate. Anything else is a runtime error.
+
 ### Break Statement
 The `break` statement terminates the current loop statement and transfers program control back to the state following the terminated statement.
 
 A `break` statement cannot be used at the top level of a script, module, function, or class.
 
-As an example, the following function has a `break` statement that terminates the `while` loop when `i` is `3`, and then returns the value `3 * x` from the function:
+As an example, the following function has a `break` statement that terminates the `while` loop when `i` reaches `3`, and then returns the value `3 * x` from the function:
 
 ```typescript
 function testBreak(x) {
@@ -210,7 +290,7 @@ function testBreak(x) {
       break
     }
 
-    i + i + 1
+    i = i + 1
   }
 
   return i * x
@@ -218,11 +298,11 @@ function testBreak(x) {
 ```
 
 ### Continue Statement
-The `continue` statement terminates execution of the statements in the current iteration of the current or labeled loop, and continues execution of the loop with the next iteration.
+The `continue` statement terminates execution of the statements in the current iteration of the current loop, and continues execution of the loop with the next iteration.
 
 Much like `break`, a `continue` statement cannot be used at the top level of a script, module, function, or class.
 
-As an example, the following example shows a `while` loop that has a `continue` statement that executes when the value of `i` is `3`. Thus, `n` takes on the values `1`, `3`, `7`, and `12`.
+As an example, the following example shows a `while` loop that has a `continue` statement that executes when the value of `i` is `3`. `n` therefore counts every pass except that one, and ends at `4`.
 
 ```typescript
 i = 0

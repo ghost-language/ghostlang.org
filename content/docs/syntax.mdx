@@ -25,13 +25,28 @@ This is a block comment.
 
 Comments behave like whitespace and are discarded during execution. While single line comments are the norm, block comments are useful within an expression or to disable large swaths of code.
 
+## Statements
+
+A statement ends at the end of the line. Ghost has no statement terminator, and a stray semicolon is a syntax error — the only place `;` appears in Ghost source is between the three clauses of a [`for` loop](/docs/control-flow#for-statement) header.
+
+```typescript
+name = "Ghost"
+print(name)
+```
+
 ## Reserved Words
 
 Ghost has a small subset of reserved words used as predefined identifiers. None of the identifiers listed here should be used as identifiers in any of your scripts.
 
 ```text
-function true false if else return while and or
+and       as        break     case      class     continue
+default   else      extends   false     for       from
+function  if        import    in        new       null
+or        return    super     switch    this      trait
+true      use       while
 ```
+
+<callout>The names of registered library modules and functions — `print`, `type`, `console`, `ghost`, `http`, `io`, `json`, `math`, `os`, `random`, and `time` — are not reserved words, but a variable that shares a name with one shadows it for the rest of the scope. Embedders (and Lumen) register more names on top of these.</callout>
 
 ## Identifiers
 
@@ -57,3 +72,5 @@ if (pressure > 3.4) {
   print("Pressure is above critical levels.")
 }
 ```
+
+Blocks group statements; they do not introduce a new scope. See [Variables](/docs/variables#scope) for what does.

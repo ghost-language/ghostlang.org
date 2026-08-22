@@ -3,39 +3,71 @@ title: "Colors"
 section: "Lumen"
 ---
 
-The `color` module provides a set of color methods and properties for use in your games when drawing to the screen. Lumen comes with a pre-defined color palette for your convenience, but you can also define your own colors.
+The `color` module builds colors for use when drawing to the screen. Lumen comes with a small named palette for convenience, and four ways to make your own.
+
+## Ranges
+
+**Red, green, and blue run 0-255. Alpha runs 0-1.**
+
+The two ranges are deliberately different. A single range accepting both and guessing from the value cannot tell `1` (nearly transparent) from `1.0` (fully opaque), and gets it silently wrong either way.
 
 ## Creating Colors
-You can create a new color by using either the `rgb` or `hex` methods.
 
-### RGB
-The `rgb` method accepts three parameters: `red`, `green`, and `blue`. Each parameter should be a number between 0 and 255.
+### `color.rgb()`
 
-```typescript
-color.rgb(255, 0, 0) // Red
-```
-
-You can also pass in a fourth parameter, `alpha`, to set the transparency of the color. This should also be a value between 0 and 255.
+Takes `red`, `green`, and `blue` between 0 and 255, plus an optional `alpha` between 0 and 1. `color.rgba()` is the same method under a second name.
 
 ```typescript
-color.rgb(255, 0, 0, 128) // Red with 50% transparency
+color.rgb(255, 128, 0)      // opaque orange
+color.rgb(255, 128, 0, 0.5) // the same orange at half opacity
 ```
 
-### Hex
-The `hex` method accepts a single parameter: `hex`. This should be a string containing a hexadecimal color value. It accepts both 3 and 6 character hex values.
+### `color.hex()`
+
+Parses a hex string, with or without the leading `#`. Accepts `#rgb`, `#rgba`, `#rrggbb`, and `#rrggbbaa`.
 
 ```typescript
-color.hex('#FFF') // White
-color.hex('#FF0000') // Red
+color.hex('#fff')
+color.hex('#ff8800')
+color.hex('#ff8800cc')
 ```
 
-You can also pass in a hex value that contains an alpha channel.
+Note that in hex form the alpha channel is a byte like the others — the 0-1 range applies to `rgb()` and `withAlpha()`.
+
+### `color.hsl()`
+
+Takes a hue in degrees (0-360), a saturation and a lightness between 0 and 1, and an optional alpha between 0 and 1.
 
 ```typescript
-color.hex('#FF000080') // Red with 50% transparency
+color.hsl(30, 1, 0.5)      // the same orange
+color.hsl(30, 1, 0.5, 0.5)
 ```
+
+`hsl` is the convenient one for generating a spread of related colors — walk the hue and keep saturation and lightness fixed.
+
+## Color Methods
+
+Colors are objects, and carry methods of their own.
+
+| Method | Returns |
+| --- | --- |
+| `getRed()` | The red channel, 0-255. |
+| `getGreen()` | The green channel, 0-255. |
+| `getBlue()` | The blue channel, 0-255. |
+| `getAlpha()` | The alpha, 0-1. |
+| `toHex()` | The color as a hex string. |
+| `withAlpha(a)` | A copy of the color at the given opacity, 0-1. |
+| `lerp(other, amount)` | A color between this one and `other`, at `amount` from 0 to 1. |
+
+```typescript
+shadow = color.black.withAlpha(0.25)
+flash = game.baseColor.lerp(color.white, 0.6)
+```
+
+`lerp` is how a health bar goes green to red, or a sprite flashes white on a hit.
 
 ## Built-in Palette
+
 <div class="grid grid-cols-2 lg:grid-cols-4 py-4 gap-6">
   <div>
       <div class="w-full h-32 rounded-lg bg-[#000000]"></div>
@@ -44,60 +76,6 @@ color.hex('#FF000080') // Red with 50% transparency
       <div>#000000</div>
       <div>RGB: 0, 0, 0</div>
       <div><code>color.black</code></div>
-  </div>
-
-  <div>
-      <div class="w-full h-32 rounded-lg bg-[#1D2B53]"></div>
-
-      <div class="pt-4 font-semibold">Dark Blue</div>
-      <div>#1D2B53</div>
-      <div>RGB: 29, 43, 83</div>
-      <div><code>color.darkBlue</code></div>
-  </div>
-
-  <div>
-      <div class="w-full h-32 rounded-lg bg-[#7E2553]"></div>
-
-      <div class="pt-4 font-semibold">Dark Purple</div>
-      <div>#7E2553</div>
-      <div>RGB: 126, 37, 83</div>
-      <div><code>color.darkPurple</code></div>
-  </div>
-
-  <div>
-      <div class="w-full h-32 rounded-lg bg-[#008751]"></div>
-
-      <div class="pt-4 font-semibold">Dark Green</div>
-      <div>#008751</div>
-      <div>RGB: 0, 135, 81</div>
-      <div><code>color.darkGreen</code></div>
-  </div>
-
-  <div>
-      <div class="w-full h-32 rounded-lg bg-[#AB5236]"></div>
-
-      <div class="pt-4 font-semibold">Brown</div>
-      <div>#AB5236</div>
-      <div>RGB: 171, 82, 54</div>
-      <div><code>color.brown</code></div>
-  </div>
-
-  <div>
-      <div class="w-full h-32 rounded-lg bg-[#5F574F]"></div>
-
-      <div class="pt-4 font-semibold">Dark Gray</div>
-      <div>#5F574F</div>
-      <div>RGB: 95, 87, 79</div>
-      <div><code>color.darkGray</code></div>
-  </div>
-
-  <div>
-      <div class="w-full h-32 rounded-lg bg-[#C2C3C7]"></div>
-
-      <div class="pt-4 font-semibold">Light Gray</div>
-      <div>#C2C3C7</div>
-      <div>RGB: 194, 195, 199</div>
-      <div><code>color.lightGray</code></div>
   </div>
 
   <div>
@@ -110,74 +88,121 @@ color.hex('#FF000080') // Red with 50% transparency
   </div>
 
   <div>
-      <div class="w-full h-32 rounded-lg bg-[#FF004D]"></div>
+      <div class="w-full h-32 rounded-lg border-4 border-dashed border-gray-200"></div>
+
+      <div class="pt-4 font-semibold">Transparent</div>
+      <div>#00000000</div>
+      <div>RGB: 0, 0, 0 at alpha 0</div>
+      <div><code>color.transparent</code></div>
+  </div>
+
+  <div>
+      <div class="w-full h-32 rounded-lg bg-[#E03C3C]"></div>
 
       <div class="pt-4 font-semibold">Red</div>
-      <div>#FF004D</div>
-      <div>RGB: 255, 0, 77</div>
+      <div>#E03C3C</div>
+      <div>RGB: 224, 60, 60</div>
       <div><code>color.red</code></div>
   </div>
 
   <div>
-      <div class="w-full h-32 rounded-lg bg-[#FFA300]"></div>
-
-      <div class="pt-4 font-semibold">Orange</div>
-      <div>#FFA300</div>
-      <div>RGB: 255, 163, 0</div>
-      <div><code>color.orange</code></div>
-  </div>
-
-  <div>
-      <div class="w-full h-32 rounded-lg bg-[#FFEC27]"></div>
-
-      <div class="pt-4 font-semibold">Yellow</div>
-      <div>#FFEC27</div>
-      <div>RGB: 255, 236, 39</div>
-      <div><code>color.yellow</code></div>
-  </div>
-
-  <div>
-      <div class="w-full h-32 rounded-lg bg-[#00E436]"></div>
+      <div class="w-full h-32 rounded-lg bg-[#48B860]"></div>
 
       <div class="pt-4 font-semibold">Green</div>
-      <div>#00E436</div>
-      <div>RGB: 0, 228, 54</div>
+      <div>#48B860</div>
+      <div>RGB: 72, 184, 96</div>
       <div><code>color.green</code></div>
   </div>
 
   <div>
-      <div class="w-full h-32 rounded-lg bg-[#29ADFF]"></div>
+      <div class="w-full h-32 rounded-lg bg-[#4080E0]"></div>
 
       <div class="pt-4 font-semibold">Blue</div>
-      <div>#29ADFF</div>
-      <div>RGB: 41, 173, 255</div>
+      <div>#4080E0</div>
+      <div>RGB: 64, 128, 224</div>
       <div><code>color.blue</code></div>
   </div>
 
   <div>
-      <div class="w-full h-32 rounded-lg bg-[#83769C]"></div>
+      <div class="w-full h-32 rounded-lg bg-[#F0C848]"></div>
 
-      <div class="pt-4 font-semibold">Lavender</div>
-      <div>#83769C</div>
-      <div>RGB: 131, 118, 156</div>
-      <div><code>color.lavender</code></div>
+      <div class="pt-4 font-semibold">Yellow</div>
+      <div>#F0C848</div>
+      <div>RGB: 240, 200, 72</div>
+      <div><code>color.yellow</code></div>
   </div>
 
   <div>
-      <div class="w-full h-32 rounded-lg bg-[#FF77A8]"></div>
+      <div class="w-full h-32 rounded-lg bg-[#E88838]"></div>
 
-      <div class="pt-4 font-semibold">Pink</div>
-      <div>#FF77A8</div>
-      <div>RGB: 255, 119, 168</div>
-      <div><code>color.pink</code></div>
+      <div class="pt-4 font-semibold">Orange</div>
+      <div>#E88838</div>
+      <div>RGB: 232, 136, 56</div>
+      <div><code>color.orange</code></div>
   </div>
 
   <div>
-      <div class="w-full h-32 rounded-lg bg-[#FFCCAA]"></div>
+      <div class="w-full h-32 rounded-lg bg-[#9660D0]"></div>
 
-      <div class="pt-4 font-semibold">Peach</div>
-      <div>#FFCCAA</div>
-      <div>RGB: 255, 204, 170</div>
-      <div><code>color.peach</code></div>
+      <div class="pt-4 font-semibold">Purple</div>
+      <div>#9660D0</div>
+      <div>RGB: 150, 96, 208</div>
+      <div><code>color.purple</code></div>
+  </div>
+
+  <div>
+      <div class="w-full h-32 rounded-lg bg-[#48C8D0]"></div>
+
+      <div class="pt-4 font-semibold">Cyan</div>
+      <div>#48C8D0</div>
+      <div>RGB: 72, 200, 208</div>
+      <div><code>color.cyan</code></div>
+  </div>
+
+  <div>
+      <div class="w-full h-32 rounded-lg bg-[#D858A8]"></div>
+
+      <div class="pt-4 font-semibold">Magenta</div>
+      <div>#D858A8</div>
+      <div>RGB: 216, 88, 168</div>
+      <div><code>color.magenta</code></div>
+  </div>
+
+  <div>
+      <div class="w-full h-32 rounded-lg bg-[#805838]"></div>
+
+      <div class="pt-4 font-semibold">Brown</div>
+      <div>#805838</div>
+      <div>RGB: 128, 88, 56</div>
+      <div><code>color.brown</code></div>
+  </div>
+
+  <div>
+      <div class="w-full h-32 rounded-lg bg-[#808080]"></div>
+
+      <div class="pt-4 font-semibold">Gray</div>
+      <div>#808080</div>
+      <div>RGB: 128, 128, 128</div>
+      <div><code>color.gray</code></div>
+  </div>
+
+  <div>
+      <div class="w-full h-32 rounded-lg bg-[#C0C0C0]"></div>
+
+      <div class="pt-4 font-semibold">Light Gray</div>
+      <div>#C0C0C0</div>
+      <div>RGB: 192, 192, 192</div>
+      <div><code>color.lightGray</code></div>
+  </div>
+
+  <div>
+      <div class="w-full h-32 rounded-lg bg-[#404040]"></div>
+
+      <div class="pt-4 font-semibold">Dark Gray</div>
+      <div>#404040</div>
+      <div>RGB: 64, 64, 64</div>
+      <div><code>color.darkGray</code></div>
   </div>
 </div>
+
+These are here to keep prototypes readable before a game settles on its own palette — not a suggestion that a game should ship with them.
