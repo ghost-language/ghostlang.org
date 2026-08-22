@@ -12,21 +12,30 @@ The array half of the module — building lists of numbers, reshaping them, and 
 Most methods are *elementwise*. Hand one a number and it answers with a number; hand it a list and it answers with a list of the same shape, having applied itself to every element.
 
 ```typescript
-math.sqrt(16)             // 4
-math.sqrt([1, 4, 9])      // [1, 2, 3]
+math.sqrt(16)                 // 4
+math.sqrt([1, 4, 9])          // [1, 2, 3]
 math.sqrt([[1, 4], [9, 16]])  // [[1, 2], [3, 4]]
 ```
 
-Methods that take more than one argument follow one rule: **a number is held constant against a list, and two lists are paired off element by element.** Lists paired against each other must be the same length.
+Where more than one value is involved, shapes are lined up **from the right**. At each axis the two lengths must match, or one of them must be 1, or one side must have no axis there at all. Whichever it is, the shorter side repeats.
 
 ```typescript
-math.add([1, 2, 3], 10)          // [11, 12, 13]  — 10 applies to each
-math.add(10, [1, 2, 3])          // [11, 12, 13]  — either side may be the list
-math.multiply([1, 2, 3], [4, 5, 6])  // [4, 10, 18] — paired off
-math.clamp([-5, 5, 15], 0, 10)   // [0, 5, 10]    — bounds held constant
+math.add([1, 2, 3], 10)              // [11, 12, 13]  — the number repeats
+math.add(10, [1, 2, 3])              // [11, 12, 13]  — either side may be the list
+math.multiply([1, 2, 3], [4, 5, 6])  // [4, 10, 18]   — paired off
+math.clamp([-5, 5, 15], 0, 10)       // [0, 5, 10]    — bounds repeat
 ```
 
-<callout>This is not quite numpy's rule. Numpy stretches a row across every row of a matrix; Ghost pairs the outer lists off instead. `math.add([[1, 2], [3, 4]], [10, 20])` gives `[[11, 12], [23, 24]]` — the `10` applied to the first row and the `20` to the second — where numpy would give `[[11, 22], [13, 24]]`. To add a row to every row of a matrix, loop over the rows.</callout>
+The case worth knowing is a row against a matrix. The row is stretched down every row of the matrix rather than paired against them, which is what makes a single bias row apply to a whole batch:
+
+```typescript
+math.add([[1, 2], [3, 4]], [10, 20])      // [[11, 22], [13, 24]]
+math.add([[1, 2], [3, 4]], [[10], [20]])  // [[11, 12], [23, 24]]
+```
+
+These are numpy's rules, so a matrix expression carries over unchanged.
+
+Lists have to be rectangular to take part — a ragged list has no shape to line up, and says so rather than guessing.
 
 Whole numbers stay whole wherever the answer is exact, so a result can index a list without a conversion.
 
@@ -103,7 +112,18 @@ y = math.sin(angle) * speed
 
 ## Arithmetic
 
-The operators already add two numbers. These methods exist because they broadcast — they add a number to every element of a list, or two lists to each other.
+Arithmetic on lists is elementwise, and the operators say so directly:
+
+```typescript
+[1, 2, 3] + 10                // [11, 12, 13]
+[1, 2, 3] * 2                 // [2, 4, 6]
+[1, 2, 3] + [10, 20, 30]      // [11, 22, 33]
+[[1, 2], [3, 4]] + [10, 20]   // [[11, 22], [13, 24]]
+```
+
+The methods below are the same operations under a name, broadcasting identically — `a + b` and `math.add(a, b)` are one operation reached two ways. Reach for whichever reads better: the operators for arithmetic in the middle of an expression, the methods where a name carries more.
+
+See [Lists](/docs/lists) for what the operators mean in full, including comparison and joining.
 
 | Method | Returns |
 | --- | --- |

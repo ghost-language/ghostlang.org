@@ -44,10 +44,44 @@ for (index, word in vocabulary) {
 
 An index that is out of range reads as `null` rather than raising an error, so guard with `length()` when the index is computed.
 
+## Arithmetic
+
+Arithmetic operators work on lists of numbers, elementwise. A number spreads across every element, and two lists are applied to each other:
+
+```typescript
+print([1, 2, 3] * 2)             // >> [2, 4, 6]
+print([1, 2, 3] + 10)            // >> [11, 12, 13]
+print([1, 2, 3] + [10, 20, 30])  // >> [11, 22, 33]
+```
+
+Shapes are lined up from the right, so a shorter shape stretches across a longer one rather than having to match it exactly. A row applies down every row of a matrix:
+
+```typescript
+print([[1, 2], [3, 4]] + [10, 20])  // >> [[11, 22], [13, 24]]
+print([[1, 2], [3, 4]] * 2)         // >> [[2, 4], [6, 8]]
+```
+
+These are the same rules and the same operation as the [`math`](/docs/math#broadcasting) module's methods — `a + b` and `math.add(a, b)` are two ways of writing one thing. Lists have to be rectangular and hold only numbers to take part; anything else is an error rather than a guess.
+
+`+` does not join two lists. Joining is [`concat()`](#concat), because the operators are arithmetic — if `+` meant joining, `-`, `*`, `/` and `%` would have no matching reading and the operators would stop agreeing with each other.
+
+## Comparing
+
+`==` and `!=` compare lists by their contents, to any depth, so a list you built compares equal to one you wrote out:
+
+```typescript
+print([1, 2] == [1, 2])          // >> true
+print([1, 2] + [1, 2] == [2, 4]) // >> true
+print([[1], [2]] == [[1], [2]])  // >> true
+```
+
+Ordering two lists with `<` or `>` is not supported.
+
 ## Methods
 For the remainder of this documentation, we'll discuss each method available on lists.
 
 <Collection>
+  <p>[concat](#concat)</p>
   <p>[first](#first)</p>
   <p>[join](#join)</p>
   <p>[last](#last)</p>
@@ -57,6 +91,17 @@ For the remainder of this documentation, we'll discuss each method available on 
   <p>[tail](#tail)</p>
   <p>[toString](#toString)</p>
 </Collection>
+
+### `concat()`
+The `concat` method joins two lists end to end, returning a new list and leaving both alone:
+
+```typescript
+[1, 2].concat([3, 4])
+
+// [1, 2, 3, 4]
+```
+
+Unlike the arithmetic operators, `concat` works on lists of anything, not just numbers. Use [`push()`](#push) to add a single element instead of a whole list.
 
 ### `first()`
 The `first` method returns the first element in the list. If the list is empty, it returns `null`:

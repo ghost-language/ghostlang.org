@@ -17,7 +17,14 @@ math.mean([1, 2, 3, 4])           // 2.5
 math.mean([[1, 2], [3, 4]])       // 2.5
 ```
 
-Nesting is flattened first, so a reduction over a matrix reads every value in it. There is no axis argument — to work a matrix row by row, loop over the rows.
+Nesting is flattened first, so a reduction over a matrix reads every value in it.
+
+There is no axis argument. To total a matrix along one axis, multiply by a row of ones — which is what summing along an axis is:
+
+```typescript
+math.dot(math.ones(2), [[1, 2], [3, 4]])   // [4, 6] — down the columns
+math.dot([[1, 2], [3, 4]], math.ones(2))   // [3, 7] — across the rows
+```
 
 ## Building
 
@@ -125,6 +132,7 @@ math.cumulativeSum([1, 2, 3])     // [1, 3, 6]
 | --- | --- |
 | `math.dot(a, b)` | The dot product, matrix product, or matrix-vector product. |
 | `math.cross(a, b)` | The cross product. |
+| `math.outer(a, b)` | Every element of `a` multiplied by every element of `b`, as a matrix. |
 | `math.norm(v)` | The length of the vector. |
 | `math.norm(v, p)` | Its p-norm — `1` sums the absolute values, `math.infinity` takes the largest. |
 | `math.normalize(v)` | The vector scaled to a length of 1, keeping its direction. |
@@ -178,73 +186,56 @@ math.solve([[2, 1], [1, 3]], [5, 10])   // [1, 3]
 
 ## A worked example
 
-Enough of the module is here to train a small neural network in Ghost alone — a 2-4-1 network learning XOR, with the forward pass, the loss, and backpropagation all expressed as matrix and vector operations.
+Enough of the module is here to train a neural network in Ghost alone — a 2-4-1 network learning XOR, with the forward pass, the loss, and backpropagation all expressed as whole-matrix operations. All four samples train at once: the bias is a single row added to a matrix of four, which works because [shapes line up from the right](/docs/math#broadcasting) and the row stretches down the batch.
 
 ```typescript
 math.randomSeed(7)
 
-function sigmoid(z) {
-    return math.divide(1, math.add(1, math.exp(math.multiply(z, -1))))
-}
-
-// The derivative of the sigmoid, expressed through its own output.
-function sigmoidSlope(a) {
-    return math.multiply(a, math.subtract(1, a))
-}
-
-// The outer product of two vectors, which is the shape a weight gradient takes.
-function outer(left, right) {
-    return math.dot(math.transpose([left]), [right])
-}
+function sigmoid(z) { return 1 / (1 + math.exp(z * -1)) }
+function sigmoidSlope(a) { return a * (1 - a) }
 
 function randomMatrix(rows, columns) {
     m = []
-
     for (row = 0; row < rows; row++) {
         values = []
-
-        for (column = 0; column < columns; column++) {
-            values.push(math.random() - 0.5)
-        }
-
+        for (column = 0; column < columns; column++) { values.push(math.random() - 0.5) }
         m.push(values)
     }
-
     return m
 }
+
+// Summing down the batch is a dot product against a row of ones.
+function columnSums(m, rows) { return math.dot(math.ones(rows), m) }
 
 inputs = [[0, 0], [0, 1], [1, 0], [1, 1]]
 targets = [[0], [1], [1], [0]]
 
+batch = 4
 rate = 0.5
+
 weights1 = randomMatrix(2, 4)
 bias1 = math.zeros(4)
 weights2 = randomMatrix(4, 1)
 bias2 = math.zeros(1)
 
 for (epoch = 0; epoch < 4000; epoch++) {
-    for (sample = 0; sample < 4; sample++) {
-        x = inputs[sample]
-        target = targets[sample]
+    // Forward, all four samples at once.
+    hidden = sigmoid(math.dot(inputs, weights1) + bias1)
+    output = sigmoid(math.dot(hidden, weights2) + bias2)
 
-        // Forward.
-        h = sigmoid(math.add(math.dot(x, weights1), bias1))
-        y = sigmoid(math.add(math.dot(h, weights2), bias2))
+    // Gradients.
+    error = output - targets
+    delta2 = error * sigmoidSlope(output)
+    delta1 = math.dot(delta2, math.transpose(weights2)) * sigmoidSlope(hidden)
 
-        // Gradients.
-        error = math.subtract(y, target)
-        delta2 = math.multiply(error, sigmoidSlope(y))
-        delta1 = math.multiply(math.dot(weights2, delta2), sigmoidSlope(h))
-
-        // Backward.
-        weights2 = math.subtract(weights2, math.multiply(outer(h, delta2), rate))
-        bias2 = math.subtract(bias2, math.multiply(delta2, rate))
-        weights1 = math.subtract(weights1, math.multiply(outer(x, delta1), rate))
-        bias1 = math.subtract(bias1, math.multiply(delta1, rate))
-    }
+    // Backward.
+    weights2 -= math.dot(math.transpose(hidden), delta2) * rate
+    bias2 -= columnSums(delta2, batch) * rate
+    weights1 -= math.dot(math.transpose(inputs), delta1) * rate
+    bias1 -= columnSums(delta1, batch) * rate
 }
 ```
 
-After four thousand epochs it answers `0.019`, `0.963`, `0.965`, and `0.052` — XOR, learned.
+After four thousand epochs it answers `0.048`, `0.952`, `0.949`, and `0.054` — XOR, learned.
 
-Two things are worth noticing about how that had to be written. Weights are updated one sample at a time rather than in a batch, because [broadcasting](/docs/math#broadcasting) pairs outer lists off instead of stretching a row across a matrix. And the outer product is composed out of `transpose` and `dot`, because there is no method for it. Neither is a wall, but both are places where the module asks you to spell out what numpy would infer.
+Notice how little of that is about Ghost. `sigmoid` is written once as `1 / (1 + math.exp(z * -1))` and works unchanged on a number, a vector, or a matrix, because [every arithmetic operator broadcasts](/docs/lists#arithmetic). `weights2 -= math.dot(math.transpose(hidden), delta2) * rate` is the update rule as you would write it on paper. The one thing still spelled out by hand is summing down the batch, which is the `columnSums` helper above — the module has no axis argument on its reductions.
