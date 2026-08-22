@@ -5,7 +5,9 @@ section: "Language"
 
 Ghost employs a simple module system to split and organize code into self-contained files.
 
-Every ghost file is its own module with its own scope. Importing a file into another does not explicitely merge its scope. For example, two modules can define the same top-level variable with the same name without causing any name collision.
+Paths in an `import` statement are written without the `.ghost` extension, and are resolved relative to the directory of the file being run.
+
+Every Ghost file is its own module with its own scope. Importing a file into another does not explicitely merge its scope. For example, two modules can define the same top-level variable with the same name without causing any name collision.
 
 ## Shared Imports
 
@@ -16,10 +18,10 @@ Ghost keeps track of every file it imports. Importing a module in multiple locat
 All top-level variables within a module are exportable. To actually import data, you may specify any number of identifiers in your import statement:
 
 ```typescript
-import Request, Response from "http"
+import Request, Response from "network"
 ```
 
-The above will _import_ and _bind_ the values `Request` and `Response` from the `http` module. This will make `Request` and `Response` available in your file.
+The above will _import_ and _bind_ the values `Request` and `Response` from the `network` module. This will make `Request` and `Response` available in your file.
 
 ### Aliases
 
@@ -43,22 +45,22 @@ Cyclic imports for the most part are "supported" by Ghost, though they should st
 
 ```typescript
 // main.ghost
-import "a";
+import "a"
 
 // a.ghost
-print("start a");
-import "b";
-print("end a");
+print("start a")
+import "b"
+print("end a")
 
 // b.ghost
-print("start b");
-import "c";
-print("end b");
+print("start b")
+import "c"
+print("end b")
 
 // c.ghost
-print("start c");
-import "a";
-print("end c");
+print("start c")
+import "a"
+print("end c")
 ```
 
 When running the above program, you'll find that it prints the correct output and does not get stuck in an infinite loop:

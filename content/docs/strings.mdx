@@ -7,11 +7,21 @@ Strings are useful for holding data that can be represented in text form.
 
 ## Creating Strings
 
-Strings are created using either single or double quotes.
+Strings are created using either single or double quotes, and can hold unicode text.
 
 ```typescript
 string1 = "A string value"
-string2 = "This is also a string value"
+string2 = 'This is also a string value'
+string3 = "こんにちは、世界"
+```
+
+## Accessing Characters
+
+The subscript operator reads a single character by index, counting from zero. An index outside the string reads as `null`.
+
+```typescript
+print("Ghost"[0]) // >> G
+print("Ghost"[9]) // >> null
 ```
 
 ## Comparing Strings
@@ -42,9 +52,11 @@ longString = "This is a very long string which needs " +
 
 <Collection>
   <p>[find](#find)</p>
+  <p>[findAll](#findall)</p>
   <p>[format](#format)</p>
   <p>[endsWith](#endsWith)</p>
   <p>[length](#length)</p>
+  <p>[matches](#matches)</p>
   <p>[replace](#replace)</p>
   <p>[split](#split)</p>
   <p>[startsWith](#startsWith)</p>
@@ -59,7 +71,7 @@ longString = "This is a very long string which needs " +
 
 ### `find()`
 
-The `find()` method retrieves the result of matching a _string_ against a regular expression.
+The `find()` method matches a regular expression against a string and returns the matched text. The receiver is the **pattern**, and the argument is the string being searched. When nothing matches, it returns an empty string.
 
 ```typescript
 pattern = "I need (.*)"
@@ -67,7 +79,22 @@ input = "I need coffee"
 
 found = pattern.find(input)
 
-// expected output: ["coffee"]
+// expected value: "I need coffee"
+```
+
+Patterns use [Go's regular expression syntax](https://pkg.go.dev/regexp/syntax).
+
+### `findAll()`
+
+The `findAll()` method matches a regular expression against a string and returns a list holding the whole match followed by each of its capture groups. An unmatched pattern gives an empty list.
+
+```typescript
+pattern = "I need (.*)"
+input = "I need coffee"
+
+found = pattern.findAll(input)
+
+// expected value: ["I need coffee", "coffee"]
 ```
 
 ### `format()`
@@ -83,9 +110,12 @@ message = "%s is %s years old.".format(name, age)
 // expected value: "Soma is 3 years old."
 ```
 
+Every argument is converted to its string form before being substituted, so `%s` is the formatter to use for any value — numbers included.
+
 | Formatter | Description |
 |-----------|-------------|
-| `%s` | a string value |
+| `%s` | any value |
+| `%%` | a literal percent sign |
 
 ### `endsWith()`
 
@@ -99,12 +129,26 @@ result = "This is my name".endsWith("name")
 
 ### `length()`
 
-The `length()` method returns the length of the given string.
+The `length()` method returns the number of characters in the given string. It counts unicode characters, not bytes.
 
 ```typescript
 length = "Ghost".length()
 
 // expected value: 5
+
+length = "こんにちは".length()
+
+// expected value: 5
+```
+
+### `matches()`
+
+The `matches()` method reports whether a regular expression matches anywhere in a string. As with `find()`, the receiver is the pattern.
+
+```typescript
+result = "^Gh".matches("Ghost")
+
+// expected value: true
 ```
 
 ### `replace()`
@@ -169,12 +213,16 @@ value = "Ghost".toString()
 
 ### `toNumber()`
 
-The `toNumber()` method converts the given string to a number if valid.
+The `toNumber()` method converts the given string to a number. A string that isn't a number converts to `0` rather than raising an error.
 
 ```typescript
-value = "3.14"
+value = "3.14".toNumber()
 
 // expected value: 3.14
+
+value = "ghost".toNumber()
+
+// expected value: 0
 ```
 
 ### `trim()`
@@ -206,3 +254,5 @@ value = "  Ghost  ".trimStart()
 
 // expected value: "Ghost  "
 ```
+
+<callout>Ghost has no substring or slicing method yet. Taking part of a string means indexing it a character at a time, or splitting it and rebuilding.</callout>

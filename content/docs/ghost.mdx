@@ -3,11 +3,20 @@ title: "Ghost"
 section: "Standard Library"
 ---
 
+The `ghost` module exposes the interpreter itself: its version, the names it currently knows, and the ability to run more Ghost code or load a compiled plugin.
+
 ## Methods
+
+<Collection>
+  <p>[abort](#abort)</p>
+  <p>[execute](#execute)</p>
+  <p>[extend](#extend)</p>
+  <p>[identifiers](#identifiers)</p>
+</Collection>
 
 ### `ghost.abort()`
 
-Creates a new runtime error and outputs the specified message. If the passed value is `null` no runtime error is generated.
+Raises a runtime error carrying the given message, stopping the program. Passing `null` instead does nothing, so a check with nothing to report can hand back `null` and be aborted on unconditionally.
 
 ```typescript
 ghost.abort("A critical error was encountered. Aborting.")
@@ -15,9 +24,11 @@ ghost.abort("A critical error was encountered. Aborting.")
 // expected output: A critical error was encountered. Aborting.
 ```
 
+It takes exactly one argument, and that argument must be a string or `null`.
+
 ### `ghost.execute()`
 
-Executes Ghost code represented as a string. The string representation can include variables and properties of existing objects.
+Executes Ghost code represented as a string, in the current scope, and returns the result of the last expression. The string can reference variables and properties that already exist.
 
 ```typescript
 print(ghost.execute('2 + 2'))
@@ -27,13 +38,21 @@ print(ghost.execute('2 + 2'))
 
 ### `ghost.extend()`
 
-Registers and executes a plugin compiled through Go, allowing the ability to dynamically extend Ghost with new native functionality. Plugins must be compiled against both the exact version of Ghost, and the version of Go used to compile Ghost.
+Loads a plugin compiled through Go, allowing the ability to dynamically extend Ghost with new native functionality. The path is resolved relative to the directory of the running script.
 
-| Ghost Version | Go Version |
-|---------------|------------|
-| `1.0-beta.1`  | `1.17.5`   |
+The plugin must export a function named `Register` taking no arguments, which Ghost calls immediately after loading it. That is where the plugin registers its own functions and modules:
 
-To compile a plugin with Go, use the `-buildmode=plugin` build flag:
+```go
+package main
+
+import "ghostlang.org/x/ghost/ghost"
+
+func Register() {
+	ghost.RegisterModule("example", ExampleMethods, ExampleProperties)
+}
+```
+
+To compile it, use the `-buildmode=plugin` build flag:
 
 ```
 $ go build -buildmode=plugin -o example.so main.go
@@ -43,9 +62,11 @@ $ go build -buildmode=plugin -o example.so main.go
 ghost.extend('./example.so')
 ```
 
+<callout>Go plugins are only supported on Linux, FreeBSD, and macOS. A plugin must be built with the same Go toolchain version, and against the same version of Ghost, as the interpreter loading it — otherwise Go refuses to open it.</callout>
+
 ### `ghost.identifiers()`
 
-Returns a list of all identifieris within the current scope.
+Returns a list of all identifiers within the current scope.
 
 ```typescript
 ghost.identifiers()
@@ -59,4 +80,6 @@ Returns the current version of Ghost.
 
 ```typescript
 ghost.version
+
+// expected value: "0.30.0"
 ```

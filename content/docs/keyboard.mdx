@@ -3,7 +3,7 @@ title: "Keyboard"
 section: "Lumen"
 ---
 
-The keyboard module provides methods for retrieving input from the keyboard.
+The `keyboard` module reads the state of the keyboard, and switches text entry on and off.
 
 ## Detecting Key Presses
 
@@ -11,10 +11,10 @@ The keyboard module provides methods for retrieving input from the keyboard.
   <Image src="/keyboard_wasd.gif" width={192} height={128} />
 </div>
 
-You can check if a key is currently pressed (and held down) using the `isDown` method. This method takes a single argument, which is the key to check specified as a string.
+`isDown` reports whether a key is currently held. It is true on every frame the key is down, which is what continuous movement wants.
 
 ```typescript
-function update() {
+function update(dt) {
   if (keyboard.isDown('w')) {
     // Move the player up
   }
@@ -33,138 +33,68 @@ function update() {
 }
 ```
 
-To check if a key was pressed this frame, use the `wasPressed` method. This method takes a single argument, which is the key to check specified as a string.
+Every method here takes **any number of key names** and is true if any of them matches, so one action can be bound to several keys in a single call:
 
 ```typescript
-function update() {
-  if (keyboard.wasPressed('i')) {
-    // Open the inventory
-  }
+if (keyboard.isDown('left', 'a')) {
+  // Move the player left
 }
 ```
 
-The difference between `isDown` and `wasPressed` is that `isDown` will return `true` as long as the key is held down, while `wasPressed` will only return `true` once per key press.
+## Methods
 
-## Detecting Key Releases
-You can check if a key is currently released (and not held down) using the `isUp` method. This method takes a single argument, which is the key to check specified as a string.
+| Method | What it reports |
+| --- | --- |
+| `isDown(key, ...)` | The key is held down right now. |
+| `isUp(key, ...)` | The key is not held down. |
+| `wasPressed(key, ...)` | The key went down this frame. |
+| `wasReleased(key, ...)` | The key came up this frame. |
+| `startTextInput()` | Begin delivering typed text to the `textinput` callback. |
+| `stopTextInput()` | Stop. |
+| `isTextInputActive()` | Whether text input is on. |
+
+## Key Names
+
+Names are SDL key names, matched case-insensitively: `'left'`, `'right'`, `'up'`, `'down'`, `'space'`, `'escape'`, `'return'`, `'tab'`, `'backspace'`, `'lshift'`, `'f1'` through `'f12'`, `'a'` through `'z'`, `'0'` through `'9'`, and so on.
+
+An unrecognised name is an error rather than a silently false result, so a typo shows up the first time the line runs instead of as a control that quietly does nothing.
+
+## Held vs. Pressed
+
+The distinction matters more than it looks.
+
+- `isDown` is true every frame the key is held. Use it for movement, and anything else that should keep happening.
+- `wasPressed` is true for the single frame the key went down. Use it for menus, jumps, dialogue advance — anything that should happen once per physical press.
 
 ```typescript
-function update() {
-  if (keyboard.isUp('space')) {
-    // Space bar is not pressed
-  }
+function update(dt) {
+  if (keyboard.isDown('right')) { game.x = game.x + 180 * dt } // continuous
+  if (keyboard.wasPressed('space')) { jump() }                 // once
 }
 ```
 
-To check if a key was released this frame, use the `wasReleased` method. This method takes a single argument, which is the key to check specified as a string.
+The [`keypressed(key, isRepeat)` callback](/docs/game-loop#event-callbacks) does the same job as `wasPressed` from the other direction, and tells you whether the event came from the operating system's key repeat.
+
+## Text Input
+
+Reading letters through `isDown` gives you key positions, not characters — it can't tell you about shift, layouts, or accents. For anything the player types, switch on text input and take the characters from the `textinput` callback.
 
 ```typescript
-function update() {
-  if (keyboard.wasReleased('space')) {
-    // Space bar was released this frame
+function load() {
+  game.name = ''
+}
+
+function keypressed(key, isRepeat) {
+  if (key == 'return') {
+    keyboard.stopTextInput()
   }
+}
+
+function textinput(text) {
+  game.name = game.name + text
 }
 ```
 
-Similar to `isDown` and `wasPressed`, the difference between `isUp` and `wasReleased` is that `isUp` will return `true` as long as the key is not held down, while `wasReleased` will only return `true` once per key release.
+Call `keyboard.startTextInput()` when a field takes focus and `stopTextInput()` when it loses it. `isTextInputActive()` reports which state you are in — useful for suppressing game controls while a field has focus.
 
-## Key Codes
-The following table lists the key codes for each key on the keyboard.
-
-| Key Code | Key | Scan Code | Unicode |
-| -------- | --- | --------- | ------- |
-| `3` | Cancel | `cancel` |  |
-| `8` | Backspace | `backspace` | ⌫ |
-| `9` | Tab | `tab` | ↹ |
-| `12` | Clear | `clear` | ⌧ |
-| `13` | Enter | `enter` | ⏎ |
-| `16` | Shift | `shiftleft` | ⇧ |
-| `16` | Shift | `shiftright` | ⇧ |
-| `17` | Control | `controlleft` | ⌃ |
-| `17` | Control | `controlright` | ⌃ |
-| `18` | Alt | `altleft` | ⌥ |
-| `18` | Alt | `altright` | ⌥ |
-| `19` | Pause | `pause` | ⎉ |
-| `20` | Caps Lock | `capslock` | ⇪ |
-| `27` | Escape | `escape` | ⎋ |
-| `32` | Space | `space` | ␣ |
-| `33` | Page Up | `pageup` | ⇞ |
-| `34` | Page Down | `pagedown` | ⇟ |
-| `35` | End | `end` | ⇟ |
-| `36` | Home | `home` | ⇞ |
-| `37` | Left Arrow | `left` | ← |
-| `38` | Up Arrow | `up` | ↑ |
-| `39` | Right Arrow | `right` | → |
-| `40` | Down Arrow | `down` | ↓ |
-| `42` | Print Screen | `printscreen` |  |
-| `45` | Insert | `insert` | ⌤ |
-| `46` | Delete | `delete` | ⌦ |
-| `48` | 0 | `0` | 0 |
-| `49` | 1 | `1` | 1 |
-| `50` | 2 | `2` | 2 |
-| `51` | 3 | `3` | 3 |
-| `52` | 4 | `4` | 4 |
-| `53` | 5 | `5` | 5 |
-| `54` | 6 | `6` | 6 |
-| `55` | 7 | `7` | 7 |
-| `56` | 8 | `8` | 8 |
-| `57` | 9 | `9` | 9 |
-| `65` | A | `a` | A |
-| `66` | B | `b` | B |
-| `67` | C | `c` | C |
-| `68` | D | `d` | D |
-| `69` | E | `e` | E |
-| `70` | F | `f` | F |
-| `71` | G | `g` | G |
-| `72` | H | `h` | H |
-| `73` | I | `i` | I |
-| `74` | J | `j` | J |
-| `75` | K | `k` | K |
-| `76` | L | `l` | L |
-| `77` | M | `m` | M |
-| `78` | N | `n` | N |
-| `79` | O | `o` | O |
-| `80` | P | `p` | P |
-| `81` | Q | `q` | Q |
-| `82` | R | `r` | R |
-| `83` | S | `s` | S |
-| `84` | T | `t` | T |
-| `85` | U | `u` | U |
-| `86` | V | `v` | V |
-| `87` | W | `w` | W |
-| `88` | X | `x` | X |
-| `89` | Y | `y` | Y |
-| `90` | Z | `z` | Z |
-| `91` | Left Meta | `metaleft` | ⌘ |
-| `91` | Right Meta | `metaright` | ⌘ |
-| `96` | Numpad 0 | `numpad0` | 0 |
-| `97` | Numpad 1 | `numpad1` | 1 |
-| `98` | Numpad 2 | `numpad2` | 2 |
-| `99` | Numpad 3 | `numpad3` | 3 |
-| `100` | Numpad 4 | `numpad4` | 4 |
-| `101` | Numpad 5 | `numpad5` | 5 |
-| `102` | Numpad 6 | `numpad6` | 6 |
-| `103` | Numpad 7 | `numpad7` | 7 |
-| `104` | Numpad 8 | `numpad8` | 8 |
-| `105` | Numpad 9 | `numpad9` | 9 |
-| `106` | Numpad * | `numpadmultiply` | * |
-| `107` | Numpad + | `numpadadd` | + |
-| `109` | Numpad - | `numpadsubtract` | - |
-| `110` | Numpad . | `numpaddecimal` | . |
-| `111` | Numpad / | `numpaddivide` | / |
-| `112` | F1 | `f1` | F1 |
-| `113` | F2 | `f2` | F2 |
-| `114` | F3 | `f3` | F3 |  
-| `115` | F4 | `f4` | F4 |
-| `116` | F5 | `f5` | F5 |
-| `117` | F6 | `f6` | F6 |
-| `118` | F7 | `f7` | F7 |
-| `119` | F8 | `f8` | F8 |
-| `120` | F9 | `f9` | F9 |
-| `121` | F10 | `f10` | F10 |
-| `122` | F11 | `f11` | F11 |
-| `123` | F12 | `f12` | F12 |
-| `144` | Num Lock | `numlock` |  |
-| `145` | Scroll Lock | `scrolllock` |  |
-| `160` | ^ | `^` | ^ |
-| `161` | ! | `!` | ! |
+<callout>Lumen gives you the raw characters and nothing else. Caret movement, selection, backspace handling, and clipboard paste are yours to build; [`system.getClipboardText()`](/docs/system#the-system-module) is there for the last of those.</callout>

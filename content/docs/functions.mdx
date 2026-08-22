@@ -31,9 +31,30 @@ Once you have a function, calling it is as simple as passing the required parame
 value = sum(1, 2)
 ```
 
-The assigned value is the result of either an explicit `return` statement or the last value of the function's body.
+The assigned value is whatever the function's `return` statement produced. A function that falls off the end of its body without returning gives back `null` — the last expression in a body is not an implicit return value.
 
-## Anonoymous Functions
+## Default Parameters
+
+A parameter may declare a default value, used when the caller leaves that argument out:
+
+```typescript
+function greet(name, greeting = "Hello") {
+  return greeting + ", " + name
+}
+
+print(greet("Ghost"))       // >> Hello, Ghost
+print(greet("Ghost", "Hi")) // >> Hi, Ghost
+```
+
+The default expression is evaluated when the function is called, not when it is defined.
+
+## Extra and Missing Arguments
+
+Passing more arguments than a function declares is fine — the extras are dropped.
+
+Passing fewer is not. A parameter with no argument and no default is simply never defined, and the first line that reads it fails with `unknown identifier`. Give an optional parameter a default value.
+
+## Anonymous Functions
 
 Functions are _first class_ in Ghost, which just means they are real values that you can get a reference to, store in variables, pass around, etc.
 
@@ -49,6 +70,16 @@ function identity(a) {
 print(identity(addPair)(1, 2)) // >> 3
 ```
 
+Leaving the name off gives you a function value with nowhere to live but the expression it's in:
+
+```typescript
+square = function (x) {
+  return x * x
+}
+
+print(square(4)) // >> 16
+```
+
 Since function declarations are statements, you can declare local functions inside another function:
 
 ```typescript
@@ -61,7 +92,9 @@ function outerFunction() {
 }
 ```
 
-You can even combine local functions, first-class functions, and block scope:
+## Closures
+
+A function keeps hold of the scope it was defined in, so a function returned from another function can still see that function's variables:
 
 ```typescript
 function returnFunction() {
@@ -77,3 +110,5 @@ function returnFunction() {
 newFunction = returnFunction()
 newFunction() // >> outside
 ```
+
+Note that a closure can _read_ those variables but assigning to one inside the inner function creates a local instead. See [Variables](/docs/variables#assignment-inside-a-function-is-always-local).

@@ -3,4 +3,87 @@ title: "Mouse"
 section: "Lumen"
 ---
 
-_Coming soon._
+The `mouse` module reports where the pointer is, which buttons are down, and controls the cursor.
+
+## Position
+
+```typescript
+function draw() {
+  position = mouse.getPosition()
+
+  canvas.setColor(color.white)
+  canvas.filledCircle(position[0], position[1], 8)
+}
+```
+
+`getPosition()` returns `[x, y]`; `mouse.x` and `mouse.y` are the same two numbers read one at a time.
+
+Positions are in the same coordinate space the game draws in. With a [logical size](/docs/window#a-fixed-canvas) set, they arrive already scaled into it, so nothing in your game has to know that scaling is happening.
+
+`getWorldPosition()` maps the pointer back through the current transform, which is how a game finds what the player clicked on while a camera is active:
+
+```typescript
+function draw() {
+  canvas.push()
+  canvas.translate(-camera.x, -camera.y)
+
+  world = mouse.getWorldPosition()
+  hovered = tileAt(world[0], world[1])
+
+  canvas.pop()
+}
+```
+
+## Buttons
+
+Buttons are named `'left'`, `'middle'`, `'right'`, `'x1'`, and `'x2'`.
+
+| Method | What it reports |
+| --- | --- |
+| `isButtonDown(button)` | The button is held down right now. |
+| `isButtonUp(button)` | The button is not held down. |
+| `wasButtonPressed(button)` | The button went down this frame. |
+| `wasButtonReleased(button)` | The button came up this frame. |
+
+The same held-versus-pressed distinction applies as on the [keyboard](/docs/keyboard#held-vs-pressed): use `isButtonDown` for dragging, `wasButtonPressed` for clicking.
+
+```typescript
+function update(dt) {
+  if (mouse.wasButtonPressed('left')) {
+    select(mouse.getWorldPosition())
+  }
+}
+```
+
+The [`mousepressed`, `mousereleased`, `mousemoved`, and `wheelmoved` callbacks](/docs/game-loop#event-callbacks) carry the same events with their coordinates attached, including a click count that distinguishes a double-click.
+
+## Methods
+
+| Method | What it does |
+| --- | --- |
+| `getPosition()` | `[x, y]` of the pointer. |
+| `setPosition(x, y)` | Warps the pointer. |
+| `getWorldPosition()` | `[x, y]` mapped back through the current transform. |
+| `showCursor()` / `hideCursor()` | Shows or hides the system cursor. |
+| `isVisible()` | Whether the cursor is showing. |
+| `isButtonDown(button)` / `isButtonUp(button)` | Button state. |
+| `wasButtonPressed(button)` / `wasButtonReleased(button)` | Button edges. |
+| `setRelativeMode(bool)` | Hides the cursor and reports movement instead of position — for a first-person or free-look camera. |
+| `setGrabbed(bool)` | Confines the cursor to the window. |
+
+## Properties
+
+| Property | Value |
+| --- | --- |
+| `mouse.x` | Pointer x. |
+| `mouse.y` | Pointer y. |
+| `mouse.wheel` | Vertical wheel movement this frame. |
+| `mouse.wheelX` | Horizontal wheel movement this frame. |
+
+```typescript
+function update(dt) {
+  if (mouse.wheel != 0) {
+    camera.zoom = math.clamp(camera.zoom + mouse.wheel * 0.1, 0.5, 4)
+  }
+}
+```

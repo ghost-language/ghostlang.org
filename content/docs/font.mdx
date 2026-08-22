@@ -3,4 +3,71 @@ title: "Font"
 section: "Lumen"
 ---
 
-_Coming soon._
+The `font` module loads fonts. Drawing with one goes through [`canvas.print()`](/docs/canvas#text), or through the font object's own `print` method.
+
+## Methods
+
+### `font.load()`
+
+Loads a TrueType font at a given size, and returns a [Font](#font-1).
+
+```typescript
+function load() {
+  game.bodyFont = font.load('resources/PressStart2P.ttf', 16)
+}
+```
+
+A font is loaded at a fixed pixel size. Two sizes of the same face are two `font.load()` calls.
+
+### `font.system()`
+
+Returns Lumen's built-in font at the given size, or the current default font when called with no arguments.
+
+```typescript
+titleFont = font.system(32)
+```
+
+`font.load(size)` with a single numeric argument does the same thing.
+
+<callout>The built-in font is `font.system()` rather than `font.default()` because [`default` is a reserved word](/docs/syntax#reserved-words) in Ghost and cannot be used as a method name.</callout>
+
+## Using a Font
+
+Set it as the current font and draw through the canvas:
+
+```typescript
+function draw() {
+  canvas.setFont(game.bodyFont)
+  canvas.print('Score: ' + game.score.toString(), 20, 20)
+}
+```
+
+Unlike the rest of the draw state, the current font is **not** reset between frames — it is a choice a game makes once and keeps. `canvas.resetFont()` goes back to the built-in one.
+
+## Font
+
+| Method | What it does |
+| --- | --- |
+| `print(text, x, y, [rotation, sx, sy, ox, oy])` | Draws text with this font, whatever the current font is. |
+| `printf(text, x, y, limit, [align], [rotation, sx, sy, ox, oy])` | Draws wrapped text, aligned `'left'`, `'center'`, or `'right'`. |
+| `getWidth(text)` | How wide that string would be, in pixels. |
+| `getHeight()` | The font's height. |
+| `getLineHeight()` / `setLineHeight(n)` | Spacing between wrapped lines. |
+| `getAscent()` / `getDescent()` / `getBaseline()` | Vertical metrics. |
+| `getWrap(text, limit)` | The lines `printf` would produce at that limit. |
+| `getSize()` | The size the font was loaded at. |
+
+`getWidth()` is what centring text and sizing a dialogue box need:
+
+```typescript
+label = 'Game Over'
+x = (window.width - game.titleFont.getWidth(label)) / 2
+
+game.titleFont.print(label, x, 100)
+```
+
+`getWrap()` answers the same question for wrapped text — how many lines a dialogue box needs before it is drawn.
+
+Rendered strings are cached, so drawing the same text every frame costs almost nothing; text that changes every frame is evicted automatically.
+
+Text is drawn in the current [color](/docs/colors), like everything else — set it back to `color.white` if a previous draw tinted it.

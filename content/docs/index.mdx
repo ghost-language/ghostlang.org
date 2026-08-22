@@ -42,9 +42,40 @@ make
 
 This downloads and builds the latest version of Ghost found on GitHub. You will be put inside a fresh instance of `ghost` if everything was successful.
 
-## Interactive Mode
+## Running Ghost
+
+### Interactive Mode
 
 If you just run `ghost` without any arguments, it starts the interpreter in interactive mode (aka, REPL mode, _read-eval-print loop_). You can type in a line of code, and immediately execute it. While in this mode, your state is saved until you exit the program. Meaning if you define a variable, you may reference the variable later on.
+
+```
+$  ghost
+   Ghost (0.30.0)
+   Press Ctrl + C to exit
+
+>> print("Hello, world!")
+Hello, world!
+```
+
+### Running a File
+
+Ghost source files use the `.ghost` extension. Pass one to `ghost` and it is executed, then control returns to your terminal.
+
+```bash
+ghost example.ghost
+```
+
+Anything after the filename is passed through to your script, where [`os.args()`](/docs/os#osargs) can read it.
+
+### Flags
+
+| Flag | Description                             |
+| ---- | --------------------------------------- |
+| `-h` | Show help.                              |
+| `-v` | Show the version and exit.              |
+| `-t` | Report how long the program took to run.|
+
+## Hello, World
 
 Ready to give Ghost a spin?
 
@@ -53,3 +84,7 @@ print("Hello, world!")
 ```
 
 Once you have Ghost setup and installed, you're ready to jump into [learning the language](/docs/syntax).
+
+## Building Games
+
+Ghost also has a 2D game engine, [Lumen](/docs/lumen), which gives it a game loop, a renderer, input, audio, and file access — enough that a whole game can be written in Ghost and nothing else.

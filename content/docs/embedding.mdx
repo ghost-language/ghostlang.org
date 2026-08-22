@@ -12,12 +12,14 @@ To get started, simply `go get` the latest version of Ghost. Make sure your proj
 go get ghostlang.org/x/ghost
 ```
 
-## Creating a Ghost VM
-The first step to embedding Ghost is to create a new Ghost VM. This is the instance that will be used to execute Ghost code. To start, simply create a new Ghost VM.
+## Creating an Interpreter
+The first step to embedding Ghost is to create a new interpreter instance. This is what will be used to execute Ghost code.
 
 ```go
 vm := ghost.New()
 ```
+
+Each instance carries its own scope, so variables defined by one script are visible to the next script the same instance runs, and invisible to any other instance.
 
 From here we need to configure and set a couple of things before we can execute any Ghost code.
 
@@ -53,6 +55,13 @@ The next step is to set the source code that you want to execute. This can be do
 vm.SetSource(`print('Hello, universe!')`)
 ```
 
+### Setting the File Name
+`SetFile` names the file the source came from. It has no effect on execution — it is what error messages report, so setting it turns `1:7: runtime error` into `1:7:game.ghost: runtime error`.
+
+```go
+vm.SetFile("game.ghost")
+```
+
 ## Executing Ghost Code
 Once you have set the source code, you can execute it by calling the `Execute` method on the Ghost VM. This will return a Ghost object that you can use to get the result of the execution.
 
@@ -70,7 +79,38 @@ if _, ok := result.(*object.Error); ok {
 }
 ```
 
-And that's the basics! You can now embed Ghost into your application. But there's more you can do; realistically you will want to do more than execute "hello universe" in your application. In the other sections of this documentation, we will cover how to load and execute Ghost scripts, how to pass data between Ghost and Go, and how to create and use Ghost modules.
+`Execute` can be called more than once on the same instance. Set a new source and call it again, and the second script picks up where the first left off.
+
+## Calling Back Into Ghost
+Once a script has run, the functions it defined are still there. `Call` invokes one by name with a list of Ghost objects as arguments, and hands back the result:
+
+```go
+vm.SetSource(`function update(dt) { return dt * 2 }`)
+vm.Execute()
+
+result := vm.Call("update", []object.Object{object.NewFloat(0.016)})
+```
+
+This is how a host program drives a script — a game loop calling `update` and `draw` every frame, for example. Calling a name the script never defined returns an error object rather than panicking.
+
+## Extending Ghost From Go
+Your program can add its own functions and modules to the language before running any code. Both registration functions live on the `ghost` package rather than on an instance, so what you register is available to every instance.
+
+```go
+// A single global function, callable as `greet("world")`
+ghost.RegisterFunction("greet", func(scope *object.Scope, tok token.Token, args ...object.Object) object.Object {
+	return &object.String{Value: "Hello, " + args[0].String()}
+})
+
+// A module of methods and properties, callable as `example.ping()`
+ghost.RegisterModule("example", ExampleMethods, ExampleProperties)
+```
+
+A module's methods and properties are `map[string]*object.LibraryFunction` and `map[string]*object.LibraryProperty`, built with the `RegisterMethod` and `RegisterProperty` helpers in `ghostlang.org/x/ghost/library/modules`. This is exactly how Ghost's own standard library is written, and how [Lumen](/docs/lumen) adds `canvas`, `image`, `audio`, and the rest — the standard library's source is the best reference to work from.
+
+Register everything before calling `Execute`: Ghost's optimizer resolves module and function names ahead of evaluation, so a name registered afterwards will not be found.
+
+<callout>Ghost cannot expose properties on objects your program defines — only methods. An embedded object's state has to be read through getter methods.</callout>
 
 ## A Complete Example
 Below is a complete example of what we have covered so far. It's a simple program that creates a Ghost VM, loads a script, and executes it.
@@ -100,8 +140,9 @@ func main() {
 
 	vm.SetDirectory(filepath.Dir(executable))
 
-	// Set the source code to execute
+	// Set the source code to execute, and the name errors should report
 	vm.SetSource(`print('Hello, universe!')`)
+	vm.SetFile("main.ghost")
 
 	// Execute the source code
 	// The result will be a ghost object

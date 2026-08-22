@@ -5,17 +5,200 @@ section: "Lumen"
 
 ## What is Lumen?
 
-Lumen is a lightweight 2D game engine for Ghost. It's a standalone application that allows you to create and publish your own games.
+Lumen is a lightweight 2D game engine for Ghost. It gives Ghost a game loop, a renderer, input, audio, and file access, so a whole game can be written in Ghost and nothing else.
+
+It is built on SDL2 and takes its shape from [LÖVE](https://love2d.org): the same game loop, the same transform stack, the same drawing model.
+
+```typescript
+game = { x: 100, y: 100 }
+
+function load() {
+  game.sprite = image.load('resources/player.png')
+}
+
+function update(dt) {
+  if (keyboard.isDown('right', 'd')) {
+    game.x = game.x + 120 * dt
+  }
+}
+
+function draw() {
+  game.sprite.draw(game.x, game.y)
+}
+```
+
+## Requirements
+
+Lumen links against SDL2 through cgo, so the SDL development libraries have to be present to build it:
+
+- SDL2
+- SDL2_image
+- SDL2_ttf
+- SDL2_mixer
+
+```bash
+# macOS
+brew install sdl2 sdl2_image sdl2_ttf sdl2_mixer
+
+# Debian / Ubuntu
+apt install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev
+```
 
 ## Building Lumen
-Lumen is currently under development and is not feature complete, however, you can experiment with it by downloading and building the source code from [GitHub](https://github.com/ghost-language/lumen).
 
-If you're on a Unix or Mac machine, you can easily download the source code and build Lumen directly:
+Lumen is under active development. Download and build the source from [GitHub](https://github.com/ghost-language/lumen):
 
 ```bash
 git clone https://github.com/ghost-language/lumen
 cd lumen
-make
+make build
 ```
 
-This downloads and builds the latest version of Lumen found on GitHub. You will immediately have the latest version of Lumen ready to go!
+Ghost is expected as a sibling checkout (`../ghost`), which is what the `replace` directive in Lumen's `go.mod` points at. Clone both side by side.
+
+`make build` produces `dist/lumen`. `make run EXAMPLE=60_rpg` builds and runs one of the bundled examples, and `make examples` starts every example briefly and reports any that fail.
+
+## Running a Game
+
+A game is a folder containing a `main.ghost`.
+
+```bash
+lumen main.ghost      # run a specific file
+lumen examples/60_rpg # run the main.ghost inside a directory
+lumen game.lumen      # run a packaged game
+lumen                 # run the main.ghost beside the binary, or in the
+                      # working directory
+```
+
+| Flag | Description                              |
+| ---- | ---------------------------------------- |
+| `-h` | Show help.                               |
+| `-v` | Show the version and exit.               |
+| `-o` | Output path, for `build` and `package`.  |
+
+Asset paths — `image.load`, `font.load`, `audio.newSource`, `filesystem.readAsset` — resolve relative to the directory the entry file is in.
+
+The window opens at 800×600, titled "Lumen", targeting 60 frames a second. [`window.setMode()`](/docs/window#size-and-mode), [`window.setTitle()`](/docs/window#appearance), and [`lumen.setTargetFps()`](/docs/system#the-lumen-module) change all three.
+
+## Your First Game
+
+Create a folder with a single `main.ghost` in it:
+
+```typescript
+game = { x: 100, y: 100, speed: 180 }
+
+function load() {
+  window.setTitle('My First Game')
+}
+
+function update(dt) {
+  if (keyboard.isDown('right', 'd')) { game.x = game.x + game.speed * dt }
+  if (keyboard.isDown('left', 'a'))  { game.x = game.x - game.speed * dt }
+  if (keyboard.isDown('down', 's'))  { game.y = game.y + game.speed * dt }
+  if (keyboard.isDown('up', 'w'))    { game.y = game.y - game.speed * dt }
+}
+
+function draw() {
+  canvas.setColor(color.white)
+  canvas.filledRectangle(game.x, game.y, 32, 32)
+}
+```
+
+Run it with `lumen .` from inside that folder.
+
+Two things in there are worth noticing now, because they come up in every Lumen game:
+
+- Movement is multiplied by `dt`, the time the previous frame took. See [the game loop](/docs/game-loop#updatedt).
+- The state lives on the `game` map rather than in loose variables, because [assignment inside a function is local](/docs/variables#assignment-inside-a-function-is-always-local) and would not otherwise stick.
+
+## Modules
+
+Lumen registers these modules on top of Ghost's own standard library. All of them are global — no `import` needed.
+
+| Module | For |
+| --- | --- |
+| [`canvas`](/docs/canvas) | Drawing, draw state, and the transform stack |
+| [`color`](/docs/colors) | Building colors |
+| [`image`](/docs/image) | Loading images, spritesheets, and animations |
+| [`font`](/docs/font) | Loading and measuring fonts |
+| [`audio`](/docs/audio) | Sound effects and music |
+| [`keyboard`](/docs/keyboard) | Key state and text input |
+| [`mouse`](/docs/mouse) | Pointer position, buttons, and cursor |
+| [`joystick`](/docs/joystick) | Game controllers |
+| [`window`](/docs/window) | Window size, mode, and the logical canvas |
+| [`timer`](/docs/timer) | Frame timing and FPS |
+| [`filesystem`](/docs/filesystem) | Saved games and shipped data files |
+| [`system`](/docs/system) | Clipboard, power, and the engine itself |
+| [`math`](/docs/game-math) | Ghost's `math` module, extended for games |
+
+## Writing Ghost for Lumen
+
+A few of Ghost's rules surprise people coming from other languages, and every one of them bites hardest inside a game loop.
+
+**Assignment is local to the function it happens in.** A bare `score = score + 1` inside `update()` creates a new local each frame; the outer `score` never changes. Keep mutable state on a map or a class instance, where assignment goes through a property and mutates in place.
+
+```typescript
+game = { score: 0 }
+
+function update(dt) {
+  game.score = game.score + 1 // works
+}
+```
+
+**`and` and `or` evaluate both sides.** They do not short-circuit, so a guard cannot protect the test beside it:
+
+```typescript
+if (j >= 0 and list[j].y > 0) { } // list[j] is read even when j is -1
+```
+
+Split it into nested `if`s instead. A negative or out-of-range list index reads as `null` rather than raising, so the failure shows up later as an error about a property of `null`.
+
+**Module names are global.** Naming a variable or parameter `font`, `image`, `color`, `canvas`, `window`, `timer`, `audio`, `system`, `math`, or `json` gets the module instead of your value. Name them `bodyFont`, `sprite`, and so on.
+
+**`default` is a keyword.** It cannot be used as a method name, which is why the built-in font is `font.system(size)` rather than `font.default(size)`.
+
+## Examples
+
+The repository ships with sixteen examples. Run one with `make run EXAMPLE=<name>` or `lumen examples/<name>`.
+
+| Example | Shows |
+| --- | --- |
+| `01_draw` | shapes and colors |
+| `02_input` | reading the keyboard |
+| `03_modular` | splitting a game across files |
+| `04_collision` | rectangle overlap |
+| `05_translate` | moving the world under a camera |
+| `06_spritesheets` | slicing an image into tiles |
+| `07_animations` | frame animation |
+| `08_tilemap` | drawing a grid of tiles |
+| `11_camera` | following a player |
+| `12_mouse` | pointer position and buttons |
+| `13_mouse_select` | click-and-drag selection |
+| `50_conway` | Conway's Game of Life |
+| `51_player_animations` | directional walk cycles |
+| `52_tiled_maps` | loading a map exported from Tiled |
+| `53_top_down` | a tiled world with a following camera |
+| `60_rpg` | **a complete top-down RPG with turn-based battles** |
+
+`60_rpg` is the one to read first if you are building something. It has a Tiled map with per-layer collision and view culling, a smoothed camera with bounds and screen shake, dt-driven walk animations, depth-sorted characters, NPCs and typewriter dialogue, weighted random encounters, front-view turn-based battles with spells and items, levelling, a party with equipment and a shared pack, scrolling menus, saving and loading, sound, and gamepad support.
+
+## What Lumen Doesn't Have
+
+An honest list, so you find out here rather than halfway through a project:
+
+- **Cross-compiling.** Lumen links SDL2 through cgo, so `lumen build` produces a binary for the machine that ran it, and only that. Shipping to three platforms means building on three platforms.
+- **Shaders and particles.** Neither exists. Particles can be written in Ghost; shaders cannot be worked around, which rules out lighting, palette swaps, and whole-screen effects.
+- **Physics.** There is no Box2D equivalent. Axis-aligned collision is a few lines of Ghost, which covers a top-down RPG and most puzzle games, and nothing that needs slopes, joints, or stacking.
+- **Asset hot-reloading.** Changing a sprite or a line of dialogue means restarting the game.
+- **Ghost-side gaps.** No string slicing, no list removal or sorting, and no way for a host program to expose properties on its own objects — so everything Lumen hands back is a method call.
+
+## Differences from LÖVE
+
+Lumen follows LÖVE's model but is not a port, and does not try to be.
+
+- Drawing methods live on the objects being drawn (`sprite.draw(x, y)`) rather than on the graphics module (`love.graphics.draw(sprite, x, y)`), which is the shape the rest of Ghost's standard library already has.
+- The graphics module is `canvas`; render targets are `Target` objects.
+- Color channels are 0-255 and alpha is 0-1, where LÖVE uses 0-1 for both.
+- The draw state resets every frame, where LÖVE carries color and line width across frames.
+- Batching is automatic rather than an object a game builds. There is no `SpriteBatch` to fill.
+- Spritesheets and animations are engine objects, where LÖVE leaves both to libraries like `anim8`.

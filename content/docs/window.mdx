@@ -3,4 +3,95 @@ title: "Window"
 section: "Lumen"
 ---
 
-...
+The `window` module controls the game's window: its size, its title, whether it is fullscreen, and the logical canvas the game draws into.
+
+The window opens at 800×600 titled "Lumen". Set it up in `load()`.
+
+```typescript
+function load() {
+  window.setTitle('My Game')
+  window.setMode(1280, 720)
+}
+```
+
+## Methods
+
+### Size and mode
+
+| Method | What it does |
+| --- | --- |
+| `setMode(width, height, [fullscreen])` | Sets the window size, and optionally goes fullscreen. |
+| `setSize(width, height)` | Resizes the window. |
+| `setFullscreen(bool)` / `toggleFullscreen()` | Fullscreen. |
+| `setResizable(bool)` | Whether the player can resize the window. |
+| `setBorderless(bool)` | Removes the title bar and border. |
+| `setVsync(bool)` | Synchronises presentation with the display's refresh. |
+| `getDimensions()` | `[width, height]` of the real window. |
+| `getDesktopDimensions()` | `[width, height]` of the display. |
+
+### Position
+
+| Method | What it does |
+| --- | --- |
+| `setPosition(x, y)` | Moves the window. |
+| `center()` | Centres it on the display. |
+| `maximize()` / `minimize()` / `restore()` | The usual three. |
+
+### Appearance
+
+| Method | What it does |
+| --- | --- |
+| `setTitle(title)` | Sets the window title. |
+| `setIcon(image)` | Sets the window icon from a loaded [image](/docs/image). |
+
+### Logical canvas
+
+| Method | What it does |
+| --- | --- |
+| `setLogicalSize(width, height)` | Makes the game draw in a fixed-size space, scaled to fit the window. |
+| `getLogicalSize()` | `[width, height]` of that space. |
+| `clearLogicalSize()` | Goes back to drawing in window pixels. |
+| `setPixelPerfect(bool)` | Restricts that scaling to whole numbers. |
+
+## Properties
+
+| Property | Value |
+| --- | --- |
+| `window.width` | Width of the space the game draws in — the logical size when one is set, the window otherwise. |
+| `window.height` | Height of the same. |
+| `window.scale` | How many screen pixels one game pixel currently covers. |
+| `window.title` | The window title. |
+| `window.fps` | Frames per second, as measured. |
+| `window.fullscreen` | Whether the window is fullscreen. |
+| `window.focused` | Whether the window has focus. |
+
+## A Fixed Canvas
+
+By default a game draws in window pixels, so a bigger window shows more of the world at the same size and leaves the interface stranded in the corner it was placed in. That is the right answer for an application and the wrong one for a game, where the layout of the screen is part of the design.
+
+```typescript
+function load() {
+  window.setLogicalSize(320, 180)  // the game now draws in a 320x180 space
+  window.setPixelPerfect(true)     // ...scaled by whole numbers only
+}
+```
+
+With a logical size set, Lumen scales that space to fill as much of the window as it can, keeps its proportions, centres it, and paints black bars around what is left. Going fullscreen makes the game bigger rather than wider.
+
+`window.width` and `window.height` then report the logical size — the space the game actually draws in — and mouse positions and `mousepressed` arrive in the same coordinates, so nothing in a game has to know that scaling is happening. `window.getDimensions()` still reports the real window, and `window.scale` is how many screen pixels one game pixel currently covers.
+
+`setPixelPerfect(true)` rounds that scale down to a whole number, which is what keeps pixel art from developing uneven edges. It costs more of the screen to the bars, and is worth it for a small canvas and not for a large one. Scaling *down* stays fractional either way, since a window smaller than the game still has to show all of it.
+
+## Resizing
+
+The [`resize(width, height)` callback](/docs/game-loop#event-callbacks) fires when the window changes size — the place to re-lay-out an interface that isn't on a fixed canvas.
+
+```typescript
+function load() {
+  window.setResizable(true)
+}
+
+function resize(width, height) {
+  game.layout = buildLayout(width, height)
+}
+```

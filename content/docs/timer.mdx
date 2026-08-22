@@ -1,0 +1,75 @@
+---
+title: "Timer"
+section: "Lumen"
+---
+
+The `timer` module reports frame timing: how long the last frame took, how many frames a second the game is managing, and how long it has been running.
+
+## Frame Time
+
+`timer.delta` is the same value handed to [`update(dt)`](/docs/game-loop#updatedt) — the seconds the previous frame took. Multiplying movement by it keeps a game running at the same speed on any machine.
+
+```typescript
+function update(dt) {
+  // dt and timer.delta are the same number
+  game.x = game.x + 180 * dt
+}
+```
+
+Reading it from `timer` is useful in a function that isn't `update()` and wasn't handed `dt`.
+
+## Methods
+
+| Method | What it returns |
+| --- | --- |
+| `getDelta()` | Seconds the previous frame took. |
+| `getFps()` | Frames per second, as measured. |
+| `getTime()` | Seconds since the game started. |
+| `sleep(seconds)` | Blocks for that long. |
+
+`getDelta()`, `getFps()`, and `getTime()` are the method forms of the properties below and return the same values.
+
+<callout>`timer.sleep()` stalls the whole game — the loop does not run, nothing draws, and input is not read. It exists for scripts and tools rather than gameplay. To make something happen later in a game, count `dt` down instead.</callout>
+
+## Properties
+
+| Property | Value |
+| --- | --- |
+| `timer.delta` | Seconds the previous frame took. |
+| `timer.averageDelta` | Frame time averaged over recent frames — steadier than `delta` for display. |
+| `timer.fps` | Frames per second. |
+| `timer.time` | Seconds since the game started. |
+| `timer.frame` | How many frames have been drawn. |
+
+## Showing a Frame Counter
+
+```typescript
+function draw() {
+  canvas.setColor(color.white)
+  canvas.print('FPS: ' + timer.fps.toString(), 10, 10)
+}
+```
+
+Use `averageDelta` rather than `delta` for anything a player looks at: a per-frame number flickers too much to read.
+
+## Timers Without `sleep`
+
+Counting down in `update()` is how a game waits.
+
+```typescript
+game = { cooldown: 0 }
+
+function update(dt) {
+  if (game.cooldown > 0) {
+    game.cooldown = game.cooldown - dt
+  }
+
+  if (keyboard.wasPressed('space')) {
+    if (game.cooldown <= 0) {
+      fire()
+
+      game.cooldown = 0.4 // seconds until the next shot
+    }
+  }
+}
+```

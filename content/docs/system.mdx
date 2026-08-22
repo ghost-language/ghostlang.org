@@ -1,0 +1,64 @@
+---
+title: "System"
+section: "Lumen"
+---
+
+Two small modules for talking to the machine and to the engine itself: `system` for the clipboard, the browser, and the power supply, and `lumen` for quitting and frame pacing.
+
+## The `system` Module
+
+### Methods
+
+| Method | What it does |
+| --- | --- |
+| `getClipboardText()` | Returns the clipboard's contents as a string. |
+| `setClipboardText(text)` | Puts a string on the clipboard. |
+| `openUrl(url)` | Opens a URL in the player's browser. `http` and `https` only. |
+| `getPowerInfo()` | Battery state, as `[state, percent, seconds]`. |
+
+`getPowerInfo()` returns a state of `'unknown'`, `'battery'`, `'nobattery'`, `'charging'`, or `'charged'`, the charge as a percentage, and the seconds of charge remaining. Percent and seconds are `-1` when the system cannot tell.
+
+```typescript
+power = system.getPowerInfo()
+
+if (power[0] == 'battery') {
+  if (power[1] < 15) {
+    game.showLowBatteryWarning = true
+  }
+}
+```
+
+### Properties
+
+| Property | Value |
+| --- | --- |
+| `system.os` | `darwin`, `linux`, `windows`, and so on. |
+| `system.processorCount` | Logical CPUs the machine has. |
+
+## The `lumen` Module
+
+### Methods
+
+| Method | What it does |
+| --- | --- |
+| `quit()` | Ends the game. |
+| `setTargetFps(n)` | Caps the frame rate. `0` uncaps it. |
+| `getTargetFps()` | The current cap. |
+
+The default is 60. An uncapped game runs as fast as it can, which is what [`window.setVsync()`](/docs/window#size-and-mode) is usually the better answer to.
+
+```typescript
+function keypressed(key, isRepeat) {
+  if (key == 'escape') {
+    lumen.quit()
+  }
+}
+```
+
+`quit()` runs the [`quit()` callback](/docs/game-loop#event-callbacks) if your game defines one, so an unsaved-changes prompt gets its chance either way.
+
+### Properties
+
+| Property | Value |
+| --- | --- |
+| `lumen.version` | The engine's version. |

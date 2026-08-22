@@ -1,0 +1,79 @@
+---
+title: "Filesystem"
+section: "Lumen"
+---
+
+Saved games belong in the player's own data directory, not next to the program: a game installed read-only cannot write to its own folder. Ghost's built-in [`io`](/docs/io) module reads and writes next to the source, which is right for assets and wrong for saves, so Lumen adds this module.
+
+## Where Saves Go
+
+| Platform | Location |
+| --- | --- |
+| Linux | `~/.local/share/lumen/<identity>` (honouring `XDG_DATA_HOME`) |
+| macOS | `~/Library/Application Support/lumen/<identity>` |
+| Windows | `%AppData%\lumen\<identity>` |
+
+Set the identity once, in `load()`:
+
+```typescript
+function load() {
+  filesystem.setIdentity('my-game')
+}
+```
+
+Save paths cannot escape the save directory.
+
+## Methods
+
+| Method | What it does |
+| --- | --- |
+| `setIdentity(name)` | Names your game's save folder. Call once in `load()`. |
+| `getSaveDirectory()` | The full path saves are written to. |
+| `write(name, contents)` | Writes a file, replacing it if it exists. |
+| `append(name, contents)` | Appends to a file. |
+| `read(name)` | Returns the file's contents, or `null` if it does not exist. |
+| `exists(name)` | Whether the file is there. |
+| `remove(name)` | Deletes it. |
+| `createDirectory(name)` | Creates a directory inside the save directory. |
+| `getDirectoryItems([name])` | Lists a directory's contents. |
+| `readAsset(path)` | Reads a file shipped with the game, read-only. |
+
+## Saving and Loading
+
+`read()` returns `null` when the file does not exist, so "no save yet" is an ordinary case rather than an error. Combined with [`json`](/docs/json), a save is a few lines:
+
+```typescript
+function saveGame() {
+  filesystem.write('save.json', json.encode({
+    level: game.level,
+    hp: game.player.hp,
+    x: game.player.x,
+    y: game.player.y
+  }))
+}
+
+function loadGame() {
+  contents = filesystem.read('save.json')
+
+  if (contents == null) {
+    return newGame()
+  }
+
+  save = json.decode(contents)
+
+  game.level = save.level
+  game.player.hp = save.hp
+}
+```
+
+## Reading Shipped Data
+
+`readAsset(path)` is the read-only counterpart, resolved against the game's own directory. Use it for maps, dialogue, and other data you ship with the game:
+
+```typescript
+function load() {
+  game.map = json.decode(filesystem.readAsset('resources/overworld.json'))
+}
+```
+
+This is what lets a packaged `.lumen` game read its own data files — the assets are unpacked to a cache directory on first run, and `readAsset` resolves against wherever they actually landed.
