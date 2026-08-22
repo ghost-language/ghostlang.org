@@ -66,6 +66,16 @@ print(-5 % -3) // >> -2
 print("Hello, " + "world!") // >> Hello, world!
 ```
 
+On [lists](/docs/lists#arithmetic) every arithmetic operator is elementwise, and broadcasts: a number spreads across the list, and a shorter shape stretches across a longer one.
+
+```typescript
+print([1, 2, 3] * 2)               // >> [2, 4, 6]
+print([1, 2, 3] + [10, 20, 30])    // >> [11, 22, 33]
+print([[1, 2], [3, 4]] + [10, 20]) // >> [[11, 22], [13, 24]]
+```
+
+Note that `+` does **not** join two lists the way it joins two strings — the arithmetic reading is the one that keeps all five operators agreeing with each other. Use [`concat()`](/docs/lists#concat) to join.
+
 Both operands have to be the same type. Adding a number to a string is a type mismatch error — call [`toString()`](/docs/numbers#tostring) on the number first.
 
 ## Assignment Operator
@@ -134,6 +144,15 @@ if (result == null) {
 ```
 
 Two class instances compare by _identity_: two instances of the same class holding equal fields are still two different objects, and `==` reports `false`.
+
+Lists compare by _contents_, to any depth, so a list you built compares equal to one you wrote out:
+
+```typescript
+print([1, 2] + [1, 2] == [2, 4])       // >> true
+print([[1], [2]] == [[1], [2]])        // >> true
+```
+
+Ordering two lists with `<` or `>` is not supported, and reports an unknown operator.
 
 ## Logical Operators
 

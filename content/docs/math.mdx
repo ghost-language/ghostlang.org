@@ -3,146 +3,260 @@ title: "Math"
 section: "Standard Library"
 ---
 
-The `math` module provides a set of mathematical functions and constants.
+The `math` module covers the mathematics a program is likely to need: rounding, roots, logarithms, trigonometry, statistics, and linear algebra. Every method here works on a single number, and almost all of them work just as well on a list of numbers, or a list of lists.
 
-<callout>[Lumen](/docs/lumen) adds a good deal more to this same module — `floor`, `ceil`, `sqrt`, `clamp`, `lerp`, and others. See [Math (Lumen)](/docs/game-math).</callout>
+The array half of the module — building lists of numbers, reshaping them, and the linear algebra — has its own page: [Arrays](/docs/math-arrays).
 
-## Methods
+## Broadcasting
 
-<Collection>
-  <p>[abs](#abs)</p>
-  <p>[cos](#cos)</p>
-  <p>[isNegative](#isnegative)</p>
-  <p>[isPositive](#ispositive)</p>
-  <p>[isZero](#iszero)</p>
-  <p>[max](#max)</p>
-  <p>[min](#min)</p>
-  <p>[sin](#sin)</p>
-  <p>[tan](#tan)</p>
-</Collection>
-
-### `abs()`
-
-Returns the absolute, or non-negative value, of a given value.
+Most methods are *elementwise*. Hand one a number and it answers with a number; hand it a list and it answers with a list of the same shape, having applied itself to every element.
 
 ```typescript
-math.abs(-100)
-
-// expected value: 100
+math.sqrt(16)                 // 4
+math.sqrt([1, 4, 9])          // [1, 2, 3]
+math.sqrt([[1, 4], [9, 16]])  // [[1, 2], [3, 4]]
 ```
 
-### `cos()`
-
-Returns the cosine of the radian argument.
+Where more than one value is involved, shapes are lined up **from the right**. At each axis the two lengths must match, or one of them must be 1, or one side must have no axis there at all. Whichever it is, the shorter side repeats.
 
 ```typescript
-math.cos(math.pi / 2).round()
-
-// expected value: 0
+math.add([1, 2, 3], 10)              // [11, 12, 13]  — the number repeats
+math.add(10, [1, 2, 3])              // [11, 12, 13]  — either side may be the list
+math.multiply([1, 2, 3], [4, 5, 6])  // [4, 10, 18]   — paired off
+math.clamp([-5, 5, 15], 0, 10)       // [0, 5, 10]    — bounds repeat
 ```
 
-### `isNegative()`
-
-Determines if the specified value is negative.
+The case worth knowing is a row against a matrix. The row is stretched down every row of the matrix rather than paired against them, which is what makes a single bias row apply to a whole batch:
 
 ```typescript
-math.isNegative(-100)
-
-// expected value: true
+math.add([[1, 2], [3, 4]], [10, 20])      // [[11, 22], [13, 24]]
+math.add([[1, 2], [3, 4]], [[10], [20]])  // [[11, 12], [23, 24]]
 ```
 
-### `isPositive()`
+These are numpy's rules, so a matrix expression carries over unchanged.
 
-Determines if the specified value is positive.
+Lists have to be rectangular to take part — a ragged list has no shape to line up, and says so rather than guessing.
+
+Whole numbers stay whole wherever the answer is exact, so a result can index a list without a conversion.
 
 ```typescript
-math.isPositive(100)
-
-// expected value: true
+math.pow(2, 10)     // 1024, a whole number
+math.pow(2, 0.5)    // 1.4142135623730951
 ```
 
-### `isZero()`
+## Rounding and sign
 
-Determines if the specified value is zero.
+| Method | Returns |
+| --- | --- |
+| `math.floor(n)` | The largest whole number less than or equal to `n`. |
+| `math.ceil(n)` | The smallest whole number greater than or equal to `n`. |
+| `math.round(n)` | `n` rounded to the nearest whole number. |
+| `math.round(n, places)` | `n` rounded to `places` decimal places. |
+| `math.truncate(n)` | `n` with its fraction dropped, toward zero. |
+| `math.abs(n)` | The absolute, or non-negative, value. |
+| `math.sign(n)` | `-1`, `0`, or `1`. |
 
 ```typescript
-math.isZero(5)
-
-// expected value: false
+math.floor(2.7)        // 2
+math.truncate(-2.7)    // -2, where math.floor(-2.7) is -3
+math.round(2.567, 2)   // 2.57
 ```
 
-### `max()`
+`floor`, `ceil`, `round`, `truncate`, and `sign` all answer with whole numbers, so they can be used as list indices directly.
 
-Returns the larger of two numbers. Extra arguments beyond the first two are ignored.
+## Powers, roots, and logarithms
+
+| Method | Returns |
+| --- | --- |
+| `math.sqrt(n)` | The square root. |
+| `math.cbrt(n)` | The cube root. |
+| `math.square(n)` | `n` multiplied by itself. |
+| `math.reciprocal(n)` | `1 / n`. |
+| `math.pow(base, exponent)` | `base` raised to `exponent`. |
+| `math.hypot(x, y)` | The hypotenuse, without overflowing on the way. |
+| `math.exp(n)` | e raised to `n`. |
+| `math.exp2(n)` | 2 raised to `n`. |
+| `math.expm1(n)` | `math.exp(n) - 1`, accurate for tiny `n`. |
+| `math.log(n)` | The natural logarithm. |
+| `math.log(n, base)` | The logarithm in the given base. |
+| `math.log2(n)` / `math.log10(n)` | The logarithm in base 2 or 10. |
+| `math.log1p(n)` | `math.log(1 + n)`, accurate for tiny `n`. |
 
 ```typescript
-math.max(100, 200)
-
-// expected value: 200
+math.log(8, 2)      // 3
+math.hypot(3, 4)    // 5
 ```
 
-### `min()`
+## Trigonometry
 
-Returns the smaller of two numbers. Extra arguments beyond the first two are ignored.
+Angles are radians throughout.
+
+| Method | Returns |
+| --- | --- |
+| `math.sin(n)` / `math.cos(n)` / `math.tan(n)` | Sine, cosine, tangent. |
+| `math.asin(n)` / `math.acos(n)` / `math.atan(n)` | Their inverses. |
+| `math.atan2(y, x)` | The angle to a point, correct in all four quadrants. |
+| `math.sinh(n)` / `math.cosh(n)` / `math.tanh(n)` | The hyperbolic forms. |
+| `math.asinh(n)` / `math.acosh(n)` / `math.atanh(n)` | Their inverses. |
+| `math.degrees(radians)` | Radians converted to degrees. |
+| `math.radians(degrees)` | Degrees converted to radians. |
 
 ```typescript
-math.min(100, 200)
+angle = math.atan2(target.y - player.y, target.x - player.x)
 
-// expected value: 100
+x = math.cos(angle) * speed
+y = math.sin(angle) * speed
 ```
 
-### `sin()`
+`atan2` is the one to reach for over `atan`: it takes both coordinates, so it knows which quadrant the point is in.
 
-Returns the sine of the radian argument.
+## Arithmetic
+
+Arithmetic on lists is elementwise, and the operators say so directly:
 
 ```typescript
-math.sin(math.pi).round()
-
-// expected value: 0
+[1, 2, 3] + 10                // [11, 12, 13]
+[1, 2, 3] * 2                 // [2, 4, 6]
+[1, 2, 3] + [10, 20, 30]      // [11, 22, 33]
+[[1, 2], [3, 4]] + [10, 20]   // [[11, 22], [13, 24]]
 ```
 
-### `tan()`
+The methods below are the same operations under a name, broadcasting identically — `a + b` and `math.add(a, b)` are one operation reached two ways. Reach for whichever reads better: the operators for arithmetic in the middle of an expression, the methods where a name carries more.
 
-Returns the tangent of the radian argument.
+See [Lists](/docs/lists) for what the operators mean in full, including comparison and joining.
+
+| Method | Returns |
+| --- | --- |
+| `math.add(a, b)` | `a + b`. |
+| `math.subtract(a, b)` | `a - b`. |
+| `math.multiply(a, b)` | `a * b`. |
+| `math.divide(a, b)` | `a / b`. Dividing by zero is an error. |
+| `math.mod(a, b)` | The remainder, taking its sign from `a`. |
+| `math.remainder(a, b)` | The IEEE remainder, taking its sign from the nearer multiple. |
+| `math.copySign(magnitude, sign)` | `magnitude` with the sign of `sign`. |
+| `math.maximum(a, b)` | The larger of the two, elementwise. |
+| `math.minimum(a, b)` | The smaller of the two, elementwise. |
 
 ```typescript
-math.tan(0).round()
+prices = [10, 20, 30]
 
-// expected value: 0
+math.multiply(prices, 1.08)   // [10.8, 21.6, 32.400000000000006]
+math.maximum(prices, 15)      // [15, 20, 30]
 ```
 
-## Properties
+<callout>`maximum` and `minimum` compare two things elementwise. [`max`](/docs/math-arrays#extremes) and [`min`](/docs/math-arrays#extremes) are different methods that reduce a whole collection to one value.</callout>
+
+## Comparison and predicates
+
+Each of these answers `true` or `false`, and broadcasts like everything else — given a list, you get a list of booleans.
+
+| Method | True when |
+| --- | --- |
+| `math.isZero(n)` | `n` is zero. |
+| `math.isPositive(n)` / `math.isNegative(n)` | `n` is above or below zero. |
+| `math.isEven(n)` / `math.isOdd(n)` | `n` is a whole number and even, or odd. |
+| `math.isInteger(n)` | `n` has no fractional part. |
+| `math.isFinite(n)` | `n` is neither infinite nor `nan`. |
+| `math.isInfinite(n)` / `math.isNaN(n)` | `n` is infinite, or is `nan`. |
+| `math.isPrime(n)` | `n` is a prime number. |
+| `math.isClose(a, b)` | `a` and `b` are equal to within a small tolerance. |
+| `math.isClose(a, b, tolerance)` | …to within the tolerance you name. |
+
+`isClose` is the comparison to use after any run of decimal arithmetic, where `==` asks a question the arithmetic cannot answer:
+
+```typescript
+0.1 + 0.2 == 0.3            // false
+math.isClose(0.1 + 0.2, 0.3)  // true
+```
+
+It compares against both an absolute and a relative tolerance, so it holds up for values near zero and for very large ones alike.
+
+## Interpolation and bounds
+
+| Method | Returns |
+| --- | --- |
+| `math.clamp(value, low, high)` | `value`, held between `low` and `high`. |
+| `math.lerp(from, to, amount)` | A value between `from` and `to`, at `amount` from 0 to 1. |
+| `math.smoothstep(low, high, value)` | The same, eased in and out, clamped to the edges. |
+
+`clamp` keeps a value inside a range — a camera inside its map, a health bar between empty and full. `lerp` is how something follows smoothly rather than snapping:
+
+```typescript
+camera.x = math.lerp(camera.x, target.x, 8 * dt)
+camera.x = math.clamp(camera.x, 0, map.width - window.width)
+```
+
+`clamp` answers with one of the three values it was given, so clamping whole numbers leaves them whole.
+
+## Whole-number mathematics
+
+| Method | Returns |
+| --- | --- |
+| `math.gcd(a, b, …)` | The greatest common divisor. |
+| `math.lcm(a, b, …)` | The least common multiple. |
+| `math.factorial(n)` | `n!`. |
+| `math.combinations(n, k)` | How many ways `k` can be chosen from `n`, order ignored. |
+| `math.permutations(n, k)` | The same, order counted. |
+
+```typescript
+math.combinations(52, 5)   // 2598960 — five-card poker hands
+math.factorial(20)         // 2432902008176640000
+```
+
+These stay exact while the answer fits in a whole number and fall back to decimals beyond that, rather than wrapping around.
+
+## Randomness and noise
+
+| Method | Returns |
+| --- | --- |
+| `math.random()` | A decimal between 0 and 1. |
+| `math.random(n)` | A whole number from 1 to `n`. |
+| `math.random(low, high)` | A whole number from `low` to `high`. |
+| `math.randomSeed(n)` | Seeds the generator. |
+| `math.noise(x)` / `math.noise(x, y)` | Smooth noise for the given coordinate, between 0 and 1. |
+
+`math.randomSeed()` and [`random.seed()`](/docs/random) drive the same generator, so one seed governs both modules and a seeded run replays exactly however you ask for your numbers.
+
+`noise()` is what you want when variation should be smooth rather than jittery — terrain height, cloud cover, a flicker. Neighbouring inputs give neighbouring outputs, which is exactly what `random()` does not do, and the same input always gives the same result.
+
+```typescript
+math.randomSeed(1234)   // the same sequence every run
+
+height = math.noise(x * 0.05) * 40
+```
+
+## Special functions
+
+| Method | Returns |
+| --- | --- |
+| `math.gamma(n)` | The gamma function, which extends the factorial to decimals. |
+| `math.logGamma(n)` | Its natural logarithm, which survives inputs `gamma` cannot. |
+| `math.erf(n)` / `math.erfc(n)` | The error function and its complement. |
+
+## Constants
 
 <Collection>
   <p>[e](#e)</p>
   <p>[epsilon](#epsilon)</p>
+  <p>[infinity](#infinity)</p>
+  <p>[largestInteger](#largestinteger)</p>
+  <p>[largestNumber](#largestnumber)</p>
+  <p>[ln10](#ln10)</p>
+  <p>[ln2](#ln2)</p>
+  <p>[log10e](#log10e)</p>
+  <p>[log2e](#log2e)</p>
+  <p>[nan](#nan)</p>
+  <p>[phi](#phi)</p>
   <p>[pi](#pi)</p>
+  <p>[smallestInteger](#smallestinteger)</p>
+  <p>[smallestNumber](#smallestnumber)</p>
+  <p>[sqrt2](#sqrt2)</p>
+  <p>[sqrtPi](#sqrtpi)</p>
   <p>[tau](#tau)</p>
 </Collection>
 
-### `e`
-The mathematical constant `e = 2.718281…`, use the `round()` method to round down to the desired precision.
-
-```typescript
-math.e.round(2)
-
-// expected value: 2.72
-```
-
-### `epsilon`
-The smallest positive value a decimal can hold that is still distinguishable from zero (`5e-324`).
-
-```typescript
-math.epsilon
-
-// the smallest positive decimal, 5e-324
-// (printing it writes the value out in full)
-```
-
-<callout>This is the smallest representable decimal, not the machine epsilon (`2.22e-16`) that some languages give this name to. For "are these two decimals close enough", pick a tolerance that suits your numbers rather than using this.</callout>
-
 ### `pi`
-The mathematical constant `π = 3.141592…`, use the `round()` method to round down to the desired precision.
+The mathematical constant `π = 3.141592…`. Use `round()` for the precision you want.
 
 ```typescript
 math.pi.round(2)
@@ -151,10 +265,72 @@ math.pi.round(2)
 ```
 
 ### `tau`
-The mathematical constant `τ = 6.283185…`, use the `round()` method to round down to the desired precision.
+The mathematical constant `τ = 6.283185…`, which is `2π` — the ratio of a circle's circumference to its radius.
 
 ```typescript
 math.tau.round(2)
 
 // expected value: 6.28
+```
+
+### `e`
+The mathematical constant `e = 2.718281…`, the base of the natural logarithm.
+
+```typescript
+math.e.round(2)
+
+// expected value: 2.72
+```
+
+### `phi`
+The golden ratio, `φ = 1.618033…`.
+
+### `sqrt2`
+The square root of 2, `1.414213…`.
+
+### `sqrtPi`
+The square root of π, `1.772453…`.
+
+### `ln2`
+The natural logarithm of 2, `0.693147…`.
+
+### `ln10`
+The natural logarithm of 10, `2.302585…`.
+
+### `log2e`
+The base-2 logarithm of e, `1.442695…`.
+
+### `log10e`
+The base-10 logarithm of e, `0.434294…`.
+
+### `epsilon`
+Machine epsilon: the gap between 1 and the next decimal above it, `2.22e-16`. It is the smallest difference that can still be told apart at that scale, and so the floor on how precise a comparison between decimals near 1 can be.
+
+```typescript
+math.epsilon
+
+// 2.220446049250313e-16
+// (printing it writes the value out in full)
+```
+
+<callout>This changed in a recent release. `math.epsilon` previously returned the smallest representable decimal (`5e-324`), which is what [`math.smallestNumber`](#smallestnumber) is now for. For "are these two numbers close enough", reach for [`math.isClose()`](#comparison-and-predicates) rather than either.</callout>
+
+### `smallestNumber`
+The smallest positive decimal distinguishable from zero, `5e-324`.
+
+### `largestNumber`
+The largest representable decimal, `1.797693…e+308`. Like `smallestNumber`, printing it writes the value out in full.
+
+### `smallestInteger` and `largestInteger`
+The bounds of a whole number, `-9223372036854775808` and `9223372036854775807`.
+
+### `infinity`
+A value larger than every other. Dividing by zero is an error in Ghost, so this is how you name infinity when an algorithm needs it — as a starting point for a running minimum, say, or as the order argument to [`math.norm()`](/docs/math-arrays#vectors).
+
+### `nan`
+"Not a number": the result of an undefined operation, such as the square root of a negative. It compares equal to nothing, itself included, so test for it with `math.isNaN()`.
+
+```typescript
+math.sqrt(-1) == math.nan     // false, always
+math.isNaN(math.sqrt(-1))     // true
 ```

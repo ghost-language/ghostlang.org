@@ -5,6 +5,8 @@ section: "Standard Library"
 
 The `random` module provides methods for generating random numbers.
 
+<callout>This module and [`math`](/docs/math#randomness-and-noise) share one generator. Seeding either one seeds both, so a seeded run replays exactly however you ask for your numbers.</callout>
+
 ## Methods
 
 ### `random.seed()`
@@ -13,6 +15,8 @@ Initialize the random number generator. This method accepts an optional seed val
 ```typescript
 random.seed()
 ```
+
+`math.randomSeed(n)` is the same operation under the [`math`](/docs/math#randomness-and-noise) module's name.
 
 ### `random.random()`
 Returns a random decimal between 0 and 1.

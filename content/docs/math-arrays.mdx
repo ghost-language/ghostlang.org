@@ -1,0 +1,241 @@
+---
+title: "Arrays"
+section: "Standard Library"
+---
+
+Ghost has no separate array type. A list of numbers is a vector, a list of lists is a matrix, and everything on this page reads and returns ordinary [lists](/docs/lists) that the rest of the language can index, iterate, and print.
+
+These methods are part of the [`math`](/docs/math) module. That page covers the scalar and elementwise half — roots, logarithms, trigonometry, and the [broadcasting rule](/docs/math#broadcasting) that lets any of them work on a whole list at once.
+
+## Reading values
+
+Every method that reduces a collection to a single value takes its input three ways: spread across the call, collected in a list, or arranged as a matrix. All three are the same call.
+
+```typescript
+math.mean(1, 2, 3, 4)             // 2.5
+math.mean([1, 2, 3, 4])           // 2.5
+math.mean([[1, 2], [3, 4]])       // 2.5
+```
+
+Nesting is flattened first, so a reduction over a matrix reads every value in it.
+
+There is no axis argument. To total a matrix along one axis, multiply by a row of ones — which is what summing along an axis is:
+
+```typescript
+math.dot(math.ones(2), [[1, 2], [3, 4]])   // [4, 6] — down the columns
+math.dot([[1, 2], [3, 4]], math.ones(2))   // [3, 7] — across the rows
+```
+
+## Building
+
+| Method | Returns |
+| --- | --- |
+| `math.arange(stop)` | Whole numbers from 0 up to but not including `stop`. |
+| `math.arange(start, stop)` | The same, from `start`. |
+| `math.arange(start, stop, step)` | The same, counting by `step`. |
+| `math.linspace(start, stop, count)` | `count` evenly spaced values, including both ends. |
+| `math.zeros(n)` / `math.zeros(rows, columns)` | A list, or list of rows, of zeros. |
+| `math.ones(n)` / `math.ones(rows, columns)` | The same, of ones. |
+| `math.full(n, value)` / `math.full(rows, columns, value)` | The same, of `value`. |
+| `math.identity(n)` | The `n`×`n` matrix that leaves what it multiplies unchanged. |
+
+```typescript
+math.arange(5)              // [0, 1, 2, 3, 4]
+math.arange(0, 1, 0.25)     // [0, 0.25, 0.5, 0.75]
+math.linspace(0, 1, 5)      // [0, 0.25, 0.5, 0.75, 1]
+math.identity(3)            // [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+```
+
+`arange` is told the step and works out how many values there are; `linspace` is told how many and works out the step. `arange` given whole numbers answers with whole numbers, so it can drive an index directly.
+
+## Rearranging
+
+| Method | Returns |
+| --- | --- |
+| `math.reshape(values, rows, columns)` | The same values, laid out in the given shape. |
+| `math.flatten(values)` | Any nesting collapsed into a single list. |
+| `math.shape(values)` | The dimensions, outermost first. |
+| `math.transpose(matrix)` | The matrix with its rows and columns swapped. |
+
+One dimension of `reshape` may be `-1`, in which case it is worked out from how many values there are.
+
+```typescript
+math.reshape(math.arange(6), 2, 3)    // [[0, 1, 2], [3, 4, 5]]
+math.reshape(math.arange(6), -1, 2)   // [[0, 1], [2, 3], [4, 5]]
+math.shape([[1, 2, 3], [4, 5, 6]])    // [2, 3]
+```
+
+`shape` stops at the first level that is ragged, which is the level at which the values stop describing a rectangle.
+
+## Statistics
+
+| Method | Returns |
+| --- | --- |
+| `math.sum(values)` | The total. |
+| `math.product(values)` | The product. |
+| `math.mean(values)` | The arithmetic mean. |
+| `math.median(values)` | The middle value, or the average of the middle two. |
+| `math.mode(values)` | The most frequent value, the smallest of them if several tie. |
+| `math.variance(values)` | The variance of the values in hand. |
+| `math.standardDeviation(values)` | Its square root. |
+| `math.sampleVariance(values)` | The variance, estimating the population these were drawn from. |
+| `math.sampleStandardDeviation(values)` | Its square root. |
+| `math.percentile(values, p)` | The value below which `p` percent of the input falls. |
+| `math.quantile(values, q)` | The same, on a 0-to-1 scale. |
+
+```typescript
+scores = [72, 85, 90, 90, 61, 78]
+
+math.mean(scores)                 // 79.33333333333333
+math.median(scores)               // 81.5
+math.mode(scores)                 // 90
+math.standardDeviation(scores)    // 10.418999738725189
+math.percentile(scores, 90)       // 90
+```
+
+The plain forms divide by how many values there are, describing the values you have. The `sample` forms divide by one less, estimating the wider population those values came from — which is what you want when the numbers are a sample rather than the whole story. `percentile` interpolates between neighbours when the position falls between two values.
+
+### Extremes
+
+| Method | Returns |
+| --- | --- |
+| `math.min(values)` / `math.max(values)` | The smallest or largest value. |
+| `math.argmin(values)` / `math.argmax(values)` | Its position, counting from 0. |
+
+```typescript
+math.max(3, 1, 2)        // 3
+math.max([3, 1, 2])      // 3
+math.argmax([3, 1, 2])   // 0
+```
+
+When values tie, all four agree on which one they mean: the first.
+
+### Ordering
+
+| Method | Returns |
+| --- | --- |
+| `math.sort(values)` | The values in ascending order. |
+| `math.sort(values, true)` | Descending. |
+| `math.unique(values)` | Repeats dropped, in the order first seen. |
+| `math.cumulativeSum(values)` | The running total, as long as the input. |
+| `math.cumulativeProduct(values)` | The running product. |
+
+```typescript
+math.sort([3, 1, 2])              // [1, 2, 3]
+math.unique([1, 1, 2, 3, 3])      // [1, 2, 3]
+math.cumulativeSum([1, 2, 3])     // [1, 3, 6]
+```
+
+## Vectors
+
+| Method | Returns |
+| --- | --- |
+| `math.dot(a, b)` | The dot product, matrix product, or matrix-vector product. |
+| `math.cross(a, b)` | The cross product. |
+| `math.outer(a, b)` | Every element of `a` multiplied by every element of `b`, as a matrix. |
+| `math.norm(v)` | The length of the vector. |
+| `math.norm(v, p)` | Its p-norm — `1` sums the absolute values, `math.infinity` takes the largest. |
+| `math.normalize(v)` | The vector scaled to a length of 1, keeping its direction. |
+| `math.distance(…)` | The straight-line distance between two points. |
+| `math.angle(x1, y1, x2, y2)` | The angle from one point to another, in radians. |
+
+```typescript
+math.dot([1, 2, 3], [4, 5, 6])      // 32
+math.norm([3, 4])                    // 5
+math.normalize([3, 4])               // [0.6, 0.8]
+math.cross([1, 0, 0], [0, 1, 0])     // [0, 0, 1]
+```
+
+`cross` on two three-dimensional vectors gives the vector perpendicular to both. On two-dimensional vectors it gives the single number that is all a cross product can hold there — positive when the turn is one way, negative the other.
+
+`distance` takes its points however you have them, in as many dimensions as they have:
+
+```typescript
+math.distance(0, 0, 3, 4)            // 5
+math.distance([0, 0], [3, 4])        // 5, the same call
+math.distance([0, 0, 0], [1, 2, 2])  // 3
+```
+
+## Matrices
+
+`math.dot` works out what you meant from the shapes it is given: two vectors produce a number, a matrix and a vector produce a vector, and two matrices produce a matrix. `math.matmul` is the same method under a second name.
+
+```typescript
+math.dot([[1, 2], [3, 4]], [[5, 6], [7, 8]])   // [[19, 22], [43, 50]]
+math.dot([[1, 2], [3, 4]], [5, 6])             // [17, 39]
+```
+
+| Method | Returns |
+| --- | --- |
+| `math.transpose(m)` | Rows and columns swapped. |
+| `math.trace(m)` | The sum along the diagonal. |
+| `math.determinant(m)` | The factor by which the matrix scales area or volume. |
+| `math.inverse(m)` | The matrix that undoes this one. |
+| `math.solve(a, b)` | The `x` satisfying `a · x = b`. |
+
+A determinant of zero means the matrix collapses what it multiplies, and so cannot be inverted; `inverse` and `solve` report that rather than answering with nonsense.
+
+Solving a system directly is both faster and steadier than forming the inverse and multiplying by it:
+
+```typescript
+// 2x +  y =  5
+//  x + 3y = 10
+
+math.solve([[2, 1], [1, 3]], [5, 10])   // [1, 3]
+```
+
+## A worked example
+
+Enough of the module is here to train a neural network in Ghost alone — a 2-4-1 network learning XOR, with the forward pass, the loss, and backpropagation all expressed as whole-matrix operations. All four samples train at once: the bias is a single row added to a matrix of four, which works because [shapes line up from the right](/docs/math#broadcasting) and the row stretches down the batch.
+
+```typescript
+math.randomSeed(7)
+
+function sigmoid(z) { return 1 / (1 + math.exp(z * -1)) }
+function sigmoidSlope(a) { return a * (1 - a) }
+
+function randomMatrix(rows, columns) {
+    m = []
+    for (row = 0; row < rows; row++) {
+        values = []
+        for (column = 0; column < columns; column++) { values.push(math.random() - 0.5) }
+        m.push(values)
+    }
+    return m
+}
+
+// Summing down the batch is a dot product against a row of ones.
+function columnSums(m, rows) { return math.dot(math.ones(rows), m) }
+
+inputs = [[0, 0], [0, 1], [1, 0], [1, 1]]
+targets = [[0], [1], [1], [0]]
+
+batch = 4
+rate = 0.5
+
+weights1 = randomMatrix(2, 4)
+bias1 = math.zeros(4)
+weights2 = randomMatrix(4, 1)
+bias2 = math.zeros(1)
+
+for (epoch = 0; epoch < 4000; epoch++) {
+    // Forward, all four samples at once.
+    hidden = sigmoid(math.dot(inputs, weights1) + bias1)
+    output = sigmoid(math.dot(hidden, weights2) + bias2)
+
+    // Gradients.
+    error = output - targets
+    delta2 = error * sigmoidSlope(output)
+    delta1 = math.dot(delta2, math.transpose(weights2)) * sigmoidSlope(hidden)
+
+    // Backward.
+    weights2 -= math.dot(math.transpose(hidden), delta2) * rate
+    bias2 -= columnSums(delta2, batch) * rate
+    weights1 -= math.dot(math.transpose(inputs), delta1) * rate
+    bias1 -= columnSums(delta1, batch) * rate
+}
+```
+
+After four thousand epochs it answers `0.048`, `0.952`, `0.949`, and `0.054` — XOR, learned.
+
+Notice how little of that is about Ghost. `sigmoid` is written once as `1 / (1 + math.exp(z * -1))` and works unchanged on a number, a vector, or a matrix, because [every arithmetic operator broadcasts](/docs/lists#arithmetic). `weights2 -= math.dot(math.transpose(hidden), delta2) * rate` is the update rule as you would write it on paper. The one thing still spelled out by hand is summing down the batch, which is the `columnSums` helper above — the module has no axis argument on its reductions.

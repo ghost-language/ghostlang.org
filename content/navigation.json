@@ -29,6 +29,7 @@
       "IO": "/docs/io",
       "JSON": "/docs/json",
       "Math": "/docs/math",
+      "Arrays": "/docs/math-arrays",
       "OS": "/docs/os",
       "Random": "/docs/random",
       "Time": "/docs/time"
