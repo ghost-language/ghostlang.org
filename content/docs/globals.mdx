@@ -13,11 +13,11 @@ import "ghost:math"
 console.log(math.sqrt(16)) // >> 4
 ```
 
-<callout>Earlier 0.x releases put the whole standard library in global scope. That changed: a script now says what it uses. `console` and `type` stay global because they are used constantly and are small enough in surface to earn the standing that printing and type-checking primitives have in other scripting languages.</callout>
+<callout>A script says what it uses. `console` and `type` are global because they are reached for constantly and are small enough in surface to earn it — not because "frequently used" is a standing invitation to add a third.</callout>
 
 ## `console`
 
-The [`console`](/docs/console) module writes to and reads from the terminal. `console.log()` is the way to write a line of output — there is no bare `print()` function in Ghost.
+The [`console`](/docs/console) module writes to and reads from the terminal. `console.log()` is how a Ghost program writes a line of output.
 
 ```typescript
 console.log("Hello, world!")     // >> Hello, world!

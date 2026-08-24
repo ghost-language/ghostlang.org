@@ -32,7 +32,7 @@ The following table summarizes the operator precedence in Ghost, from highest to
 | 11         | `and`               | Logical and                       | Left       |
 | 12         | `or`                | Logical or                        | Left       |
 
-<callout>Two of these differ from what C-like languages usually do. `%` binds **tighter** than `*` and `/`, so `2 * 3 % 4` is `2 * (3 % 4)` and evaluates to `6`. And `..` binds looser than the comparisons, so a range built from compared values needs parentheses. When in doubt, parenthesize.</callout>
+<callout>Two of these are worth committing to memory. `%` binds **tighter** than `*` and `/`, so `2 * 3 % 4` is `2 * (3 % 4)` and evaluates to `6`. And `..` binds looser than the comparisons, so a range built from compared values needs parentheses. When in doubt, parenthesize.</callout>
 
 Assignment (`=`) is not in the table: it is a statement rather than an expression, so `a = b = c` is not valid Ghost.
 

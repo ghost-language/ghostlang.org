@@ -5,7 +5,7 @@ section: "Standard Library"
 
 The `console` module writes to and reads from the terminal.
 
-Along with [`type()`](/docs/globals#type), `console` is one of only two names available without an [import](/docs/modules#importing-the-standard-library) — and `console.log()` is the way to write a line of output, since Ghost has no bare `print()` function.
+Along with [`type()`](/docs/globals#type), `console` is one of only two names available without an [import](/docs/modules#importing-the-standard-library). `console.log()` is how a Ghost program writes a line of output.
 
 The logging methods each prefix their output with a label, which is what separates them from `log()`.
 
@@ -83,8 +83,6 @@ console.newLine()
 
 // >> Loading...
 ```
-
-<callout>This was `console.print()` in earlier releases. The `write`/`writeln` distinction it now follows is the one Symfony's Console component draws, and the rename kept `print` from meaning two different things.</callout>
 
 ### `console.read()`
 

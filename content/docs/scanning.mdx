@@ -107,7 +107,6 @@ const (
 	NEW
 	NULL
 	OR
-	PRINT   // unused: Ghost has no `print`; see below
 	RETURN
 	SUPER
 	SWITCH
@@ -120,8 +119,6 @@ const (
 	INVALID
 )
 ```
-
-`PRINT` is left over from an earlier design and is never produced: the scanner's keyword table has no entry for `print`, and Ghost has no `print` at all — [`console.log()`](/docs/console#consolelog) replaced it.
 
 Each constant is an integer rather than a string. That is a deliberate choice: the parser looks up a token's precedence and the evaluator dispatches on its operator many times per line of source, and comparing integers lets those switches compile to jump tables instead of string comparisons. A separate table maps each type back to its source spelling, which is what error messages print:
 

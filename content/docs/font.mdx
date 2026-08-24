@@ -9,8 +9,6 @@ import font, { Font } from "lumen:font"
 
 The `font` module loads fonts. Drawing with one goes through [`canvas.print()`](/docs/canvas#text), or through the font object's own `print` method.
 
-<callout>Loading used to be `font.load()`. A font is now a [native class](/docs/embedding#registering-a-class), built with `new Font(...)` and imported by name.</callout>
-
 ## `new Font()`
 
 `new Font(path, size)` loads a TrueType font at a pixel size.

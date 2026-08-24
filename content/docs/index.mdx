@@ -87,7 +87,7 @@ Ready to give Ghost a spin?
 console.log("Hello, world!")
 ```
 
-`console.log()` is how a Ghost program writes a line. There is no bare `print()`.
+`console.log()` is how a Ghost program writes a line of output.
 
 ## Importing what you use
 
@@ -109,13 +109,13 @@ console.log(sqrt(16)) // >> 4
 
 Using a module you haven't imported is an error that names the exact import to add, so this is not something you have to memorise. See [Modules](/docs/modules).
 
-## Three things that surprise people
+## Three rules worth knowing early
 
-Ghost looks enough like JavaScript that a few deliberate differences are worth knowing before you hit them:
+Three of Ghost's rules are deliberate, load-bearing, and easiest to learn before you trip over them:
 
 **Types are never converted for you.** `"count: " + 1` is a type error, not `"count: 1"`. Use a [template literal](/docs/strings#template-literals) — `` `count: ${1}` `` — to build a string out of mixed types. For the same reason, comparing values of different types with `==` is an error rather than `false`.
 
-**`0` and `[]` are truthy.** Only `null`, `false`, and the empty string are falsy. This differs from both JavaScript and Python — see [Truthiness](/docs/values#truthiness).
+**`0` and `[]` are truthy.** Only `null`, `false`, and the empty string are falsy — see [Truthiness](/docs/values#truthiness).
 
 **`and` and `or` do not short-circuit.** Both sides are evaluated before the operator is applied, so a test on the left cannot guard the expression on the right.
 

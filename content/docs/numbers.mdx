@@ -34,7 +34,7 @@ console.log(10 / 4)    // >> 2.5
 
 ## Precision
 
-Decimals are IEEE 754 binary floats, which is the same representation used by Go's `float64`, JavaScript's numbers, and C's `double`. That representation cannot express fractions like `0.1` exactly, and the tiny errors accumulate when you add many of them together:
+Decimals are IEEE 754 binary floats, the standard 64-bit representation. It cannot express fractions like `0.1` exactly, and the tiny errors accumulate when you add many of them together:
 
 ```typescript
 value = 0

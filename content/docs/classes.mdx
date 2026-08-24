@@ -5,7 +5,7 @@ section: "Language"
 
 Classes define an object's _behavior_ and _state_. Behavior is defined by [methods](/docs/method-calls) which live in the class. Every object of the same class supports the same methods. State is defined in fields, whose values are stored in each instance.
 
-Ghost's class syntax follows JavaScript and TypeScript conventions: methods are declared by name with no `function` keyword, and instances are created with `new`.
+Methods are declared by name with no `function` keyword, and instances are created with `new`.
 
 ## Defining A Class
 
@@ -116,7 +116,7 @@ These declarations are **initializers, not shared class state**. They are re-eva
 
 ## Method Scope
 
-Up to this point, "[scope](/docs/variables#scope)" has been used to talk exclusively about [variables](/docs/variables). In a procedural language like C, or a functional one like Scheme, that's the only kind of scope there is. But object-oriented languages like Ghost introduce another kind of scope: _object scope_. It contains the methods that are available on an object. When you write:
+Up to this point, "[scope](/docs/variables#scope)" has been used to talk exclusively about [variables](/docs/variables). Classes introduce a second kind: _object scope_, which contains the methods available on an object. When you write:
 
 ```typescript
 coffee.brew()
@@ -162,7 +162,7 @@ class CoffeeMaker {
 }
 ```
 
-This is unlike Lua and Dart which can "forget" `this` when you create a callback inside a method. Ghost does what you want here and retains the reference to the original object.
+A callback created inside a method keeps hold of the instance it was created in, so `this` still means what it meant where the callback was written.
 
 (In technical terms, a function's closure includes `this`. Ghost can do this because it makes a distinction between methods and functions.)
 
@@ -300,4 +300,4 @@ Deliberately small, and unlikely to grow:
 - **No getter/setter syntax.** A field is read and written directly; a method is a method.
 - **Single inheritance only.** One `extends`, plus as many traits as you like.
 
-Two mistakes get their own message rather than failing obscurely. `ClassName.new()` — muscle memory from PHP or older JavaScript — is a syntax error pointing at `new ClassName()`, and declaring a *field* called `constructor` is a syntax error telling you to write it as a method.
+Two mistakes get their own message rather than failing obscurely. `ClassName.new()` is a syntax error pointing at `new ClassName()`, and declaring a *field* called `constructor` is a syntax error telling you to write it as a method.

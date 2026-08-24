@@ -27,7 +27,7 @@ if ([]) { console.log("runs") }    // >> runs
 if ("") { console.log("skipped") } // (nothing)
 ```
 
-<callout>This differs from both of the languages Ghost most resembles. JavaScript treats `0` as falsy; Python treats `0`, `[]`, and `{}` as falsy. Ghost treats only the three above as falsy, and the empty string is the one type-specific rule worth remembering.</callout>
+<callout>Only the three values above are falsy. A zero, an empty list, and an empty map are all truthy, and the empty string is the one type-specific rule worth remembering.</callout>
 
 ## Lists
 

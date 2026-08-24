@@ -41,7 +41,7 @@ http.handle("/echo", function(request) {
 })
 ```
 
-Patterns follow Go's `net/http` rules: a pattern ending in `/` matches every path beneath it, and `/` on its own matches everything not matched by something more specific.
+A pattern ending in `/` matches every path beneath it, and `/` on its own matches everything not matched by something more specific.
 
 ### `http.listen()`
 
@@ -55,4 +55,4 @@ http.listen(3000, function() {
 
 The server shuts down gracefully on `Ctrl + C`, giving in-flight requests up to 30 seconds to finish.
 
-<callout>The module is deliberately minimal: there is no routing beyond Go's path patterns, no way to set a status code or response headers, and no client for making outbound requests.</callout>
+<callout>The module is deliberately minimal: there is no routing beyond the path patterns above, no way to set a status code or response headers, no route parameters, and no client for making outbound requests.</callout>

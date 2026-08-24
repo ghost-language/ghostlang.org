@@ -7,9 +7,7 @@ section: "Lumen"
 import "ghost:math"
 ```
 
-Lumen used to add square roots, rounding, angles, and interpolation to Ghost's `math` module, because a game needs them on nearly every frame and Ghost's module did not have them. Ghost covers all of it natively now, so Lumen adds nothing here — the full module is documented under [Math](/docs/math) and [Arrays](/docs/math-arrays).
-
-Nothing you were calling has gone away. This page is what a game reaches for most.
+Maths a game needs on nearly every frame — square roots, rounding, angles, interpolation — all come from Ghost's own [`math`](/docs/math) module, imported as `ghost:math`. This page is the part of it a game reaches for most; [Math](/docs/math) and [Arrays](/docs/math-arrays) document the whole thing.
 
 ## Angles
 
@@ -65,7 +63,7 @@ function load() {
 }
 ```
 
-<callout>Ghost's `math` and [`random`](/docs/random) modules share one generator, so Lumen's seed governs `random.random()` too, and either module's seed call reseeds both. Lumen's math used to keep a generator of its own; it no longer does.</callout>
+<callout>Ghost's `math` and [`random`](/docs/random) modules share one generator, so Lumen's seed governs `random.random()` too, and either module's seed call reseeds both.</callout>
 
 `noise()` is what you want when variation should be smooth rather than jittery — terrain height, cloud cover, a torch flicker. Neighbouring inputs give neighbouring outputs, which is exactly what `randomInt()` does not do, and the same input always gives the same result.
 

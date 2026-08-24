@@ -3,7 +3,7 @@ title: "Syntax"
 section: "Language"
 ---
 
-Ghost's syntax pulls a lot of influence from other C-like languages. In particular Go, JavaScript, and PHP. It's designed to be familiar to those coming from these languages, with the aim to be simple and predictable.
+Ghost's syntax is designed to be simple and predictable: curly braces for blocks, parentheses around conditions, and as few special cases as the language can get away with.
 
 Scripts are stored in plain text files with a `.ghost` file extension. Ghost does not compile ahead of time: programs are run directly from source, from top to bottom like any other scripting language.
 
@@ -70,7 +70,7 @@ or        return    super     switch    this      trait
 true      use       while
 ```
 
-There are 27 of them, and they are all lowercase and case-sensitive. Note that `print` is **not** among them — Ghost has no `print` at all. [`console.log()`](/docs/console#consolelog) is the way to write a line.
+There are 27 of them, and they are all lowercase and case-sensitive.
 
 <callout>The two names Ghost makes available without an import — `console` and `type` — are not reserved words either, and neither is the name of a module you have imported. A variable that shares a name with one shadows it for the rest of the scope, which matters most for a name like `font` or `image` inside a file that imported the module of that name.</callout>
 

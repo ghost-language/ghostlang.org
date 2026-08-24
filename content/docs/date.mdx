@@ -8,11 +8,11 @@ import "ghost:date"
 import { now, format } from "ghost:date"
 ```
 
-The `date` module works with instants in time. It replaces the old `time` module, which only counted seconds and carried a table of constants for converting between units.
+The `date` module works with instants in time.
 
 Two things shape the whole module:
 
-**Every date is immutable.** Nothing here changes a date in place. Every function takes a date and returns a *new* one, which is why the operations are functions in this module rather than methods on the value. The design is taken from [date-fns](https://date-fns.org).
+**Every date is immutable.** Nothing here changes a date in place. Every function takes a date and returns a *new* one, which is why the operations are functions in this module rather than methods on the value.
 
 **Every date is UTC.** Ghost does not model time zones at all, so a date built once compares the same everywhere the program runs.
 
@@ -122,7 +122,7 @@ There is no `startOfWeek`, `endOfWeek`, `startOfYear`, or `endOfYear` yet.
 
 ## Formatting
 
-`format(date, pattern)` uses date-fns-style pattern letters, not Go's reference layout. A run of the same letter is one token, and anything else in the pattern copies through literally.
+`format(date, pattern)` builds a string from pattern letters. A run of the same letter is one token, and anything else in the pattern copies through literally.
 
 | Letter | Means | Longer runs |
 | --- | --- | --- |

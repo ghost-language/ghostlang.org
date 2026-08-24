@@ -16,8 +16,6 @@ Appends an archive of your game to a copy of the Lumen binary, so the result is 
 
 <callout>**Builds are per-platform.** Lumen links SDL2 through cgo, so `lumen build` produces a binary for the machine that ran it and only that. There is no way to build a Windows executable from a Mac. Shipping to three platforms means building on three platforms.</callout>
 
-`lumen fuse` is an older name for the same command and still works.
-
 ### macOS signing
 
 On macOS a built binary is re-signed with an ad-hoc signature as the last step, because appending anything to an executable invalidates its existing signature and the system kills a binary whose signature does not match its contents.

@@ -125,7 +125,7 @@ import "lumen:canvas"
 import { setColor } from "lumen:canvas"
 ```
 
-There is one registry per scheme and one `scheme:` import mechanism under all of them, so there is no second convention to learn — only which call to make. The unscoped `RegisterFunction`/`RegisterModule` keep targeting `ghost:` for the sake of embedding code written before schemes existed; a new host should reach for the `ForScheme` pair.
+There is one registry per scheme and one `scheme:` import mechanism under all of them, so there is no second convention to learn — only which call to make. The unscoped `RegisterFunction`/`RegisterModule` target `ghost:`; a host that wants a namespace reading as its own reaches for the `ForScheme` pair.
 
 A scheme nothing has ever registered under is a distinct import error from a misspelled name inside a real one, so a typo in the prefix tells you it is the prefix that is wrong.
 

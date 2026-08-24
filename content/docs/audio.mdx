@@ -9,8 +9,6 @@ import audio, { Source } from "lumen:audio"
 
 The `audio` module plays sound effects and music. WAV, OGG, and MP3 are supported, and paths resolve relative to your game's entry file.
 
-<callout>Loading used to be `audio.newSource()`. A sound is now a [native class](/docs/embedding#registering-a-class), built with `new Source(...)` and imported by name.</callout>
-
 ## `new Source()`
 
 `new Source(path, ['static'|'stream'])` loads a sound. See [Source](#source) for what one can do.

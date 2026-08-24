@@ -12,8 +12,6 @@ The `file` module reads and writes files, and does the directory work around the
 
 Every relative path is resolved against **the directory of the running script**, not the process's working directory, so a script behaves the same however it was invoked. An absolute path is used as given.
 
-<callout>This module was called `io` in earlier releases. The old name never said what the module actually does, and nothing else was ever added under it to justify the more generic one. `io.read()` is now `file.read()`, and `io.write()` and `io.append()` moved across unchanged.</callout>
-
 ## Methods
 
 <Collection>
