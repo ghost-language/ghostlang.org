@@ -24,15 +24,16 @@
     "Standard Library": {
       "Globals": "/docs/globals",
       "Console": "/docs/console",
+      "Date": "/docs/date",
+      "File": "/docs/file",
       "Ghost": "/docs/ghost",
       "HTTP": "/docs/http",
-      "IO": "/docs/io",
       "JSON": "/docs/json",
       "Math": "/docs/math",
       "Arrays": "/docs/math-arrays",
       "OS": "/docs/os",
-      "Random": "/docs/random",
-      "Time": "/docs/time"
+      "Path": "/docs/path",
+      "Random": "/docs/random"
     },
     "Embedding": {
       "Embedding": "/docs/embedding"

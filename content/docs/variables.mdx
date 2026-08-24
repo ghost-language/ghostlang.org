@@ -14,13 +14,13 @@ This creates a new variable `a` in the current scope and initializes it with the
 ```typescript
 technology = "Micromachines"
 
-print(technology) // >> Micromachines
+console.log(technology) // >> Micromachines
 ```
 
 Reading a name that has never been defined is an error, and Ghost reports it as soon as it reaches that line:
 
 ```typescript
-print(mystery) // Error: unknown identifier: mystery
+console.log(mystery) // name error: `mystery` is not defined
 ```
 
 ## Scope
@@ -32,7 +32,7 @@ if (true) {
   message = "assigned inside the block"
 }
 
-print(message) // >> assigned inside the block
+console.log(message) // >> assigned inside the block
 ```
 
 A function body is different. Everything assigned inside it lives and dies with the call:
@@ -41,12 +41,12 @@ A function body is different. Everything assigned inside it lives and dies with 
 function foobar() {
   a = 123
 
-  print(a) // >> 123
+  console.log(a) // >> 123
 }
 
 foobar()
 
-print(a) // Error: unknown identifier: a
+console.log(a) // name error: `a` is not defined
 ```
 
 Variables defined at the top level of a script are _top-level_, or _global_. All other variables are _local_.
@@ -64,7 +64,7 @@ function bump() {
 
 bump()
 
-print(count) // >> 0
+console.log(count) // >> 0
 ```
 
 A function can _read_ a variable from an enclosing scope, so the right-hand side above sees `0`. The assignment then defines a local `count` that disappears when the call returns.
@@ -81,7 +81,7 @@ function bump() {
 bump()
 bump()
 
-print(state.count) // >> 2
+console.log(state.count) // >> 2
 ```
 
 ### Shadowing
@@ -94,12 +94,12 @@ a = "outer"
 function foobar() {
   a = "inner"
 
-  print(a) // >> inner
+  console.log(a) // >> inner
 }
 
 foobar()
 
-print(a) // >> outer
+console.log(a) // >> outer
 ```
 
 ### Loop variables
@@ -111,6 +111,6 @@ for (i = 0; i < 3; i++) {
   last = i
 }
 
-print(last) // >> 2
-print(i)    // Error: unknown identifier: i
+console.log(last) // >> 2
+console.log(i)    // name error: `i` is not defined
 ```

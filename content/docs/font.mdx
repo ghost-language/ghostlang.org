@@ -3,31 +3,41 @@ title: "Font"
 section: "Lumen"
 ---
 
+```typescript
+import font, { Font } from "lumen:font"
+```
+
 The `font` module loads fonts. Drawing with one goes through [`canvas.print()`](/docs/canvas#text), or through the font object's own `print` method.
 
-## Methods
+<callout>Loading used to be `font.load()`. A font is now a [native class](/docs/embedding#registering-a-class), built with `new Font(...)` and imported by name.</callout>
 
-### `font.load()`
+## `new Font()`
 
-Loads a TrueType font at a given size, and returns a [Font](#font-1).
+`new Font(path, size)` loads a TrueType font at a pixel size.
 
 ```typescript
+import { Font } from "lumen:font"
+
 function load() {
-  game.bodyFont = font.load('resources/PressStart2P.ttf', 16)
+  game.bodyFont = new Font('resources/PressStart2P.ttf', 16)
 }
 ```
 
-A font is loaded at a fixed pixel size. Two sizes of the same face are two `font.load()` calls.
+A font is loaded at a fixed pixel size. Two sizes of the same face are two `new Font()` calls.
+
+`new Font(size)` — a single numeric argument — gives Lumen's built-in font at that size.
+
+## Methods
 
 ### `font.system()`
 
 Returns Lumen's built-in font at the given size, or the current default font when called with no arguments.
 
 ```typescript
+import font from "lumen:font"
+
 titleFont = font.system(32)
 ```
-
-`font.load(size)` with a single numeric argument does the same thing.
 
 <callout>The built-in font is `font.system()` rather than `font.default()` because [`default` is a reserved word](/docs/syntax#reserved-words) in Ghost and cannot be used as a method name.</callout>
 
@@ -48,7 +58,7 @@ Unlike the rest of the draw state, the current font is **not** reset between fra
 
 | Method | What it does |
 | --- | --- |
-| `print(text, x, y, [rotation, sx, sy, ox, oy])` | Draws text with this font, whatever the current font is. |
+| `console.log(text, x, y, [rotation, sx, sy, ox, oy])` | Draws text with this font, whatever the current font is. |
 | `printf(text, x, y, limit, [align], [rotation, sx, sy, ox, oy])` | Draws wrapped text, aligned `'left'`, `'center'`, or `'right'`. |
 | `getWidth(text)` | How wide that string would be, in pixels. |
 | `getHeight()` | The font's height. |

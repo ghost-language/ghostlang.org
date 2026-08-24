@@ -3,20 +3,25 @@ title: "Ghost"
 section: "Standard Library"
 ---
 
+```typescript
+import "ghost:ghost"
+import { abort, version } from "ghost:ghost"
+```
+
 The `ghost` module exposes the interpreter itself: its version, the names it currently knows, and the ability to run more Ghost code or load a compiled plugin.
 
 ## Methods
 
 <Collection>
-  <p>[abort](#abort)</p>
-  <p>[execute](#execute)</p>
-  <p>[extend](#extend)</p>
-  <p>[identifiers](#identifiers)</p>
+  <p>[abort](#ghostabort)</p>
+  <p>[execute](#ghostexecute)</p>
+  <p>[extend](#ghostextend)</p>
+  <p>[identifiers](#ghostidentifiers)</p>
 </Collection>
 
 ### `ghost.abort()`
 
-Raises a runtime error carrying the given message, stopping the program. Passing `null` instead does nothing, so a check with nothing to report can hand back `null` and be aborted on unconditionally.
+Raises a [value error](/docs/error-handling#kinds-of-error) carrying the given message, stopping the program. This is the one place a script raises an error deliberately, rather than an operation failing on its own. Passing `null` instead does nothing, so a check with nothing to report can hand back `null` and be aborted on unconditionally.
 
 ```typescript
 ghost.abort("A critical error was encountered. Aborting.")
@@ -31,7 +36,7 @@ It takes exactly one argument, and that argument must be a string or `null`.
 Executes Ghost code represented as a string, in the current scope, and returns the result of the last expression. The string can reference variables and properties that already exist.
 
 ```typescript
-print(ghost.execute('2 + 2'))
+console.log(ghost.execute('2 + 2'))
 
 // expected output: 4
 ```
@@ -62,7 +67,17 @@ $ go build -buildmode=plugin -o example.so main.go
 ghost.extend('./example.so')
 ```
 
-<callout>Go plugins are only supported on Linux, FreeBSD, and macOS. A plugin must be built with the same Go toolchain version, and against the same version of Ghost, as the interpreter loading it — otherwise Go refuses to open it.</callout>
+<callout>**Go plugins are unavailable on Windows.** Go's `plugin` package has no Windows implementation at all, so `ghost.extend()` cannot be used there, even though Ghost itself ships Windows binaries. On Linux and macOS, a plugin must also be built with the same Go toolchain version, and against the same version of Ghost, as the interpreter loading it — otherwise Go refuses to open it.</callout>
+
+A plugin's module becomes importable the moment it registers, because `import` resolves at the point it runs rather than ahead of time:
+
+```typescript
+ghost.extend('./example.so')
+
+import "ghost:example"
+```
+
+A plugin that wants a namespace of its own rather than Ghost's can call `ghost.RegisterModuleForScheme` instead, and be imported as `import "example:thing"`. See [Embedding](/docs/embedding#claiming-a-scheme).
 
 ### `ghost.identifiers()`
 

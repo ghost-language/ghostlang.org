@@ -3,47 +3,64 @@ title: "Random"
 section: "Standard Library"
 ---
 
-The `random` module provides methods for generating random numbers.
+```typescript
+import "ghost:random"
+import { random, seed } from "ghost:random"
+```
+
+The `random` module generates random numbers.
 
 <callout>This module and [`math`](/docs/math#randomness-and-noise) share one generator. Seeding either one seeds both, so a seeded run replays exactly however you ask for your numbers.</callout>
 
 ## Methods
 
-### `random.seed()`
-Initialize the random number generator. This method accepts an optional seed value. If no seed is provided, the current time is used. If you wish to use the same sequence of random numbers in multiple runs of your program, you should provide a seed value.
-
-```typescript
-random.seed()
-```
-
-`math.randomSeed(n)` is the same operation under the [`math`](/docs/math#randomness-and-noise) module's name.
+<Collection>
+  <p>[random](#randomrandom)</p>
+  <p>[seed](#randomseed)</p>
+</Collection>
 
 ### `random.random()`
-Returns a random decimal between 0 and 1.
+
+Returns a random decimal. With no arguments the result falls in `[0, 1)`:
 
 ```typescript
 random.random()
 ```
 
-You may optionally provide a minimum and maximum value. The returned value falls between them.
+With one argument, that argument is the maximum and the minimum is zero:
 
 ```typescript
-random.random(0, 10)
+random.random(10) // between 0 and 10
 ```
 
-If you provide a single number, it will be used as the maximum value, and the minimum value will be 0.
+With two, they are the minimum and the maximum:
 
 ```typescript
-random.random(10)
+random.random(5, 10) // between 5 and 10
 ```
 
-The result is always a decimal — use [`floor()`](/docs/numbers#floor) or [`round()`](/docs/numbers#round) if you want a whole number. A maximum of zero or less falls back to a value between 0 and 1.
+The result is always a decimal. For a whole number, use [`math.randomInt()`](/docs/math#randomness-and-noise), which draws from the same generator and is the one call that always answers a whole number — that is why the two are named apart.
+
+### `random.seed()`
+
+Initializes the random number generator. Pass a seed value to make a run reproducible; pass nothing and the current time is used.
+
+```typescript
+random.seed(42)
+```
+
+`math.randomSeed(n)` is the same operation under the [`math`](/docs/math#randomness-and-noise) module's name.
 
 ## Properties
 
-### `random.seed`
-The current seed value of the random number generator. Reading `random.seed` gives the seed; calling `random.seed(n)` sets it — the module carries both a property and a method under that name.
+### `random.currentSeed`
+
+The seed currently driving the generator.
 
 ```typescript
-random.seed
+random.seed(42)
+
+console.log(random.currentSeed) // >> 42
 ```
+
+<callout>Reading the seed and setting it are deliberately two different words: `random.currentSeed` is the property, `random.seed()` is the method. A getter and its setter never share a name in Ghost, so which one a piece of code means is never a guess from context.</callout>

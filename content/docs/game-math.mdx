@@ -3,6 +3,10 @@ title: "Math"
 section: "Lumen"
 ---
 
+```typescript
+import "ghost:math"
+```
+
 Lumen used to add square roots, rounding, angles, and interpolation to Ghost's `math` module, because a game needs them on nearly every frame and Ghost's module did not have them. Ghost covers all of it natively now, so Lumen adds nothing here — the full module is documented under [Math](/docs/math) and [Arrays](/docs/math-arrays).
 
 Nothing you were calling has gone away. This page is what a game reaches for most.
@@ -47,11 +51,11 @@ if (math.distance(player.x, player.y, enemy.x, enemy.y) < 64) {
 
 | Method | Returns |
 | --- | --- |
-| `math.random()` | A decimal between 0 and 1. |
-| `math.random(n)` | A whole number from 1 to `n`. |
-| `math.random(low, high)` | A whole number from `low` to `high`. |
+| `math.randomInt(n)` | A whole number from 1 to `n`, both ends included. |
+| `math.randomInt(low, high)` | A whole number from `low` to `high`, both ends included. |
 | `math.randomSeed(n)` | Seeds the generator. |
 | `math.noise(x, [y])` | Smooth noise for the given coordinate, between 0 and 1. |
+| [`random.random()`](/docs/random) | A decimal, from the same generator. |
 
 **Lumen seeds the generator with 1 before your game runs.** A procedural level therefore looks the same every time it is opened, which is what makes it something to iterate on rather than something that shifts underfoot. Call `math.randomSeed()` yourself for a different world each run:
 
@@ -63,7 +67,7 @@ function load() {
 
 <callout>Ghost's `math` and [`random`](/docs/random) modules share one generator, so Lumen's seed governs `random.random()` too, and either module's seed call reseeds both. Lumen's math used to keep a generator of its own; it no longer does.</callout>
 
-`noise()` is what you want when variation should be smooth rather than jittery — terrain height, cloud cover, a torch flicker. Neighbouring inputs give neighbouring outputs, which is exactly what `random()` does not do, and the same input always gives the same result.
+`noise()` is what you want when variation should be smooth rather than jittery — terrain height, cloud cover, a torch flicker. Neighbouring inputs give neighbouring outputs, which is exactly what `randomInt()` does not do, and the same input always gives the same result.
 
 ```typescript
 height = math.noise(x * 0.05) * 40

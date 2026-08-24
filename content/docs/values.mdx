@@ -8,14 +8,26 @@ In Ghost's little universe, the atoms that make up all matter are the built-in o
 You can ask any value what it is with the built-in [`type()`](/docs/globals#type) function.
 
 ```typescript
-print(type("Ghost")) // >> string
-print(type(3.14))    // >> number
-print(type([1, 2]))  // >> list
+console.log(type("Ghost")) // >> string
+console.log(type(3.14))    // >> number
+console.log(type([1, 2]))  // >> list
 ```
 
 ## Booleans
 
 A boolean value represents truthy or falsy states. There are two boolean values, `true` and `false`.
+
+### Truthiness
+
+Any value can be used where a condition is expected. **`null`, `false`, and the empty string are falsy. Everything else is truthy** — including `0`, an empty list, and an empty map.
+
+```typescript
+if (0) { console.log("runs") }     // >> runs
+if ([]) { console.log("runs") }    // >> runs
+if ("") { console.log("skipped") } // (nothing)
+```
+
+<callout>This differs from both of the languages Ghost most resembles. JavaScript treats `0` as falsy; Python treats `0`, `[]`, and `{}` as falsy. Ghost treats only the three above as falsy, and the empty string is the one type-specific rule worth remembering.</callout>
 
 ## Lists
 
@@ -27,9 +39,11 @@ Lists are an ordered list of elements of possibly different types identified by 
   57.3,
   function (x) {
     return x * x
-  },
+  }
 ]
 ```
+
+<callout>A list literal does not allow a trailing comma after its last element. A [map](/docs/maps) literal does.</callout>
 
 ## Maps
 
@@ -70,6 +84,26 @@ A string value is a (possibly empty) sequence of bytes. String values can be sur
 ```typescript
 string1 = "Hello, world!"
 string2 = "こんにちは、世界"
+```
+
+A third form, the backtick-delimited **template literal**, interpolates `${expression}`:
+
+```typescript
+name = "Ghost"
+
+console.log(`Hello, ${name}!`) // >> Hello, Ghost!
+```
+
+See [Strings](/docs/strings).
+
+## Dates
+
+A `date` is a single instant in time, always normalized to UTC. Dates are never written as a literal — they come out of the [`date`](/docs/date) module, and every operation on one is a function in that module rather than a method on the value, which keeps a date immutable.
+
+```typescript
+import "ghost:date"
+
+console.log(type(date.now())) // >> date
 ```
 
 ## Functions

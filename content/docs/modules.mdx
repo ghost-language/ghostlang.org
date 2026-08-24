@@ -3,67 +3,150 @@ title: "Modules"
 section: "Language"
 ---
 
-Ghost employs a simple module system to split and organize code into self-contained files.
+Ghost has one `import` statement, and two things can appear on the right of it: a **file** on disk, or a **module behind a scheme** — a standard library module under `ghost:`, or a module an embedding host registered under a scheme of its own.
 
-Paths in an `import` statement are written without the `.ghost` extension, and are resolved relative to the directory of the file being run.
+```typescript
+import "helpers"          // a .ghost file sitting next to this one
+import "ghost:math"       // the standard library's math module
+import "lumen:canvas"     // a module Lumen registered under its own scheme
+```
 
-Every Ghost file is its own module with its own scope. Importing a file into another does not explicitely merge its scope. For example, two modules can define the same top-level variable with the same name without causing any name collision.
+Ghost tells the two apart by the string alone: anything matching `scheme:` — two or more letters followed by a colon — is a scheme import, and everything else is a file path. (Two letters, so a Windows drive letter is never mistaken for a scheme.)
 
-## Shared Imports
+## Importing files
 
-Ghost keeps track of every file it imports. Importing a module in multiple locations will not execute or load that module every time. The first encounter of the imported module will be the only time its loaded and evaluated.
+Every Ghost file is its own module with its own scope. Paths are written without the `.ghost` extension and are resolved **relative to the file doing the importing** — there is no project root, no search path, and no package registry.
 
-## Binding Variables
+Importing a file into another does not merge its scope. Two modules can define the same top-level variable without colliding.
 
-All top-level variables within a module are exportable. To actually import data, you may specify any number of identifiers in your import statement:
+### Importing a whole file
+
+A bare import runs the module's top-level code once and binds the module itself, under the last segment of its path, as a [map](/docs/maps) of its top-level names:
+
+```typescript
+import "beverages"
+import "modules/helpers"
+
+beverages.brew()
+helpers.greet("world")
+```
+
+`as` chooses the name instead:
+
+```typescript
+import "modules/helpers" as h
+
+h.greet("world")
+```
+
+Nothing stops you from ignoring that binding and importing purely for the side effect of running the file.
+
+### Binding names
+
+Every top-level variable in a module is exportable. Name the ones you want:
 
 ```typescript
 import Request, Response from "network"
 ```
 
-The above will _import_ and _bind_ the values `Request` and `Response` from the `network` module. This will make `Request` and `Response` available in your file.
+This imports and binds `Request` and `Response` from the `network` module, making them available in your file.
+
+Asking for a name a module does not export is an error, and Ghost suggests the nearest name it does export.
 
 ### Aliases
 
-You may import a variable under a different name using `as`:
+Import a name under a different one with `as`:
 
 ```typescript
 import str as isString from "helpers"
 ```
 
-### Import an entire module's contents
+### Importing everything
 
-To import every value from a module, you may use `*`:
+`*` binds every top-level name the module has:
 
 ```typescript
 import * from "helpers"
 ```
 
-## Cyclic Imports
+## Importing the standard library
 
-Cyclic imports for the most part are "supported" by Ghost, though they should still be considered a code smell if you ever come across them. Because Ghost keeps track of the modules it imports, it's effectively able to short-circuit itself on cyclic imports:
+The standard library lives behind the `ghost:` scheme, and — [`console` and `type` aside](/docs/globals) — a script has to import what it uses.
+
+```typescript
+import "ghost:math"                    // the whole module, bound to `math`
+import "ghost:math" as m               // aliased
+import { pi, sqrt } from "ghost:math"  // named imports
+import pi, sqrt from "ghost:math"      // the same thing without the braces
+import * from "ghost:math"             // every method, property, and class
+```
+
+The bare form binds the module itself, so dot access works as it always has: `math.pi`, `math.sqrt(2)`.
+
+The `from` forms pull individual methods, properties, and classes out by name. A property is evaluated once, at the import — `import { pi } from "ghost:math"` binds a plain number, the same value `math.pi` would read.
+
+```typescript
+import { sqrt, pi } from "ghost:math"
+
+console.log(sqrt(16)) // >> 4
+console.log(pi)       // >> 3.141592653589793
+```
+
+The modules under `ghost:` are [`math`](/docs/math), [`date`](/docs/date), [`random`](/docs/random), [`os`](/docs/os), [`file`](/docs/file), [`path`](/docs/path), [`json`](/docs/json), [`http`](/docs/http), and [`ghost`](/docs/ghost).
+
+<callout>Using a module without importing it is a name error that tells you the exact import to add, rather than a generic "did you mean". Misspelling the module name itself — `"ghost:mathh"` — gets the same nearest-match suggestion every other unresolved name in Ghost gets.</callout>
+
+## Importing from a host
+
+`ghost:` is not special-cased. It is simply the one scheme Ghost itself pre-registers, and a Go program [embedding Ghost](/docs/embedding#claiming-a-scheme) can claim a scheme of its own. [Lumen](/docs/lumen), the game engine, registers its modules under `lumen:`:
+
+```typescript
+import "lumen:keyboard"
+import { Image } from "lumen:image"
+```
+
+Named imports, aliases, and `*` all work identically whatever the scheme. A class a module exports binds the class value itself, and `new` works on it exactly as it does on a class declared in Ghost.
+
+## Combining the two forms
+
+The module and a name out of it can be imported in one statement, JavaScript-style: the module name first, the braced list after it.
+
+```typescript
+import image, { Spritesheet } from "lumen:image"
+
+image.something()                 // the whole module, as `import "lumen:image" as image`
+new Spritesheet("sheet.png")      // the named export
+```
+
+The braces matter here. `import a, b from "path"` — no brace after the comma — keeps its own, unrelated meaning of two named imports. The combined form works for file imports too, and `import name, { * } from "path"` combines the module with every export.
+
+## Shared imports
+
+Ghost keeps track of every module it imports. A module is read, parsed, and evaluated **once**, no matter how many files import it; every later import of the same path binds what the first one produced.
+
+## Cyclic imports
+
+Because Ghost memoizes imports, a cycle short-circuits rather than recursing forever:
 
 ```typescript
 // main.ghost
 import "a"
 
 // a.ghost
-print("start a")
+console.log("start a")
 import "b"
-print("end a")
+console.log("end a")
 
 // b.ghost
-print("start b")
+console.log("start b")
 import "c"
-print("end b")
+console.log("end b")
 
 // c.ghost
-print("start c")
+console.log("start c")
 import "a"
-print("end c")
+console.log("end c")
 ```
-
-When running the above program, you'll find that it prints the correct output and does not get stuck in an infinite loop:
 
 ```
 start a
@@ -74,23 +157,9 @@ end b
 end a
 ```
 
-## Importing Side Effects
+A cycle that cannot be resolved this way is reported as an import error naming the cycle, rather than looping. Either way, cyclic imports are worth treating as a smell.
 
-Import an entire module for side effects only, without importing anything. This runs the module's global code, but doesn't actually import any values.
-
-```typescript
-import "beverages"
-```
-
-This will evaluate the module and run it, but it will not bind any new variables.
-
-## Introducing An Example
-
-To demonstrate the usage of modules, we're going to show a very simple example below.
-
-### Basic Example Structure
-
-In our example, we have the file structure below:
+## A worked example
 
 ```
 main.ghost
@@ -105,7 +174,7 @@ modules/
 import * from "modules/functions"
 import * from "modules/variables"
 
-print("Program loaded.")
+console.log("Program loaded.")
 
 add(one, two)
 greet(hello)
@@ -115,11 +184,11 @@ greet(hello)
 
 ```typescript
 function add(a, b) {
-  print(a + b)
+  console.log(a + b)
 }
 
 function greet(message) {
-  print(message)
+  console.log(message)
 }
 ```
 
@@ -131,4 +200,4 @@ two = 2
 hello = "Hello, world!"
 ```
 
-While this is a very rudimentary example, it showcases how simple it is to load in modules. Modules are nothing more than other Ghost files, and can be located anywhere within your program. We chose to put our modules in a `modules` directory, but you don't have to do this.
+Modules are nothing more than other Ghost files, and can live anywhere in your program. Putting them in a `modules` directory is a convention, not a requirement.

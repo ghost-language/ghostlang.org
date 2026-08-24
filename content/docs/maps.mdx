@@ -29,21 +29,21 @@ You can access any element in a map by calling the subscript operator on it with
 ```typescript
 people = { Artemis: 35, Rabbit: 37, Orion: 43 }
 
-print(people["Artemis"]) // >> 35
-print(people["Rabbit"])  // >> 37
-print(people["Orion"])   // >> 43
+console.log(people["Artemis"]) // >> 35
+console.log(people["Rabbit"])  // >> 37
+console.log(people["Orion"])   // >> 43
 ```
 
 A key that is a valid identifier can also be reached with a `.`:
 
 ```typescript
-print(people.Artemis) // >> 35
+console.log(people.Artemis) // >> 35
 ```
 
 Calling a key that does not exist will return a `null` value.
 
 ```typescript
-print(people["Arasaka"]) // >> null
+console.log(people["Arasaka"]) // >> null
 ```
 
 ## Adding and Changing Elements
@@ -54,8 +54,8 @@ Assigning through either form adds the key if it isn't there, and replaces the v
 people["Arasaka"] = 12
 people.Orion = 44
 
-print(people["Arasaka"]) // >> 12
-print(people.Orion)      // >> 44
+console.log(people["Arasaka"]) // >> 12
+console.log(people.Orion)      // >> 44
 ```
 
 ## Iterating
@@ -64,15 +64,23 @@ print(people.Orion)      // >> 44
 
 ```typescript
 for (value in people) {
-  print(value)
+  console.log(value)
 }
 
 for (name, age in people) {
-  print(name + " is " + age.toString())
+  console.log(name + " is " + age.toString())
 }
 ```
 
-Maps are unordered: the pairs come back in no particular order, and that order can differ between runs.
+<callout>**Maps are unordered.** The pairs come back in no particular order, and that order can differ between two runs of the identical program — for `for ... in`, for [`keys()`](#keys) and [`values()`](#values), and for printing the map. Do not write a program, or a test, that depends on it.</callout>
+
+Sort the keys yourself when the order matters:
+
+```typescript
+for (name in people.keys().sort()) {
+  console.log(name)
+}
+```
 
 ## Nesting
 
@@ -84,7 +92,90 @@ config = {
   title: "Ghost"
 }
 
-print(config.window.width) // >> 1280
+console.log(config.window.width) // >> 1280
 ```
 
-<callout>Maps carry no methods of their own — there is no `length()`, `keys()`, or `remove()` yet. Counting or collecting keys means walking the map with `for ... in`.</callout>
+## Methods
+
+<Collection>
+  <p>[get](#get)</p>
+  <p>[has](#has)</p>
+  <p>[keys](#keys)</p>
+  <p>[length](#length)</p>
+  <p>[merge](#merge)</p>
+  <p>[set](#set)</p>
+  <p>[values](#values)</p>
+</Collection>
+
+### `get()`
+The `get` method reads a key, and takes an optional fallback for when the key is absent. Without one, a missing key answers `null` — the same as `[]` indexing.
+
+```typescript
+scores = { a: 1 }
+
+console.log(scores.get("a"))    // >> 1
+console.log(scores.get("z"))    // >> null
+console.log(scores.get("z", 0)) // >> 0
+```
+
+### `has()`
+The `has` method reports whether a key is present, whatever its value. This is what distinguishes "absent" from "present and `null`", which reading the key cannot tell you:
+
+```typescript
+scores = { a: 1, b: null }
+
+console.log(scores.has("a")) // >> true
+console.log(scores.has("b")) // >> true
+console.log(scores.has("z")) // >> false
+```
+
+### `keys()`
+The `keys` method returns the map's keys as a [list](/docs/lists):
+
+```typescript
+{ a: 1, b: 2 }.keys()
+
+// [a, b]
+```
+
+### `length()`
+The `length` method returns how many pairs the map holds:
+
+```typescript
+{ a: 1, b: 2 }.length()
+
+// 2
+```
+
+### `merge()`
+The `merge` method returns a **new** map holding both maps' pairs, leaving each alone. Where both have the same key, the argument's value wins — the same rule a later assignment to that key would follow:
+
+```typescript
+defaults = { width: 800, height: 600 }
+
+defaults.merge({ width: 1280 })
+
+// { width: 1280, height: 600 }
+```
+
+### `set()`
+The `set` method assigns a key and returns the map itself, so calls can be chained. It mutates the map, exactly as assigning through `[]` or `.` does:
+
+```typescript
+config = {}
+
+config.set("width", 1280).set("height", 720)
+
+console.log(config.width) // >> 1280
+```
+
+### `values()`
+The `values` method returns the map's values as a [list](/docs/lists):
+
+```typescript
+{ a: 1, b: 2 }.values()
+
+// [1, 2]
+```
+
+<callout>Ghost maps have no way to remove a key yet. Building a new map without it — walking the original with `for ... in` — is the way around it for now.</callout>

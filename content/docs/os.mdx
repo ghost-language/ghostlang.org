@@ -3,7 +3,20 @@ title: "OS"
 section: "Standard Library"
 ---
 
+```typescript
+import "ghost:os"
+import { args, exit, sleep } from "ghost:os"
+```
+
+The `os` module covers the program's own relationship with the machine running it: the arguments it was given, pausing, ending, and which operating system it is on.
+
 ## Methods
+
+<Collection>
+  <p>[args](#osargs)</p>
+  <p>[exit](#osexit)</p>
+  <p>[sleep](#ossleep)</p>
+</Collection>
 
 ### `os.args()`
 
@@ -11,20 +24,6 @@ Returns a list of the command line arguments the interpreter was given, as strin
 
 ```typescript
 os.args()
-```
-
-### `os.clock()`
-
-Returns the number of nanoseconds elapsed since January 1, 1970 UTC.
-
-<callout>
-January 1st, 1970 at 00:00:00 UTC is referred to as the Unix epoch. Early Unix engineers picked that date arbitrarily because they needed to set a uniform date for the start of time, and New Year's Day, 1970, seemed most convenient.
-</callout>
-
-```typescript
-os.clock()
-
-// expected value: 1643344902998773000
 ```
 
 ### `os.exit()`
@@ -39,7 +38,18 @@ os.exit(0, "Process completed successfully")
 // expected output: Process completed successfully
 ```
 
-The message is optional; `os.exit(1)` exits quietly.
+The message is optional; `os.exit(1)` exits quietly. Arguments are validated before anything is printed, so a miscall does not half-run. Nothing deferred runs either — the process ends immediately.
+
+### `os.sleep()`
+
+Pauses for the given number of milliseconds. A negative duration is a value error.
+
+```typescript
+// Pause for one second
+os.sleep(1000)
+```
+
+<callout>`os.sleep()` is where pausing lives, rather than on [`date`](/docs/date): stopping the program is something the program does, not something a calendar instant does. Reading the clock is `date.now()`; the old `time` module's `time.sleep()` and its unit constants are both gone.</callout>
 
 ## Properties
 

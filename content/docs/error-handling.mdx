@@ -3,97 +3,173 @@ title: "Error Handling"
 section: "Language"
 ---
 
-_I am error._
+Ghost has **no exceptions**. There is no `try`, no `catch`, and no `throw`. Every failure — a syntax error, a type mismatch, a bad argument, a missing file — is an ordinary value that travels back up the call chain until it reaches the top, where it is reported and the program stops.
 
-## Syntax Errors
+That is a deliberate design decision rather than a missing feature: an error in Ghost is data, not control flow.
 
-The first errors you are likely to run into are syntax errors. These include simple bugs where your code doesn't follow Ghost's grammar, like:
+## What a failure looks like
+
+Every failure Ghost reports carries the same five things: what sort of mistake it is, a sentence saying what happened, the exact place it happened with the offending text underlined, what was in flight at the time, and — where there is one — what to do about it.
+
+```
+name error: `mesage` is not defined
+ --> example.ghost:4:22
+  |
+4 |   return "Hello, " + mesage
+  |                      ^^^^^^
+  |
+  = in greet(), called at example.ghost:7:1
+  = help: did you mean `message`?
+```
+
+Reading it top to bottom:
+
+- **`name error`** — the *kind* of mistake, named below. Ghost never reports a generic "runtime error".
+- **`example.ghost:4:22`** — the file, line, and column.
+- **The quoted line** — the source itself, with `^` under exactly the text that failed.
+- **`= in greet(), called at ...`** — the call trace, recorded as the error unwinds. Deep traces are capped at eight frames, with a count of the rest.
+- **`= help:`** — what to do next, rather than a restatement of the problem.
+
+Not every failure has all of these. A trace only appears when the error happened inside a call, and a help line only when there is something useful to say.
+
+## Kinds of error
+
+The first two words say what sort of mistake it is before the sentence explains it.
+
+| Kind | What it means |
+| --- | --- |
+| `syntax error` | source that could not be read |
+| `name error` | a reference to something that was never defined |
+| `type error` | an operation applied to the wrong sort of value |
+| `argument error` | a call whose arguments do not fit what it is calling |
+| `index error` | a subscript outside what it indexes |
+| `value error` | a value of the right type the operation cannot accept |
+| `property error` | a member the value does not have |
+| `import error` | a module that could not be found, read, or resolved |
+| `system error` | the world outside the program refusing — a missing file, a port that will not bind |
+| `internal error` | a bug in Ghost itself, with a note asking for it to be reported |
+
+## Syntax errors
+
+Syntax errors are found while reading your code, before any of it runs:
 
 ```typescript
 1 + * 2
 ```
 
-Ghost detects these while reading your code, before running any of it. When it hits one, you get an error naming the line, the column, and the token it choked on:
+Parsing reports **every** syntax error it finds rather than stopping at the first, so one pass over a file tells you about all of them. If a file has any, none of it runs.
 
-```
-1:5: syntax error: unexpected token `*`
-```
+## Name errors, and "did you mean?"
 
-Parsing reports every syntax error it finds, not just the first, so one pass over a file tells you about all of them. If a file has any, none of it runs.
-
-## Runtime Errors
-
-Errors that can't be found by reading the code are found by running it. Since they can't be detected until then, they're called "runtime" errors.
-
-Most runtime errors come from the evaluation of your code itself. They arise from code trying to perform an operation that Ghost can't do. A common one is a method that doesn't exist. If you call a method on an object and its class doesn't define that method, there's nothing Ghost can do:
+A name that was never defined is only noticed when execution reaches the line that reads it:
 
 ```typescript
-class Foo {
-  bar() {
-    //
-  }
-}
-
-foo = new Foo()
-
-foo.someRandomMethod()
+console.log("this line runs")
+console.log(mesage)
 ```
 
-If you run this, Ghost reports:
+```
+name error: `mesage` is not defined
+ --> example.ghost:2:13
+  |
+2 | console.log(mesage)
+  |             ^^^^^^
+  |
+  = help: did you mean `message`?
+```
+
+The suggestion is a real edit-distance search over the names actually in scope — variables, class members, or a module's own methods, depending on where the mistake is — not a guess. The same machinery covers misspelled properties and misspelled imports:
 
 ```
-9:4:example.ghost: runtime error: undefined method someRandomMethod for class Foo
+property error: module `math` has no property `pii`
+ --> example.ghost:2:18
+  |
+2 | console.log(math.pii)
+  |                  ^^^
+  |
+  = help: did you mean `math.pi`?
 ```
 
-Runtime errors carry the line, the column, and the file they happened in.
+Reaching for a standard library module you have not [imported](/docs/modules#importing-the-standard-library) is a name error too, and the help names the exact import to add:
 
-Another common one is a name that was never defined. Unlike a syntax error, this is only noticed when execution reaches the line that reads it:
+```
+name error: `math` is not defined
+ --> example.ghost:1:1
+  |
+1 | math.sqrt(16)
+  | ^^^^
+  |
+  = help: `math` is not a global — import it: `import "ghost:math"`
+```
+
+## Type errors
+
+Ghost does not convert values for you:
 
 ```typescript
-print("this line runs")
-print(message)
+console.log("Ghost " + 1)
 ```
 
 ```
-this line runs
-2:7:example.ghost: runtime error: unknown identifier: message
+type error: cannot use `+` between string and number
+ --> example.ghost:1:22
+  |
+1 | console.log("Ghost " + 1)
+  |                      ^
 ```
 
-Type mismatches are the third common shape — Ghost does not convert values for you:
+Use a [template literal](/docs/strings#template-literals) to build a string out of mixed types, or call [`toString()`](/docs/numbers#tostring) on the number.
 
 ```typescript
-print("Ghost " + 1) // runtime error: type mismatch: STRING + NUMBER
+count = 1
+
+console.log(`Ghost ${count}`)
 ```
 
-Call [`toString()`](/docs/numbers#tostring) on the number, or use [`format()`](/docs/strings#format).
+## Argument errors
 
-When a runtime error occurs, Ghost reports it and stops. Unlike some other languages, Ghost will not keep plugging away after a runtime error has occurred.
+Every library method checks its own arity and argument types, so a miscall is reported as a call rather than as a crash somewhere inside it:
 
-A runtime error implies there's a bug in your code and it wants to draw your attention to it.
+```
+argument error: `math.sqrt()` expects 1 argument, got 0
+ --> example.ghost:2:6
+  |
+2 | math.sqrt()
+  |      ^^^^
+```
 
-## Creating Runtime Errors
+## Nothing can crash the host
 
-Most runtime errors come from within the Ghost evaluator, but you may want to be able to cause your own runtime errors to occur. This can be done by calling the `ghost.abort()` function:
+A Ghost program cannot take down the Go program running it. Runaway recursion is counted and reported as an ordinary error at 4,096 call frames rather than overflowing the stack, and a bug in Ghost itself is caught at the boundary and reported as an `internal error` asking you to file it. Set `GHOST_DEBUG` in the environment to attach the Go stack trace to one of those.
+
+## Raising an error yourself
+
+[`ghost.abort()`](/docs/ghost#ghostabort) is the one place a script deliberately raises an error rather than an operation failing on its own:
 
 ```typescript
+import "ghost:ghost"
+
 ghost.abort("Something bad happened")
 ```
 
-You must pass in exactly one argument, and it must be a string or `null`. A string raises a runtime error carrying that message; `null` does nothing at all, which lets a check that has nothing to complain about hand back `null` and be aborted on unconditionally.
+It takes exactly one argument, and that argument must be a string or `null`. A string raises a value error carrying that message; `null` does nothing at all, which lets a check with nothing to complain about hand back `null` and be aborted on unconditionally.
 
-## Values That Aren't Errors
+## Values that aren't errors
 
 Not every miss is an error. A few operations answer with `null` instead, and are worth knowing so you don't reach for error handling where a comparison will do:
 
 - A list index that is out of range.
 - A map key that isn't present.
 - A string index that is out of range.
+- `first()`, `last()`, `pop()`, and `shift()` on an empty list.
 - A function that ends without a `return`.
 
 ```typescript
 list = [1, 2, 3]
 
 if (list[10] == null) {
-  print("nothing there")
+  console.log("nothing there")
 }
 ```
+
+The rule is roughly: a read that names a **position** is lenient, and an operation that names a **range** validates it. [`slice()`](/docs/lists#slice) raises an index error for bounds outside the list, where `list[10]` answers `null`.

@@ -3,18 +3,24 @@ title: "Audio"
 section: "Lumen"
 ---
 
+```typescript
+import audio, { Source } from "lumen:audio"
+```
+
 The `audio` module plays sound effects and music. WAV, OGG, and MP3 are supported, and paths resolve relative to your game's entry file.
 
-## Methods
+<callout>Loading used to be `audio.newSource()`. A sound is now a [native class](/docs/embedding#registering-a-class), built with `new Source(...)` and imported by name.</callout>
 
-### `audio.newSource()`
+## `new Source()`
 
-Loads a sound and returns a [Source](#source).
+`new Source(path, ['static'|'stream'])` loads a sound. See [Source](#source) for what one can do.
 
 ```typescript
+import { Source } from "lumen:audio"
+
 function load() {
-  game.hit = audio.newSource('resources/hit.wav')
-  game.music = audio.newSource('resources/theme.ogg', 'stream')
+  game.hit = new Source('resources/hit.wav')
+  game.music = new Source('resources/theme.ogg', 'stream')
 }
 ```
 
@@ -25,7 +31,7 @@ The second argument picks how the sound is decoded:
 | `'static'` (the default) | Decodes the whole sound up front. Can overlap with itself. Use it for effects. |
 | `'stream'` | Decodes while playing. Use it for music. |
 
-### Module-level control
+## Module-level control
 
 | Method | What it does |
 | --- | --- |
@@ -57,7 +63,7 @@ Each loaded sound is a Source, with its own controls.
 
 ```typescript
 function load() {
-  game.music = audio.newSource('resources/theme.ogg', 'stream')
+  game.music = new Source('resources/theme.ogg', 'stream')
   game.music.setLooping(true)
   game.music.fadeIn(2)
 }

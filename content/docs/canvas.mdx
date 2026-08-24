@@ -3,6 +3,10 @@ title: "Canvas"
 section: "Lumen"
 ---
 
+```typescript
+import canvas, { Target, Quad } from "lumen:canvas"
+```
+
 The `canvas` module is Lumen's renderer: shapes, text, images' backdrop, the draw state, and the transform stack. It is the module a `draw()` function spends most of its time in.
 
 Everything here is only valid inside `draw()` (or inside a function `draw()` calls). Drawing from `update()` has nothing to draw onto.
@@ -219,16 +223,19 @@ right = math.min(map.width - 1, math.ceil((visible[0] + visible[2]) / tileSize))
 
 A target is an off-screen surface you can draw into and then draw like any image.
 
-| Method | What it does |
+| | What it does |
 | --- | --- |
-| `newTarget(width, height)` | Creates a target. |
+| `new Target(width, height)` | Creates a target. |
 | `setTarget([target])` | Directs drawing into a target, or back to the window with no argument. |
-| `newQuad(x, y, w, h)` | Creates a [Quad](/docs/image#quad). |
 | `screenshot(filename)` | Writes the current frame to a PNG. |
 
+`Target` is a class, imported by name:
+
 ```typescript
+import canvas, { Target } from "lumen:canvas"
+
 function load() {
-  game.minimap = canvas.newTarget(120, 120)
+  game.minimap = new Target(120, 120)
 }
 
 function draw() {
@@ -242,6 +249,30 @@ function draw() {
 ```
 
 Setting a target resets the transform, because a target is its own screen: `(0, 0)` is its own corner, not the window's. Clearing it restores the transform the window draws with.
+
+A target's own methods are `draw(x, y, [rotation, sx, sy, ox, oy])`, `getWidth()`, `getHeight()`, and `getDimensions()`.
+
+## Quad
+
+A quad is a rectangle of a texture — the region an image or a spritesheet frame is clipped to. `new Quad(x, y, w, h)` builds one, and [`sheet.getQuad(frame)`](/docs/image#spritesheet) hands back the one a spritesheet already made.
+
+```typescript
+import { Quad } from "lumen:canvas"
+
+region = new Quad(0, 0, 16, 16)
+
+sprite.drawQuad(region, x, y)
+```
+
+| Method | What it does |
+| --- | --- |
+| `getX()` / `getY()` | Position within the texture. |
+| `getWidth()` / `getHeight()` | Size of the region. |
+| `setViewport(x, y, w, h)` | Moves the region. |
+
+Building one per animation frame up front and reusing it beats allocating one per draw.
+
+<callout>`Target` and `Quad` used to be `canvas.newTarget()` and `canvas.newQuad()`. Both are now [native classes](/docs/embedding#registering-a-class), constructed with `new` and imported by name.</callout>
 
 ## Properties
 

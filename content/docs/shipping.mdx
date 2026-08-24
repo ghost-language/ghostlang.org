@@ -36,7 +36,7 @@ lumen mygame.lumen
 
 A packaged game is unpacked into a cache directory the first time it runs, and run from there.
 
-That is deliberate rather than incidental. Ghost resolves `import` and its own [`io`](/docs/io) module against the real filesystem, so serving Lumen's loaders out of the zip while Ghost's imports still needed real paths would give a game two disagreeing views of its own files.
+That is deliberate rather than incidental. Ghost resolves `import` and its own [`file`](/docs/file) module against the real filesystem, so serving Lumen's loaders out of the zip while Ghost's imports still needed real paths would give a game two disagreeing views of its own files.
 
 Unpacking costs a moment on first launch and keeps every path in the system pointing at the same thing. Archives are keyed by a hash of their contents, so a second launch reuses what is there, and a changed game never reads a stale mixture.
 
@@ -45,4 +45,4 @@ Unpacking costs a moment on first launch and keeps every path in the system poin
 - **Set an identity.** [`filesystem.setIdentity('my-game')`](/docs/filesystem#where-saves-go) in `load()`, so saves land in the player's data directory under your game's name rather than under `lumen`.
 - **Set the window up in `load()`.** Title, size, and icon — see [Window](/docs/window).
 - **Check your asset paths.** They resolve relative to the entry file's directory, which is what a packaged game recreates. Anything reached with `..` from there will not survive packaging.
-- **Read shipped data with [`filesystem.readAsset()`](/docs/filesystem#reading-shipped-data)** rather than `io.read()`, so it resolves against wherever the game actually landed.
+- **Read shipped data with [`filesystem.readAsset()`](/docs/filesystem#reading-shipped-data)** rather than [`file.read()`](/docs/file#fileread), so it resolves against wherever the game actually landed.

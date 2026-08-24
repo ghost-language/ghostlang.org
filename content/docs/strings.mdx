@@ -20,9 +20,40 @@ string3 = "こんにちは、世界"
 The subscript operator reads a single character by index, counting from zero. An index outside the string reads as `null`.
 
 ```typescript
-print("Ghost"[0]) // >> G
-print("Ghost"[9]) // >> null
+console.log("Ghost"[0]) // >> G
+console.log("Ghost"[9]) // >> null
 ```
+
+## Template Literals
+
+A string written in backticks is a *template literal*, and interpolates any expression written inside `${}`.
+
+```typescript
+name = "Ghost"
+count = 3
+
+console.log(`Hello, ${name}!`)
+// >> Hello, Ghost!
+
+console.log(`there are ${count} item${count == 1 ? "" : "s"}`)
+// >> there are 3 items
+```
+
+Each interpolated value is converted with its own string form — the same representation [`console.log()`](/docs/console#consolelog) and [`format()`](#format) already use — so no value needs an explicit `toString()` to appear cleanly.
+
+```typescript
+console.log(`the list is ${[1, 2, 3]}`)
+// >> the list is [1, 2, 3]
+```
+
+Interpolations nest, so a template literal can contain another one:
+
+```typescript
+console.log(`outer ${`inner ${1 + 1}`}`)
+// >> outer inner 2
+```
+
+<callout>This is deliberately not a loosening of what `+` means. `"count: " + count` is still a type error, because both sides of `+` have to be the same type. The template literal is the fluent way to build a string out of mixed types.</callout>
 
 ## Comparing Strings
 
@@ -48,25 +79,32 @@ longString = "This is a very long string which needs " +
               "otherwise the code will be unreadable."
 ```
 
+A string may also simply span several lines literally, newlines included:
+
+```typescript
+longString = "This string
+spans two lines."
+```
+
 ## Methods
 
 <Collection>
   <p>[find](#find)</p>
   <p>[findAll](#findall)</p>
   <p>[format](#format)</p>
-  <p>[endsWith](#endsWith)</p>
+  <p>[endsWith](#endswith)</p>
   <p>[length](#length)</p>
   <p>[matches](#matches)</p>
   <p>[replace](#replace)</p>
   <p>[split](#split)</p>
-  <p>[startsWith](#startsWith)</p>
-  <p>[toLowerCase](#toLowerCase)</p>
-  <p>[toUpperCase](#toUpperCase)</p>
-  <p>[toString](#toString)</p>
-  <p>[toNumber](#toNumber)</p>
+  <p>[startsWith](#startswith)</p>
+  <p>[toLowerCase](#tolowercase)</p>
+  <p>[toUpperCase](#touppercase)</p>
+  <p>[toString](#tostring)</p>
+  <p>[toNumber](#tonumber)</p>
   <p>[trim](#trim)</p>
-  <p>[trimEnd](#trimEnd)</p>
-  <p>[trimStart](#trimStart)</p>
+  <p>[trimEnd](#trimend)</p>
+  <p>[trimStart](#trimstart)</p>
 </Collection>
 
 ### `find()`

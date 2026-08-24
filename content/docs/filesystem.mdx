@@ -3,7 +3,11 @@ title: "Filesystem"
 section: "Lumen"
 ---
 
-Saved games belong in the player's own data directory, not next to the program: a game installed read-only cannot write to its own folder. Ghost's built-in [`io`](/docs/io) module reads and writes next to the source, which is right for assets and wrong for saves, so Lumen adds this module.
+```typescript
+import "lumen:filesystem"
+```
+
+Saved games belong in the player's own data directory, not next to the program: a game installed read-only cannot write to its own folder. Ghost's built-in [`file`](/docs/file) module reads and writes next to the source, which is right for assets and wrong for saves, so Lumen adds this module.
 
 ## Where Saves Go
 
@@ -40,9 +44,12 @@ Save paths cannot escape the save directory.
 
 ## Saving and Loading
 
-`read()` returns `null` when the file does not exist, so "no save yet" is an ordinary case rather than an error. Combined with [`json`](/docs/json), a save is a few lines:
+`read()` returns `null` when the file does not exist, so "no save yet" is an ordinary case rather than an error. Combined with [`json`](/docs/json) — imported, like everything else — a save is a few lines:
 
 ```typescript
+import "ghost:json"
+import "lumen:filesystem"
+
 function saveGame() {
   filesystem.write('save.json', json.encode({
     level: game.level,
@@ -71,6 +78,9 @@ function loadGame() {
 `readAsset(path)` is the read-only counterpart, resolved against the game's own directory. Use it for maps, dialogue, and other data you ship with the game:
 
 ```typescript
+import "ghost:json"
+import "lumen:filesystem"
+
 function load() {
   game.map = json.decode(filesystem.readAsset('resources/overworld.json'))
 }

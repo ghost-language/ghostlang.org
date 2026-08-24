@@ -7,6 +7,8 @@ At the heart of every Lumen game, the game loop drives the lifecycle of the appl
 
 Lumen calls `load()` once, then `update(dt)` and `draw()` every frame until the game quits.
 
+The three callbacks — and every [event callback](#event-callbacks) below — are ordinary top-level functions in your game's entry file. Lumen looks them up by name, so there is nothing to register.
+
 1. `load()`
 2. `update(dt)`
 3. `draw()`
@@ -16,6 +18,9 @@ Lumen calls `load()` once, then `update(dt)` and `draw()` every frame until the 
 Runs once, before the first frame. Load assets and build initial state here.
 
 ```typescript
+import "lumen:window"
+import { Image } from "lumen:image"
+
 game = {}
 
 function load() {
@@ -25,7 +30,7 @@ function load() {
     x: 0,
     y: 0,
     speed: 180,
-    sprite: image.load('player.png')
+    sprite: new Image('player.png')
   }
 }
 ```
@@ -109,4 +114,4 @@ function quit() {
 
 ## Errors During the Loop
 
-A runtime error inside `update()` or `draw()` is reported and that frame is abandoned; the game keeps running. Repeated identical errors are collapsed rather than filling the terminal a thousand times a second. An error in `load()` is fatal, as described above.
+An error inside `update()`, `draw()`, or an input callback is reported on an [error screen in the window](/docs/lumen#when-something-goes-wrong) as well as to the console, and the game holds still on it — pressing `enter` carries on past that frame. An error in `load()`, or in the game's source, is fatal, as described above: neither ever built the state every later frame reads. A failure carried on past is counted in the console rather than stopped for again, so one broken frame cannot bury everything above it.

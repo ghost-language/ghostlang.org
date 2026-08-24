@@ -1,0 +1,149 @@
+---
+title: "Date"
+section: "Standard Library"
+---
+
+```typescript
+import "ghost:date"
+import { now, format } from "ghost:date"
+```
+
+The `date` module works with instants in time. It replaces the old `time` module, which only counted seconds and carried a table of constants for converting between units.
+
+Two things shape the whole module:
+
+**Every date is immutable.** Nothing here changes a date in place. Every function takes a date and returns a *new* one, which is why the operations are functions in this module rather than methods on the value. The design is taken from [date-fns](https://date-fns.org).
+
+**Every date is UTC.** Ghost does not model time zones at all, so a date built once compares the same everywhere the program runs.
+
+```typescript
+import "ghost:date"
+
+launch = date.of(2024, 1, 31)
+
+console.log(date.format(launch, "EEEE, MMMM d, yyyy"))
+// >> Wednesday, January 31, 2024
+
+console.log(date.format(date.addMonths(launch, 1), "yyyy-MM-dd"))
+// >> 2024-02-29
+```
+
+A date's own `toString()` gives ISO-8601, which is also what printing one shows:
+
+```typescript
+console.log(date.of(2024, 1, 31))
+// >> 2024-01-31T00:00:00Z
+```
+
+## Comparing dates
+
+Dates support `==`, `!=`, `<`, `<=`, `>`, and `>=` directly, comparing instants:
+
+```typescript
+if (date.now() > deadline) {
+  console.log("late")
+}
+```
+
+Arithmetic operators do **not** work on dates — `a + b` on two dates is a type error. Use [`addDays()`](#arithmetic) and the rest below.
+
+## Building and converting
+
+| Method | What it does |
+| --- | --- |
+| `now()` | The current instant. |
+| `today()` | Midnight UTC today. |
+| `of(year, month, day, [hour, minute, second])` | A date from its parts. The month is 1–12. |
+| `parseISO(text)` | Parses RFC3339, or a bare `YYYY-MM-DD`. |
+| `fromUnix(seconds)` | A date from a Unix timestamp. |
+| `toUnix(date)` | Seconds since the Unix epoch. |
+| `toUnixNano(date)` | Nanoseconds since the Unix epoch. |
+| `format(date, pattern)` | The date as a string — see [Formatting](#formatting). |
+
+An out-of-range day, hour, minute, or second given to `of()` is a value error rather than silently rolling into the next period.
+
+```typescript
+console.log(date.toUnix(date.of(2024, 1, 31)))
+// >> 1706659200
+
+console.log(date.parseISO("2024-03-01"))
+// >> 2024-03-01T00:00:00Z
+```
+
+## Arithmetic
+
+Each takes a date and a count, and returns a new date.
+
+| Method | |
+| --- | --- |
+| `addDays(date, n)` / `subDays(date, n)` | |
+| `addWeeks(date, n)` / `subWeeks(date, n)` | |
+| `addMonths(date, n)` / `subMonths(date, n)` | |
+| `addYears(date, n)` / `subYears(date, n)` | |
+| `addHours(date, n)` | |
+| `addMinutes(date, n)` | |
+| `addSeconds(date, n)` | |
+
+<callout>Adding months **clamps** to the target month's last day rather than rolling over. January 31 plus one month is February 28 — or the 29th in a leap year — not March 2. That is almost always what a calendar-shaped calculation means.</callout>
+
+There is no `subHours`, `subMinutes`, or `subSeconds` yet; pass a negative count to the matching `add`.
+
+## Differences
+
+Each takes two dates and returns a whole number, truncated toward zero — so `differenceInDays(a, b)` is always exactly `-differenceInDays(b, a)`.
+
+`differenceInDays(a, b)`, `differenceInHours(a, b)`, `differenceInMinutes(a, b)`, `differenceInSeconds(a, b)`.
+
+```typescript
+console.log(date.differenceInDays(date.of(2024, 3, 1), date.of(2024, 1, 31)))
+// >> 30
+```
+
+## Components
+
+`year(date)`, `month(date)`, `day(date)`, `hour(date)`, `minute(date)`, `second(date)`, `weekday(date)`.
+
+`weekday()` counts from `0` for Sunday.
+
+## Predicates
+
+`isSameDay(a, b)`, `isWeekend(date)`, `isLeapYear(date)`.
+
+## Period boundaries
+
+`startOfDay(date)`, `endOfDay(date)`, `startOfMonth(date)`, `endOfMonth(date)`.
+
+```typescript
+console.log(date.endOfMonth(date.of(2024, 1, 31)))
+// >> 2024-01-31T23:59:59Z
+```
+
+There is no `startOfWeek`, `endOfWeek`, `startOfYear`, or `endOfYear` yet.
+
+## Formatting
+
+`format(date, pattern)` uses date-fns-style pattern letters, not Go's reference layout. A run of the same letter is one token, and anything else in the pattern copies through literally.
+
+| Letter | Means | Longer runs |
+| --- | --- | --- |
+| `y` | year | `yyyy` → `2024` |
+| `M` | month | `M` → `1`, `MM` → `01`, `MMM` → `Jan`, `MMMM` → `January` |
+| `d` | day | padded at two or more |
+| `E` | weekday | abbreviated below four letters, full name at four or more |
+| `H` | hour, 24-hour | |
+| `h` | hour, 12-hour | |
+| `m` | minute | |
+| `s` | second | |
+| `a` | AM/PM | |
+
+```typescript
+d = date.of(2024, 1, 31)
+
+date.format(d, "yyyy-MM-dd")           // '2024-01-31'
+date.format(d, "EEEE, MMMM d, yyyy")   // 'Wednesday, January 31, 2024'
+date.format(d, "h:mm a")               // '12:00 AM'
+```
+
+## Pausing a program
+
+Sleeping is not a date operation and does not live here — it belongs to the program itself. See [`os.sleep()`](/docs/os#ossleep).

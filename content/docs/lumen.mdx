@@ -10,10 +10,13 @@ Lumen is a lightweight 2D game engine for Ghost. It gives Ghost a game loop, a r
 It is built on SDL2 and takes its shape from [LÖVE](https://love2d.org): the same game loop, the same transform stack, the same drawing model.
 
 ```typescript
+import "lumen:keyboard"
+import { Image } from "lumen:image"
+
 game = { x: 100, y: 100 }
 
 function load() {
-  game.sprite = image.load('resources/player.png')
+  game.sprite = new Image('resources/player.png')
 }
 
 function update(dt) {
@@ -80,7 +83,7 @@ lumen                 # run the main.ghost beside the binary, or in the
 | `-v` | Show the version and exit.               |
 | `-o` | Output path, for `build` and `package`.  |
 
-Asset paths — `image.load`, `font.load`, `audio.newSource`, `filesystem.readAsset` — resolve relative to the directory the entry file is in.
+Asset paths — `new Image(path)`, `new Font(path, size)`, `new Source(path)`, `filesystem.readAsset` — resolve relative to the directory the entry file is in.
 
 The window opens at 800×600, titled "Lumen", targeting 60 frames a second. [`window.setMode()`](/docs/window#size-and-mode), [`window.setTitle()`](/docs/window#appearance), and [`lumen.setTargetFps()`](/docs/system#the-lumen-module) change all three.
 
@@ -89,6 +92,11 @@ The window opens at 800×600, titled "Lumen", targeting 60 frames a second. [`wi
 Create a folder with a single `main.ghost` in it:
 
 ```typescript
+import "lumen:canvas"
+import "lumen:color"
+import "lumen:keyboard"
+import "lumen:window"
+
 game = { x: 100, y: 100, speed: 180 }
 
 function load() {
@@ -110,30 +118,68 @@ function draw() {
 
 Run it with `lumen .` from inside that folder.
 
-Two things in there are worth noticing now, because they come up in every Lumen game:
+Three things in there are worth noticing now, because they come up in every Lumen game:
 
+- Every module the file uses is imported at the top. Nothing is global.
 - Movement is multiplied by `dt`, the time the previous frame took. See [the game loop](/docs/game-loop#updatedt).
 - The state lives on the `game` map rather than in loose variables, because [assignment inside a function is local](/docs/variables#assignment-inside-a-function-is-always-local) and would not otherwise stick.
 
-## Modules
+## Modules and Imports
 
-Lumen registers these modules on top of Ghost's own standard library. All of them are global — no `import` needed.
+Ghost's standard library is [import-only](/docs/modules#importing-the-standard-library) — `console` and `type` are the only names reachable without one — and Lumen's own modules follow the same rule, registered under their own `lumen:` [scheme](/docs/embedding#claiming-a-scheme) rather than borrowed from Ghost's `ghost:`. A game imports whatever it uses, from whichever scheme it lives under.
 
-| Module | For |
+```typescript
+import "ghost:math"                              // Ghost's own standard library
+import "lumen:canvas"                            // the whole module, bound to `canvas`
+import "lumen:canvas" as gfx                     // aliased
+import { setColor, print } from "lumen:canvas"   // named imports
+```
+
+Lumen registers these modules:
+
+| Module | Import | For |
+| --- | --- | --- |
+| [`canvas`](/docs/canvas) | `lumen:canvas` | Drawing, draw state, and the transform stack |
+| [`color`](/docs/colors) | `lumen:color` | Building colors |
+| [`image`](/docs/image) | `lumen:image` | Images, spritesheets, and animations |
+| [`font`](/docs/font) | `lumen:font` | Loading and measuring fonts |
+| [`audio`](/docs/audio) | `lumen:audio` | Sound effects and music |
+| [`keyboard`](/docs/keyboard) | `lumen:keyboard` | Key state and text input |
+| [`mouse`](/docs/mouse) | `lumen:mouse` | Pointer position, buttons, and cursor |
+| [`joystick`](/docs/joystick) | `lumen:joystick` | Game controllers |
+| [`window`](/docs/window) | `lumen:window` | Window size, mode, and the logical canvas |
+| [`timer`](/docs/timer) | `lumen:timer` | Frame timing and FPS |
+| [`filesystem`](/docs/filesystem) | `lumen:filesystem` | Saved games and shipped data files |
+| [`system`](/docs/system) | `lumen:system` | Clipboard, power, and the engine itself |
+| [`lumen`](/docs/system#the-lumen-module) | `lumen:lumen` | Quitting, and the target frame rate |
+
+Ghost's own [`math`](/docs/math) is imported as `ghost:math` — Lumen no longer adds anything to it. See [Math for games](/docs/game-math).
+
+### Classes
+
+`Image`, `Spritesheet`, `Animation`, `Source`, `Font`, `Target`, and `Quad` are [native classes](/docs/embedding#registering-a-class): built and driven by Lumen, and `new`-ed exactly like a class declared in Ghost once imported from the module that exports them.
+
+```typescript
+import { Image } from "lumen:image"
+
+sprite = new Image('resources/player.png')
+```
+
+Needing both a module and one of its classes doesn't take two lines — the two forms [combine](/docs/modules#combining-the-two-forms), module name first and the braced list after it:
+
+```typescript
+import audio, { Source } from "lumen:audio"
+
+audio.setVolume(0.5)
+sound = new Source('resources/hit.wav')
+```
+
+| Class | Import from |
 | --- | --- |
-| [`canvas`](/docs/canvas) | Drawing, draw state, and the transform stack |
-| [`color`](/docs/colors) | Building colors |
-| [`image`](/docs/image) | Loading images, spritesheets, and animations |
-| [`font`](/docs/font) | Loading and measuring fonts |
-| [`audio`](/docs/audio) | Sound effects and music |
-| [`keyboard`](/docs/keyboard) | Key state and text input |
-| [`mouse`](/docs/mouse) | Pointer position, buttons, and cursor |
-| [`joystick`](/docs/joystick) | Game controllers |
-| [`window`](/docs/window) | Window size, mode, and the logical canvas |
-| [`timer`](/docs/timer) | Frame timing and FPS |
-| [`filesystem`](/docs/filesystem) | Saved games and shipped data files |
-| [`system`](/docs/system) | Clipboard, power, and the engine itself |
-| [`math`](/docs/game-math) | Ghost's `math` module, extended for games |
+| `Image`, `Spritesheet`, `Animation` | `lumen:image` |
+| `Source` | `lumen:audio` |
+| `Font` | `lumen:font` |
+| `Target`, `Quad` | `lumen:canvas` |
 
 ## Writing Ghost for Lumen
 
@@ -157,9 +203,60 @@ if (j >= 0 and list[j].y > 0) { } // list[j] is read even when j is -1
 
 Split it into nested `if`s instead. A negative or out-of-range list index reads as `null` rather than raising, so the failure shows up later as an error about a property of `null`.
 
-**Module names are global.** Naming a variable or parameter `font`, `image`, `color`, `canvas`, `window`, `timer`, `audio`, `system`, `math`, or `json` gets the module instead of your value. Name them `bodyFont`, `sprite`, and so on.
+**An imported name shadows anything else you'd call it.** If a file imports `"lumen:font"`, naming a variable or parameter `font` in that file hides the module for the rest of it. The same goes for a named class import — a file that imports `{ Image }` cannot also use `Image` as a variable name. Name them `bodyFont`, `sprite`, and so on. It only matters in the file that did the importing, since imports are not global.
 
 **`default` is a keyword.** It cannot be used as a method name, which is why the built-in font is `font.system(size)` rather than `font.default(size)`.
+
+## When Something Goes Wrong
+
+A game runs in its own window, and often on a machine nobody started it from a terminal on. So every failure is reported twice: once to the console, and once into the window, where whoever is looking at the game will actually see it.
+
+Both reports say the same things in the same order, and they are [Ghost's own error reports](/docs/error-handling) — what sort of failure it is, what happened, where, the line it happened on with the offending part marked, what was in flight at the time, and what to do about it.
+
+```
+argument error: `canvas.print()` expects argument 1 to be a string, got number
+ --> main.ghost:12:5
+   |
+12 |     canvas.print(score, 10, 10)
+   |     ^^^^^^^^^^^^
+   |
+   = in drawScore(), called at main.ghost:30:3
+   = in draw()
+   = help: did you mean `text(score)`?
+```
+
+The window shows that report on an error screen, and the game holds still on it:
+
+| Key | What it does |
+| --- | --- |
+| `esc` or `q` | close the game |
+| `enter` or `space` | carry on, if carrying on is possible |
+| `c` | copy the report to the clipboard |
+
+Carrying on is offered for a failure inside `update()`, `draw()`, or an input callback — one bad frame is worth watching past. It is not offered for a failure in `load()` or in the game's source, because neither ever built the state every later frame reads. A failure carried on past is not stopped for again: it is counted in the console instead, so the same broken frame cannot bury everything above it.
+
+While the error screen is up, no game code runs at all — not `update()`, not `draw()`, and not the input callbacks — so the keys above always belong to the error screen, even in a game that has bound them.
+
+Where Lumen is holding the answer, it offers it. A misspelled asset name is answered with the file sitting next to it, and a misremembered mode, key, button, or axis name with the nearest real one:
+
+```
+system error: `Image()` could not load `playr.png`: No such file or directory
+ --> main.ghost:2:20
+  |
+2 |     player = new Image("playr.png")
+  |                    ^^^^
+  |
+  = in load()
+  = help: did you mean `player.png`?
+```
+
+### Running without a window
+
+A game run headlessly — in CI, in a build script, over ssh — has a window nobody can see and no way to dismiss what is on it, so Lumen writes the report to the console and stops rather than holding open a window nothing will ever close. A run that ended on a failure exits non-zero.
+
+Console reports are colored when the terminal can show it, and follow the usual switches: `NO_COLOR`, `CLICOLOR=0`, `FORCE_COLOR`, `CLICOLOR_FORCE`.
+
+Set `LUMEN_DEBUG=1` to attach the Go stack to an `internal error`. It is only worth doing when filing a bug: it says nothing about the game, and everything about where Lumen broke.
 
 ## Examples
 
@@ -194,7 +291,7 @@ An honest list, so you find out here rather than halfway through a project:
 - **Shaders and particles.** Neither exists. Particles can be written in Ghost; shaders cannot be worked around, which rules out lighting, palette swaps, and whole-screen effects.
 - **Physics.** There is no Box2D equivalent. Axis-aligned collision is a few lines of Ghost, which covers a top-down RPG and most puzzle games, and nothing that needs slopes, joints, or stacking.
 - **Asset hot-reloading.** Changing a sprite or a line of dialogue means restarting the game.
-- **Ghost-side gaps.** No string slicing, no list removal or sorting, and no way for a host program to expose properties on its own objects — so everything Lumen hands back is a method call.
+- **Ghost-side gaps.** No string slicing, no removal of a list element by index, and no way for a host program to expose properties on its own objects — so everything Lumen hands back is a method call.
 
 ## Differences from LÖVE
 

@@ -3,19 +3,25 @@ title: "Console"
 section: "Standard Library"
 ---
 
-The `console` module writes to and reads from the terminal. The logging methods each prefix their output with a label, which is what separates them from the plain [`print()`](/docs/globals#print) function.
+The `console` module writes to and reads from the terminal.
+
+Along with [`type()`](/docs/globals#type), `console` is one of only two names available without an [import](/docs/modules#importing-the-standard-library) — and `console.log()` is the way to write a line of output, since Ghost has no bare `print()` function.
+
+The logging methods each prefix their output with a label, which is what separates them from `log()`.
+
+Output goes through the current scope's writer rather than straight to the process's standard output, so redirected output is respected — inside an [`http.handle()`](/docs/http#httphandle) callback, every method here writes to the response body.
 
 ## Methods
 
 <Collection>
-  <p>[clear](#clear)</p>
-  <p>[error](#error)</p>
-  <p>[info](#info)</p>
-  <p>[log](#log)</p>
-  <p>[newLine](#newline)</p>
-  <p>[print](#print)</p>
-  <p>[read](#read)</p>
-  <p>[warn](#warn)</p>
+  <p>[clear](#consoleclear)</p>
+  <p>[error](#consoleerror)</p>
+  <p>[info](#consoleinfo)</p>
+  <p>[log](#consolelog)</p>
+  <p>[newLine](#consolenewline)</p>
+  <p>[read](#consoleread)</p>
+  <p>[warn](#consolewarn)</p>
+  <p>[write](#consolewrite)</p>
 </Collection>
 
 Every output method accepts any number of values, and joins them with a single space.
@@ -66,16 +72,19 @@ Outputs a single blank line.
 console.newLine()
 ```
 
-### `console.print()`
+### `console.write()`
 
 Outputs values without a trailing newline, so the next write continues on the same line.
 
 ```typescript
-console.print("Loading")
-console.print("...")
+console.write("Loading")
+console.write("...")
+console.newLine()
 
 // >> Loading...
 ```
+
+<callout>This was `console.print()` in earlier releases. The `write`/`writeln` distinction it now follows is the one Symfony's Console component draws, and the rename kept `print` from meaning two different things.</callout>
 
 ### `console.read()`
 

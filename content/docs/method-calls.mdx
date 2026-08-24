@@ -61,8 +61,14 @@ A method call is an expression, so its result can be the receiver of the next ca
 
 ## Missing Methods
 
-Calling a method a value doesn't have is a [runtime error](/docs/error-handling#runtime-errors), reported the moment the call is reached:
+Calling a method a value doesn't have is a [property error](/docs/error-handling#kinds-of-error), reported the moment the call is reached — and Ghost suggests the nearest name the value actually has:
 
 ```
-9:4:example.ghost: runtime error: undefined method someRandomMethod for class Foo
+property error: class `Foo` has no method `spek`
+ --> example.ghost:7:5
+  |
+7 | foo.spek()
+  |     ^^^^
+  |
+  = help: did you mean `speak`?
 ```
