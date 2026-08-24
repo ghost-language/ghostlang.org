@@ -1,0 +1,96 @@
+---
+title: "Path"
+section: "Standard Library"
+---
+
+```typescript
+import "ghost:path"
+import { join, basename } from "ghost:path"
+```
+
+The `path` module builds and takes apart file paths. It is **pure string manipulation** — nothing here touches the filesystem, and nothing here knows where the running script lives. That is the line between this module and [`file`](/docs/file): building a path and reading one are different jobs, even though a script usually does both together.
+
+## Methods
+
+<Collection>
+  <p>[basename](#pathbasename)</p>
+  <p>[dirname](#pathdirname)</p>
+  <p>[extname](#pathextname)</p>
+  <p>[isAbsolute](#pathisabsolute)</p>
+  <p>[join](#pathjoin)</p>
+</Collection>
+
+### `path.basename()`
+
+Returns the last element of a path.
+
+```typescript
+path.basename('/home/user/save.json')
+
+// 'save.json'
+```
+
+### `path.dirname()`
+
+Returns everything but the last element of a path.
+
+```typescript
+path.dirname('/home/user/save.json')
+
+// '/home/user'
+```
+
+### `path.extname()`
+
+Returns the extension, dot included, or an empty string when there isn't one.
+
+```typescript
+path.extname('main.ghost')  // '.ghost'
+path.extname('README')      // ''
+```
+
+### `path.isAbsolute()`
+
+Returns whether the path is absolute.
+
+```typescript
+path.isAbsolute('/home/user')  // true
+path.isAbsolute('./saves')     // false
+```
+
+### `path.join()`
+
+Joins any number of path segments with the operating system's own separator, and cleans the result: `.` and `..` are resolved, and repeated separators collapse.
+
+```typescript
+path.join('saves', 'slot1', 'save.json')
+
+// 'saves/slot1/save.json'
+
+path.join('saves', '..', 'assets')
+
+// 'assets'
+```
+
+Building a path this way rather than by string concatenation is what keeps a script working on Windows as well as Unix.
+
+## Working with `file`
+
+The two modules are meant to be used together — `path` decides where, `file` does the reading and writing:
+
+```typescript
+import "ghost:file"
+import "ghost:path"
+
+directory = 'saves'
+
+if (!file.exists(directory)) {
+  file.mkdir(directory)
+}
+
+for (name in file.list(directory)) {
+  if (path.extname(name) == '.json') {
+    console.log(path.join(directory, name))
+  }
+}
+```

@@ -3,6 +3,10 @@ title: "Arrays"
 section: "Standard Library"
 ---
 
+```typescript
+import "ghost:math"
+```
+
 Ghost has no separate array type. A list of numbers is a vector, a list of lists is a matrix, and everything on this page reads and returns ordinary [lists](/docs/lists) that the rest of the language can index, iterate, and print.
 
 These methods are part of the [`math`](/docs/math) module. That page covers the scalar and elementwise half — roots, logarithms, trigonometry, and the [broadcasting rule](/docs/math#broadcasting) that lets any of them work on a whole list at once.
@@ -189,6 +193,9 @@ math.solve([[2, 1], [1, 3]], [5, 10])   // [1, 3]
 Enough of the module is here to train a neural network in Ghost alone — a 2-4-1 network learning XOR, with the forward pass, the loss, and backpropagation all expressed as whole-matrix operations. All four samples train at once: the bias is a single row added to a matrix of four, which works because [shapes line up from the right](/docs/math#broadcasting) and the row stretches down the batch.
 
 ```typescript
+import "ghost:math"
+import "ghost:random"
+
 math.randomSeed(7)
 
 function sigmoid(z) { return 1 / (1 + math.exp(z * -1)) }
@@ -198,7 +205,7 @@ function randomMatrix(rows, columns) {
     m = []
     for (row = 0; row < rows; row++) {
         values = []
-        for (column = 0; column < columns; column++) { values.push(math.random() - 0.5) }
+        for (column = 0; column < columns; column++) { values.push(random.random() - 0.5) }
         m.push(values)
     }
     return m

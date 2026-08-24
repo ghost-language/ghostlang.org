@@ -3,7 +3,7 @@ title: "Syntax"
 section: "Language"
 ---
 
-Ghost's syntax pulls a lot of influence from other C-like languages. In particular Go, JavaScript, and PHP. It's designed to be familiar to those coming from these languages, with the aim to be simple and predictable.
+Ghost's syntax is designed to be simple and predictable: curly braces for blocks, parentheses around conditions, and as few special cases as the language can get away with.
 
 Scripts are stored in plain text files with a `.ghost` file extension. Ghost does not compile ahead of time: programs are run directly from source, from top to bottom like any other scripting language.
 
@@ -27,12 +27,36 @@ Comments behave like whitespace and are discarded during execution. While single
 
 ## Statements
 
-A statement ends at the end of the line. Ghost has no statement terminator, and a stray semicolon is a syntax error — the only place `;` appears in Ghost source is between the three clauses of a [`for` loop](/docs/control-flow#for-statement) header.
+A statement simply ends where its grammar says it ends. Ghost has no significant-newline rule and no automatic semicolon insertion to reason about; a trailing `;` is optional and consumed when it is there.
 
 ```typescript
 name = "Ghost"
-print(name)
+console.log(name)
+
+name = "Ghost";      // also fine
 ```
+
+The one place `;` is required is between the three clauses of a [`for` loop](/docs/control-flow#for-statement) header.
+
+## Strings
+
+Strings are written in single or double quotes, and may span several lines literally.
+
+```typescript
+name = "Ghost"
+other = 'Ghost'
+```
+
+Backtick strings are **template literals**, and interpolate any expression written inside `${}`:
+
+```typescript
+count = 3
+
+console.log(`there are ${count} item${count == 1 ? "" : "s"}`)
+// >> there are 3 items
+```
+
+Each interpolated value is converted using its own string form, so nothing needs an explicit `toString()` to appear cleanly. This is the fluent way to build a string out of mixed types — `+` still requires both sides to be the same type. See [Strings](/docs/strings#template-literals).
 
 ## Reserved Words
 
@@ -46,7 +70,9 @@ or        return    super     switch    this      trait
 true      use       while
 ```
 
-<callout>The names of registered library modules and functions — `print`, `type`, `console`, `ghost`, `http`, `io`, `json`, `math`, `os`, `random`, and `time` — are not reserved words, but a variable that shares a name with one shadows it for the rest of the scope. Embedders (and Lumen) register more names on top of these.</callout>
+There are 27 of them, and they are all lowercase and case-sensitive.
+
+<callout>The two names Ghost makes available without an import — `console` and `type` — are not reserved words either, and neither is the name of a module you have imported. A variable that shares a name with one shadows it for the rest of the scope, which matters most for a name like `font` or `image` inside a file that imported the module of that name.</callout>
 
 ## Identifiers
 
@@ -69,7 +95,7 @@ Ghost uses curly braces to define _blocks_. You can use a block anywhere a state
 pressure = 3.6
 
 if (pressure > 3.4) {
-  print("Pressure is above critical levels.")
+  console.log("Pressure is above critical levels.")
 }
 ```
 

@@ -3,7 +3,7 @@ title: "Functions"
 section: "Language"
 ---
 
-Like Lua, functions are first-class values in Ghost. That means that functions can be stored in variables, passed as arguments to other functions, and returned as results. This gives great flexibility to the language.
+Functions are first-class values in Ghost. That means they can be stored in variables, passed as arguments to other functions, and returned as results. This gives great flexibility to the language.
 
 ## Defining Functions
 
@@ -11,7 +11,7 @@ You define functions using the `function` statement, followed by a list of param
 
 ```typescript
 function sum(a, b) {
-  print(a + b)
+  console.log(a + b)
 }
 ```
 
@@ -39,20 +39,24 @@ A parameter may declare a default value, used when the caller leaves that argume
 
 ```typescript
 function greet(name, greeting = "Hello") {
-  return greeting + ", " + name
+  return `${greeting}, ${name}`
 }
 
-print(greet("Ghost"))       // >> Hello, Ghost
-print(greet("Ghost", "Hi")) // >> Hi, Ghost
+console.log(greet("Ghost"))       // >> Hello, Ghost
+console.log(greet("Ghost", "Hi")) // >> Hi, Ghost
 ```
 
-The default expression is evaluated when the function is called, not when it is defined.
+The default expression is evaluated when the function is called, not when it is defined, and it is evaluated in the function's own scope — so a default can reference an earlier parameter or a name from the enclosing scope.
 
 ## Extra and Missing Arguments
 
 Passing more arguments than a function declares is fine — the extras are dropped.
 
-Passing fewer is not. A parameter with no argument and no default is simply never defined, and the first line that reads it fails with `unknown identifier`. Give an optional parameter a default value.
+Passing fewer is not. A parameter with no argument and no default is simply never defined, and the first line that reads it fails with a [name error](/docs/error-handling#name-errors-and-did-you-mean) — not a dedicated "wrong number of arguments" message. Give an optional parameter a default value.
+
+<callout>Library functions are strict about this: calling one with the wrong number of arguments is an [argument error](/docs/error-handling#argument-errors) naming the call. Functions you define yourself are not checked that way yet.</callout>
+
+Ghost has no rest parameters (`...args`) and no spread, at a call site or in a list literal.
 
 ## Anonymous Functions
 
@@ -67,7 +71,7 @@ function identity(a) {
   return a
 }
 
-print(identity(addPair)(1, 2)) // >> 3
+console.log(identity(addPair)(1, 2)) // >> 3
 ```
 
 Leaving the name off gives you a function value with nowhere to live but the expression it's in:
@@ -77,7 +81,7 @@ square = function (x) {
   return x * x
 }
 
-print(square(4)) // >> 16
+console.log(square(4)) // >> 16
 ```
 
 Since function declarations are statements, you can declare local functions inside another function:
@@ -85,7 +89,7 @@ Since function declarations are statements, you can declare local functions insi
 ```typescript
 function outerFunction() {
   function localFunction() {
-    print("I'm local!")
+    console.log("I'm local!")
   }
 
   localFunction() // >> I'm local!
@@ -101,7 +105,7 @@ function returnFunction() {
   outside = "outside"
 
   function inner() {
-    print(outside)
+    console.log(outside)
   }
 
   return inner

@@ -3,19 +3,25 @@ title: "Image"
 section: "Lumen"
 ---
 
-The `image` module loads images and cuts them into sprites. Everything it hands back — images, spritesheets, animations, quads — is an object with methods on it, and drawing happens through those objects rather than through the module.
+```typescript
+import { Image, Spritesheet, Animation } from "lumen:image"
+```
+
+The `image` module holds the classes a game draws with — `Image`, `Spritesheet`, and `Animation`. It has no free functions of its own: everything here is a class you `new`, and drawing happens through the object rather than through the module.
 
 Paths resolve relative to the directory your game's entry file is in.
 
-## Methods
+## Classes
 
-### `image.load()`
+### `new Image(path)`
 
-Loads an image from a path and returns an [Image](#image-1).
+Loads an image from a path.
 
 ```typescript
+import { Image } from "lumen:image"
+
 function load() {
-  game.player = image.load('resources/player.png')
+  game.player = new Image('resources/player.png')
 }
 ```
 
@@ -23,28 +29,34 @@ Loading the same path twice hands back the image already in memory rather than u
 
 Load in `load()`, not in `draw()`. PNG, JPEG, and the other formats SDL2_image supports all work.
 
-### `image.newQuad()`
+### `new Spritesheet(path, frameSize)`
 
-Creates a [Quad](#quad) — a rectangle of a texture.
-
-```typescript
-quad = image.newQuad(0, 0, 16, 16)
-```
-
-### `image.newSpritesheet()`
-
-Cuts an image into a grid of equally sized frames and returns a [Spritesheet](#spritesheet).
+Cuts an image into a grid of equally sized frames.
 
 ```typescript
-sheet = image.newSpritesheet('characters.png', 16)     // square frames
-sheet = image.newSpritesheet('characters.png', 16, 24) // 16 wide, 24 tall
+import { Spritesheet } from "lumen:image"
+
+sheet = new Spritesheet('characters.png', 16)     // square frames
+sheet = new Spritesheet('characters.png', 16, 24) // 16 wide, 24 tall
 ```
 
 The first argument may also be an image that is already loaded, which is how two sheets get cut from one file at different frame sizes.
 
+### `new Animation(sheet, frames, secondsPerFrame, [mode])`
+
+Plays a sequence of a sheet's frames against a clock. See [Animation](#animation).
+
+```typescript
+import { Animation } from "lumen:image"
+
+walk = new Animation(sheet, [4, 5, 6, 7], 0.16)
+```
+
+<callout>`Quad` lives on [`canvas`](/docs/canvas#quad), not here — `import { Quad } from "lumen:canvas"`.</callout>
+
 ## Image
 
-Returned by `image.load()`.
+Built with `new Image(path)`.
 
 | Method | What it does |
 | --- | --- |
@@ -78,16 +90,15 @@ One image cut into a grid of equally sized frames, numbered left to right and to
 | Method | What it does |
 | --- | --- |
 | `draw(frame, x, y, [rotation, sx, sy, ox, oy])` | Draws one frame. |
-| `newAnimation(frames, secondsPerFrame, [mode])` | Builds an [Animation](#animation) from a list of frame numbers. |
-| `getQuad(frame)` | The [Quad](#quad) for a frame. |
-| `getImage()` | The underlying [Image](#image-1). |
+| `getQuad(frame)` | The [Quad](/docs/canvas#quad) for a frame. |
+| `getImage()` | The underlying [Image](#image). |
 | `getCount()` | How many frames the sheet holds. |
 | `getColumns()` / `getRows()` | The grid's shape. |
 | `getFrameWidth()` / `getFrameHeight()` | Frame size in pixels. |
 | `getFrameDimensions()` | Both, as `[width, height]`. |
 
 ```typescript
-sheet = image.newSpritesheet('characters.png', 16)
+sheet = new Spritesheet('characters.png', 16)
 
 sheet.draw(4, x, y)
 ```
@@ -96,10 +107,10 @@ The quads are built once, when the sheet is made, so drawing a frame never alloc
 
 ## Animation
 
-A sequence of a sheet's frames played against a clock.
+A sequence of a sheet's frames played against a clock. Built with `new Animation(sheet, frames, secondsPerFrame, [mode])`.
 
 ```typescript
-walk = sheet.newAnimation([4, 5, 6, 7], 0.16)
+walk = new Animation(sheet, [4, 5, 6, 7], 0.16)
 
 function update(dt) {
   walk.update(dt) // or walk.update() to use the last frame's time
@@ -133,12 +144,4 @@ Each animation carries its own playhead, so two characters showing the same walk
 
 ## Quad
 
-A rectangle of a texture.
-
-| Method | What it does |
-| --- | --- |
-| `getX()` / `getY()` | Position within the texture. |
-| `getWidth()` / `getHeight()` | Size of the region. |
-| `setViewport(x, y, w, h)` | Moves the region. |
-
-Building one per animation frame up front and reusing it beats allocating one per draw.
+`Quad` is exported by [`canvas`](/docs/canvas#quad) rather than by this module, since it describes a region of a render surface rather than an image asset. `getQuad()` above hands one back, and `import { Quad } from "lumen:canvas"` builds one directly.

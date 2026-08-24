@@ -53,9 +53,11 @@ $  ghost
    Ghost (0.30.0)
    Press Ctrl + C to exit
 
->> print("Hello, world!")
+>> console.log("Hello, world!")
 Hello, world!
 ```
+
+`Ctrl+C` aborts the line you are typing; `Ctrl+D` ends the session. A line that fails is reported in full and the session carries on.
 
 ### Running a File
 
@@ -75,13 +77,47 @@ Anything after the filename is passed through to your script, where [`os.args()`
 | `-v` | Show the version and exit.              |
 | `-t` | Report how long the program took to run.|
 
+A file that fails exits with status 1, so a script's success can be tested from a shell or a build.
+
 ## Hello, World
 
 Ready to give Ghost a spin?
 
 ```typescript
-print("Hello, world!")
+console.log("Hello, world!")
 ```
+
+`console.log()` is how a Ghost program writes a line of output.
+
+## Importing what you use
+
+Ghost's standard library is **import-only**. Only two names — `console` and `type` — are available without an `import`; everything else is asked for by name:
+
+```typescript
+import "ghost:math"
+
+console.log(math.sqrt(16)) // >> 4
+```
+
+Individual names can be pulled out instead of the whole module:
+
+```typescript
+import { sqrt } from "ghost:math"
+
+console.log(sqrt(16)) // >> 4
+```
+
+Using a module you haven't imported is an error that names the exact import to add, so this is not something you have to memorise. See [Modules](/docs/modules).
+
+## Three rules worth knowing early
+
+Three of Ghost's rules are deliberate, load-bearing, and easiest to learn before you trip over them:
+
+**Types are never converted for you.** `"count: " + 1` is a type error, not `"count: 1"`. Use a [template literal](/docs/strings#template-literals) — `` `count: ${1}` `` — to build a string out of mixed types. For the same reason, comparing values of different types with `==` is an error rather than `false`.
+
+**`0` and `[]` are truthy.** Only `null`, `false`, and the empty string are falsy — see [Truthiness](/docs/values#truthiness).
+
+**`and` and `or` do not short-circuit.** Both sides are evaluated before the operator is applied, so a test on the left cannot guard the expression on the right.
 
 Once you have Ghost setup and installed, you're ready to jump into [learning the language](/docs/syntax).
 

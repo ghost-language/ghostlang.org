@@ -27,14 +27,14 @@ Underneath the single type, a number holds either a 64-bit integer or a 64-bit f
 Both are the same `number` type to your code — [`type()`](/docs/globals#type) reports `number` for either, and they mix freely in arithmetic and comparisons.
 
 ```typescript
-print(2 + 2)     // >> 4
-print(2 + 2.5)   // >> 4.5
-print(10 / 4)    // >> 2.5
+console.log(2 + 2)     // >> 4
+console.log(2 + 2.5)   // >> 4.5
+console.log(10 / 4)    // >> 2.5
 ```
 
 ## Precision
 
-Decimals are IEEE 754 binary floats, which is the same representation used by Go's `float64`, JavaScript's numbers, and C's `double`. That representation cannot express fractions like `0.1` exactly, and the tiny errors accumulate when you add many of them together:
+Decimals are IEEE 754 binary floats, the standard 64-bit representation. It cannot express fractions like `0.1` exactly, and the tiny errors accumulate when you add many of them together:
 
 ```typescript
 value = 0
@@ -43,7 +43,7 @@ for (i = 0; i < 1000; i++) {
   value = value + 0.01
 }
 
-print(value)
+console.log(value)
 
 // >> 9.999999999999831
 ```
@@ -108,9 +108,17 @@ value = 3.141592.toString()
 
 // expected value: "3.141592"
 
-print("pi is " + 3.14.toString())
+console.log("pi is " + 3.14.toString())
 
 // >> pi is 3.14
 ```
 
-<callout>Lumen adds more to numbers' neighbouring [`math`](/docs/math) module — `ceil`, `sqrt`, `clamp`, `lerp`, and others. See [Math (Lumen)](/docs/game-math).</callout>
+A [template literal](/docs/strings#template-literals) does the same job without the call, and is usually the tidier way to write it:
+
+```typescript
+console.log(`pi is ${3.14}`)
+
+// >> pi is 3.14
+```
+
+<callout>Only these three are methods on a number itself. Everything else — `ceil`, `abs`, `sqrt`, `pow`, `clamp`, and the `isX` predicates — lives on the [`math`](/docs/math) module, which has to be imported: `math.ceil(3.2)`, not `3.2.ceil()`.</callout>

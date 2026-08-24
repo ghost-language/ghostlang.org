@@ -17,16 +17,18 @@ The act of scanning is also referred to as _lexing_, _lexical analysis_, _tokeni
 
 The scanner takes in raw source code, and walks through it character-by-character extracting everything out into a series of tokens.
 
-As an example, let's look at this simple print statement in Ghost:
+As an example, let's look at this simple statement in Ghost:
 
 ```typescript
-print("Hello, world!")
+console.log("Hello, world!")
 ```
 
 The resulting tokens would then be the following:
 
 ```
-IDENTIFIER("print")
+IDENTIFIER("console")
+DOT(".")
+IDENTIFIER("log")
 LEFTPAREN("(")
 STRING("Hello, world!")
 RIGHTPAREN(")")
@@ -36,7 +38,7 @@ These series of tokens are much easier to work with than the individual characte
 
 ```mermaid
     flowchart LR
-        A["22 characters"] --> B["4 tokens"] --> C["1 AST node"]
+        A["28 characters"] --> B["6 tokens"] --> C["1 AST node"]
 ```
 
 ## Tokens
@@ -105,7 +107,6 @@ const (
 	NEW
 	NULL
 	OR
-	PRINT
 	RETURN
 	SUPER
 	SWITCH

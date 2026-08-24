@@ -3,6 +3,11 @@ title: "Math"
 section: "Standard Library"
 ---
 
+```typescript
+import "ghost:math"
+import { sqrt, pi } from "ghost:math"
+```
+
 The `math` module covers the mathematics a program is likely to need: rounding, roots, logarithms, trigonometry, statistics, and linear algebra. Every method here works on a single number, and almost all of them work just as well on a list of numbers, or a list of lists.
 
 The array half of the module — building lists of numbers, reshaping them, and the linear algebra — has its own page: [Arrays](/docs/math-arrays).
@@ -32,8 +37,6 @@ The case worth knowing is a row against a matrix. The row is stretched down ever
 math.add([[1, 2], [3, 4]], [10, 20])      // [[11, 22], [13, 24]]
 math.add([[1, 2], [3, 4]], [[10], [20]])  // [[11, 12], [23, 24]]
 ```
-
-These are numpy's rules, so a matrix expression carries over unchanged.
 
 Lists have to be rectangular to take part — a ragged list has no shape to line up, and says so rather than guessing.
 
@@ -209,15 +212,16 @@ These stay exact while the answer fits in a whole number and fall back to decima
 
 | Method | Returns |
 | --- | --- |
-| `math.random()` | A decimal between 0 and 1. |
-| `math.random(n)` | A whole number from 1 to `n`. |
-| `math.random(low, high)` | A whole number from `low` to `high`. |
+| `math.randomInt(n)` | A whole number from 1 to `n`, both ends included. |
+| `math.randomInt(low, high)` | A whole number from `low` to `high`, both ends included. |
 | `math.randomSeed(n)` | Seeds the generator. |
 | `math.noise(x)` / `math.noise(x, y)` | Smooth noise for the given coordinate, between 0 and 1. |
 
-`math.randomSeed()` and [`random.seed()`](/docs/random) drive the same generator, so one seed governs both modules and a seeded run replays exactly however you ask for your numbers.
+`math.randomInt()` is the one call that always answers a whole number. For a decimal, use [`random.random()`](/docs/random#randomrandom) — the two are named apart precisely because they answer different kinds of number from the same generator.
 
-`noise()` is what you want when variation should be smooth rather than jittery — terrain height, cloud cover, a flicker. Neighbouring inputs give neighbouring outputs, which is exactly what `random()` does not do, and the same input always gives the same result.
+`math.randomSeed()` and [`random.seed()`](/docs/random) drive that one shared generator, so a single seed governs both modules and a seeded run replays exactly however you ask for your numbers.
+
+`noise()` is what you want when variation should be smooth rather than jittery — terrain height, cloud cover, a flicker. Neighbouring inputs give neighbouring outputs, which is exactly what `randomInt()` does not do, and the same input always gives the same result.
 
 ```typescript
 math.randomSeed(1234)   // the same sequence every run
@@ -239,7 +243,6 @@ height = math.noise(x * 0.05) * 40
   <p>[e](#e)</p>
   <p>[epsilon](#epsilon)</p>
   <p>[infinity](#infinity)</p>
-  <p>[largestInteger](#largestinteger)</p>
   <p>[largestNumber](#largestnumber)</p>
   <p>[ln10](#ln10)</p>
   <p>[ln2](#ln2)</p>
@@ -248,7 +251,7 @@ height = math.noise(x * 0.05) * 40
   <p>[nan](#nan)</p>
   <p>[phi](#phi)</p>
   <p>[pi](#pi)</p>
-  <p>[smallestInteger](#smallestinteger)</p>
+  <p>[smallestInteger and largestInteger](#smallestinteger-and-largestinteger)</p>
   <p>[smallestNumber](#smallestnumber)</p>
   <p>[sqrt2](#sqrt2)</p>
   <p>[sqrtPi](#sqrtpi)</p>
@@ -313,7 +316,7 @@ math.epsilon
 // (printing it writes the value out in full)
 ```
 
-<callout>This changed in a recent release. `math.epsilon` previously returned the smallest representable decimal (`5e-324`), which is what [`math.smallestNumber`](#smallestnumber) is now for. For "are these two numbers close enough", reach for [`math.isClose()`](#comparison-and-predicates) rather than either.</callout>
+For "are these two numbers close enough", reach for [`math.isClose()`](#comparison-and-predicates) rather than comparing against `epsilon` by hand — it combines an absolute and a relative tolerance, so it holds up near zero and for very large values alike.
 
 ### `smallestNumber`
 The smallest positive decimal distinguishable from zero, `5e-324`.

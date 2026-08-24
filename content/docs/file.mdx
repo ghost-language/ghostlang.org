@@ -1,0 +1,129 @@
+---
+title: "File"
+section: "Standard Library"
+---
+
+```typescript
+import "ghost:file"
+import { read, write } from "ghost:file"
+```
+
+The `file` module reads and writes files, and does the directory work around them.
+
+Every relative path is resolved against **the directory of the running script**, not the process's working directory, so a script behaves the same however it was invoked. An absolute path is used as given.
+
+## Methods
+
+<Collection>
+  <p>[append](#fileappend)</p>
+  <p>[copy](#filecopy)</p>
+  <p>[delete](#filedelete)</p>
+  <p>[exists](#fileexists)</p>
+  <p>[isDirectory](#fileisdirectory)</p>
+  <p>[list](#filelist)</p>
+  <p>[mkdir](#filemkdir)</p>
+  <p>[move](#filemove)</p>
+  <p>[read](#fileread)</p>
+  <p>[size](#filesize)</p>
+  <p>[write](#filewrite)</p>
+</Collection>
+
+### `file.append()`
+
+Appends content to a file, creating it if it does not exist, and adds a trailing newline. Takes the path first and the content second.
+
+```typescript
+file.append('./log.txt', 'message from ghost')
+```
+
+### `file.copy()`
+
+Copies a file's contents and permissions to a destination, which is created or overwritten.
+
+```typescript
+file.copy('./save.json', './save.backup.json')
+```
+
+### `file.delete()`
+
+Removes a file, or an **empty** directory. A directory with anything in it is left alone and reported as a system error rather than wiped.
+
+```typescript
+file.delete('./log.txt')
+```
+
+### `file.exists()`
+
+Returns whether anything — a file or a directory — is at the path.
+
+```typescript
+if (!file.exists('./save.json')) {
+  file.append('./save.json', '{}')
+}
+```
+
+### `file.isDirectory()`
+
+Returns whether the path is a directory. A path that does not exist at all is a system error rather than `false` — use [`exists()`](#fileexists) for the existence question itself.
+
+```typescript
+file.isDirectory('./saves')
+```
+
+### `file.list()`
+
+Returns the entry names directly inside a directory as a [list](/docs/lists) of strings. Names, not full paths, and not recursive.
+
+```typescript
+for (name in file.list('./saves')) {
+  console.log(name)
+}
+```
+
+### `file.mkdir()`
+
+Creates a directory, along with any missing parent directories on the way to it — the equivalent of `mkdir -p`.
+
+```typescript
+file.mkdir('./saves/slot1')
+```
+
+### `file.move()`
+
+Renames or moves a file or directory.
+
+```typescript
+file.move('./save.json', './saves/save.json')
+```
+
+### `file.read()`
+
+Reads a whole file and returns it as a string. A file that cannot be read is a system error.
+
+```typescript
+contents = file.read('./log.txt')
+```
+
+### `file.size()`
+
+Returns a file's size in bytes.
+
+```typescript
+console.log(file.size('./log.txt'))
+```
+
+### `file.write()`
+
+Writes content to a file, replacing everything already in it. Takes the path first and the content second.
+
+```typescript
+file.write('./log.txt', content)
+```
+
+<callout>`file.write()` only writes to a file that already exists — it keeps the file's existing permissions rather than inventing new ones, so it needs the file to be there to read them from. Use [`file.append()`](#fileappend) to create one.</callout>
+
+## What isn't here
+
+There is no streaming read or write, and neither `list()` nor `delete()` recurses. A script working with very large files or deep directory trees has to shell out for now.
+
+Building and taking apart the paths themselves is a different job, and lives in [`path`](/docs/path).

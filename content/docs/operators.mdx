@@ -32,7 +32,7 @@ The following table summarizes the operator precedence in Ghost, from highest to
 | 11         | `and`               | Logical and                       | Left       |
 | 12         | `or`                | Logical or                        | Left       |
 
-<callout>Two of these differ from what C-like languages usually do. `%` binds **tighter** than `*` and `/`, so `2 * 3 % 4` is `2 * (3 % 4)` and evaluates to `6`. And `..` binds looser than the comparisons, so a range built from compared values needs parentheses. When in doubt, parenthesize.</callout>
+<callout>Two of these are worth committing to memory. `%` binds **tighter** than `*` and `/`, so `2 * 3 % 4` is `2 * (3 % 4)` and evaluates to `6`. And `..` binds looser than the comparisons, so a range built from compared values needs parentheses. When in doubt, parenthesize.</callout>
 
 Assignment (`=`) is not in the table: it is a statement rather than an expression, so `a = b = c` is not valid Ghost.
 
@@ -54,29 +54,29 @@ Division always produces a decimal, even when both operands are whole: `10 / 4` 
 The result of the modulo operator (`%`) has the same sign as the dividend - that is, the result of `a % b` will have the same sign as `a`. For example:
 
 ```typescript
-print(5 % 3) // >> 2
-print(5 % -3) // >> 2
-print(-5 % 3) // >> -2
-print(-5 % -3) // >> -2
+console.log(5 % 3) // >> 2
+console.log(5 % -3) // >> 2
+console.log(-5 % 3) // >> -2
+console.log(-5 % -3) // >> -2
 ```
 
 `+` also concatenates two strings:
 
 ```typescript
-print("Hello, " + "world!") // >> Hello, world!
+console.log("Hello, " + "world!") // >> Hello, world!
 ```
 
 On [lists](/docs/lists#arithmetic) every arithmetic operator is elementwise, and broadcasts: a number spreads across the list, and a shorter shape stretches across a longer one.
 
 ```typescript
-print([1, 2, 3] * 2)               // >> [2, 4, 6]
-print([1, 2, 3] + [10, 20, 30])    // >> [11, 22, 33]
-print([[1, 2], [3, 4]] + [10, 20]) // >> [[11, 22], [13, 24]]
+console.log([1, 2, 3] * 2)               // >> [2, 4, 6]
+console.log([1, 2, 3] + [10, 20, 30])    // >> [11, 22, 33]
+console.log([[1, 2], [3, 4]] + [10, 20]) // >> [[11, 22], [13, 24]]
 ```
 
 Note that `+` does **not** join two lists the way it joins two strings — the arithmetic reading is the one that keeps all five operators agreeing with each other. Use [`concat()`](/docs/lists#concat) to join.
 
-Both operands have to be the same type. Adding a number to a string is a type mismatch error — call [`toString()`](/docs/numbers#tostring) on the number first.
+Both operands have to be the same type. Adding a number to a string is a [type error](/docs/error-handling#type-errors) — use a [template literal](/docs/strings#template-literals), or call [`toString()`](/docs/numbers#tostring) on the number first.
 
 ## Assignment Operator
 
@@ -85,7 +85,7 @@ The assignment operator is `=`. This declares and assigns the value of the expre
 ```typescript
 message = "Hello, world!"
 
-print(message) // >> Hello, world!
+console.log(message) // >> Hello, world!
 ```
 
 ## Compound Assignment
@@ -99,16 +99,27 @@ The compound operators apply an arithmetic operation to a variable and assign th
 | `a *= b` | `a = a * b`   |
 | `a /= b` | `a = a / b`   |
 
+There is no `%=`; write `a = a % b`.
+
 ```typescript
 total = 10
 total += 5
 
-print(total) // >> 15
+console.log(total) // >> 15
 ```
 
 ## Increment and Decrement
 
-`++` and `--` are postfix operators that add or subtract one.
+`++` and `--` are postfix operators that add or subtract one. There is no prefix form — `++x` is not valid Ghost. They work on a variable, a property, and an index alike:
+
+```typescript
+counts = { hits: 0 }
+list = [1, 2]
+
+counts.hits++
+list[0]++
+```
+
 
 ```typescript
 count = 0
@@ -117,7 +128,7 @@ count++
 count++
 count--
 
-print(count) // >> 1
+console.log(count) // >> 1
 ```
 
 They are most at home in the increment clause of a [`for` loop](/docs/control-flow#for-statement).
@@ -135,7 +146,7 @@ Comparison operators, as their name implies, allow you to compare two values.
 | `a <= b` | Less than or equal to    | `true` if `a` is less than or equal to `b`.    |
 | `a >= b` | Greater than or equal to | `true` if `a` is greater than or equal to `b`. |
 
-Numbers, strings, and booleans compare by value. Comparing two values of different types is a type mismatch error — except against `null`, which any value may be compared to, and which is how you test whether something is set:
+Numbers, strings, and booleans compare by value. Comparing two values of different types is a [type error](/docs/error-handling#type-errors) rather than `false` — except against `null`, which any value may be compared to, and which is how you test whether something is set:
 
 ```typescript
 if (result == null) {
@@ -148,11 +159,15 @@ Two class instances compare by _identity_: two instances of the same class holdi
 Lists compare by _contents_, to any depth, so a list you built compares equal to one you wrote out:
 
 ```typescript
-print([1, 2] + [1, 2] == [2, 4])       // >> true
-print([[1], [2]] == [[1], [2]])        // >> true
+console.log([1, 2] + [1, 2] == [2, 4])       // >> true
+console.log([[1], [2]] == [[1], [2]])        // >> true
 ```
 
-Ordering two lists with `<` or `>` is not supported, and reports an unknown operator.
+Ordering two lists with `<` or `>` is not supported: neither an elementwise nor a lexicographic reading is obviously the right one, so Ghost refuses rather than picking.
+
+<callout>`==` does not yet reach every type. Two **maps** — and two functions, classes, or traits — cannot be compared at all today, not even against themselves: `a == a` on a map is a type error rather than `true`. Compare the keys or values you actually care about until that gap closes.</callout>
+
+Dates compare as instants, with `==`, `!=`, and all four ordering operators. See [Date](/docs/date).
 
 ## Logical Operators
 
@@ -169,14 +184,14 @@ Ordering two lists with `<` or `>` is not supported, and reports an unknown oper
 `..` builds a list of the whole numbers from its left operand up to and including its right one.
 
 ```typescript
-print(1 .. 5) // >> [1, 2, 3, 4, 5]
+console.log(1 .. 5) // >> [1, 2, 3, 4, 5]
 ```
 
 It is mostly used to drive a `for ... in` loop:
 
 ```typescript
 for (i in 1 .. 3) {
-  print(i)
+  console.log(i)
 }
 ```
 
@@ -190,10 +205,16 @@ If the start is greater than the end, the result is an empty list — ranges do 
 label = count == 1 ? "item" : "items"
 ```
 
-Ternary expressions cannot be nested directly inside one another. Parenthesize the inner one, or use an `if` statement:
+**Ternary expressions cannot be nested**, in either branch, and parentheses do not change that — `width > 100 ? (width > 500 ? "huge" : "large") : "small"` is a syntax error. Use an `if` statement, or an intermediate variable:
 
 ```typescript
-size = width > 100 ? (width > 500 ? "huge" : "large") : "small"
+if (width > 500) {
+  size = "huge"
+} else if (width > 100) {
+  size = "large"
+} else {
+  size = "small"
+}
 ```
 
 ## Subscript and Property Access
@@ -204,10 +225,10 @@ size = width > 100 ? (width > 500 ? "huge" : "large") : "small"
 list = [1, 2, 3]
 map = { name: "Ghost" }
 
-print(list[0])     // >> 1
-print("Ghost"[0])  // >> G
-print(map["name"]) // >> Ghost
-print(map.name)    // >> Ghost
+console.log(list[0])     // >> 1
+console.log("Ghost"[0])  // >> G
+console.log(map["name"]) // >> Ghost
+console.log(map.name)    // >> Ghost
 ```
 
 An index that is out of range, and a map key that is not present, both read as `null` rather than raising an error.

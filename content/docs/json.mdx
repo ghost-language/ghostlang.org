@@ -3,9 +3,14 @@ title: "JSON"
 section: "Standard Library"
 ---
 
-The `json` module provides methods for decoding from and encoding values to _JavaScript Object Notation_ (JSON).
+```typescript
+import "ghost:json"
+import { encode, decode } from "ghost:json"
+```
 
-JSON is a syntax for serializing maps, lists, numbers, strings, booleans, and null. It is based on and popularized by JavaScript, but is language independent. JSON is a common format for data exchange between applications.
+The `json` module decodes and encodes JSON.
+
+JSON is a language-independent syntax for serializing maps, lists, numbers, strings, booleans, and null, and a common format for exchanging data between applications.
 
 ## Methods
 
@@ -21,7 +26,7 @@ json.encode([1, 2, 3])
 ```
 
 ### `decode()`
-Decodes a JSON string to a value. The string must be valid JSON; if it isn't, decoding raises a runtime error.
+Decodes a JSON string to a value. The string must be valid JSON; if it isn't, decoding raises a [value error](/docs/error-handling#kinds-of-error). A valid JSON document whose top level is a bare number, string, boolean, or `null` is also rejected, with help suggesting you wrap it in `[ ]`.
 
 ```typescript
 json.decode('{"foo":"bar"}')
@@ -36,6 +41,6 @@ JSON objects come back as [maps](/docs/maps) and JSON arrays as [lists](/docs/li
 ```typescript
 data = json.decode('{"window":{"width":1280},"tags":["a","b"]}')
 
-print(data.window.width) // >> 1280
-print(data.tags[1])      // >> b
+console.log(data.window.width) // >> 1280
+console.log(data.tags[1])      // >> b
 ```

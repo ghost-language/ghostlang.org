@@ -23,14 +23,14 @@ Anywhere Ghost wants a condition — an `if`, a `while`, a ternary — it accept
 
 ### Logical Operators
 
-`and` and `or` combine two booleans. Both operands must be booleans — `false and 1` is a type mismatch error, not `false`.
+`and` and `or` combine two booleans. Both operands must be booleans — `false and 1` is a [type error](/docs/error-handling#type-errors), not `false`.
 
 ```typescript
-print(true and false) // >> false
-print(true or false)  // >> true
+console.log(true and false) // >> false
+console.log(true or false)  // >> true
 ```
 
-<callout>**Neither operator short-circuits.** Ghost evaluates both sides before applying the operator, so unlike in most C-like languages a test on the left cannot protect the expression on the right.</callout>
+<callout>**Neither operator short-circuits.** Ghost evaluates both sides before applying the operator, so a test on the left cannot protect the expression on the right.</callout>
 
 This is the shape that goes wrong:
 
@@ -206,7 +206,7 @@ Generally you'll want to avoid infinite loops (there are very few cases where an
 
 ```typescript
 while (true) {
-  print("Hello, world!")
+  console.log("Hello, world!")
 }
 ```
 
@@ -232,7 +232,7 @@ When a `for` loop executes, the following occurs:
 
 ```typescript
 for (i = 0; i < 5; i++) {
-  print(i)
+  console.log(i)
 }
 ```
 
@@ -246,7 +246,7 @@ The counter belongs to the loop: once the loop ends, the name is gone again.
 
 ```typescript
 for (name in ["Artemis", "Rabbit", "Orion"]) {
-  print(name)
+  console.log(name)
 }
 ```
 
@@ -254,11 +254,11 @@ Give it two names and the first receives the key — the index for a list, the k
 
 ```typescript
 for (index, name in ["Artemis", "Rabbit", "Orion"]) {
-  print(index.toString() + ": " + name)
+  console.log(index.toString() + ": " + name)
 }
 
 for (key, value in { name: "Ghost", type: "language" }) {
-  print(key + " = " + value)
+  console.log(key + " = " + value)
 }
 ```
 
@@ -268,11 +268,11 @@ Combined with the [range operator](/docs/operators#range-operator), `for ... in`
 
 ```typescript
 for (i in 1 .. 5) {
-  print(i)
+  console.log(i)
 }
 ```
 
-Lists and maps are the only things Ghost knows how to iterate. Anything else is a runtime error.
+Lists and maps are the only things Ghost knows how to iterate. Anything else is a [type error](/docs/error-handling#kinds-of-error), with the help text *"`for ... in` walks a list or a map."*
 
 ### Break Statement
 The `break` statement terminates the current loop statement and transfers program control back to the state following the terminated statement.

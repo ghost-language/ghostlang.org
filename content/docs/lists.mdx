@@ -11,9 +11,11 @@ Lists are an ordered list of elements of possibly different types identified by 
   57.3,
   function (x) {
     return x * x
-  },
+  }
 ]
 ```
+
+<callout>A list literal does not allow a trailing comma after its last element. A [map](/docs/maps) literal does.</callout>
 
 ## Accessing Elements
 
@@ -22,10 +24,10 @@ You can access any element in a list by calling the subscript operator on it wit
 ```typescript
 vocabulary = ["activation", "propogate", "execute", "initialize"]
 
-print(vocabulary[0]) // >> activation
-print(vocabulary[1]) // >> propogate
-print(vocabulary[2]) // >> execute
-print(vocabulary[3]) // >> initialize
+console.log(vocabulary[0]) // >> activation
+console.log(vocabulary[1]) // >> propogate
+console.log(vocabulary[2]) // >> execute
+console.log(vocabulary[3]) // >> initialize
 ```
 
 ## Iterating
@@ -34,11 +36,11 @@ print(vocabulary[3]) // >> initialize
 
 ```typescript
 for (word in vocabulary) {
-  print(word)
+  console.log(word)
 }
 
 for (index, word in vocabulary) {
-  print(index.toString() + ": " + word)
+  console.log(index.toString() + ": " + word)
 }
 ```
 
@@ -49,16 +51,16 @@ An index that is out of range reads as `null` rather than raising an error, so g
 Arithmetic operators work on lists of numbers, elementwise. A number spreads across every element, and two lists are applied to each other:
 
 ```typescript
-print([1, 2, 3] * 2)             // >> [2, 4, 6]
-print([1, 2, 3] + 10)            // >> [11, 12, 13]
-print([1, 2, 3] + [10, 20, 30])  // >> [11, 22, 33]
+console.log([1, 2, 3] * 2)             // >> [2, 4, 6]
+console.log([1, 2, 3] + 10)            // >> [11, 12, 13]
+console.log([1, 2, 3] + [10, 20, 30])  // >> [11, 22, 33]
 ```
 
 Shapes are lined up from the right, so a shorter shape stretches across a longer one rather than having to match it exactly. A row applies down every row of a matrix:
 
 ```typescript
-print([[1, 2], [3, 4]] + [10, 20])  // >> [[11, 22], [13, 24]]
-print([[1, 2], [3, 4]] * 2)         // >> [[2, 4], [6, 8]]
+console.log([[1, 2], [3, 4]] + [10, 20])  // >> [[11, 22], [13, 24]]
+console.log([[1, 2], [3, 4]] * 2)         // >> [[2, 4], [6, 8]]
 ```
 
 These are the same rules and the same operation as the [`math`](/docs/math#broadcasting) module's methods — `a + b` and `math.add(a, b)` are two ways of writing one thing. Lists have to be rectangular and hold only numbers to take part; anything else is an error rather than a guess.
@@ -70,9 +72,9 @@ These are the same rules and the same operation as the [`math`](/docs/math#broad
 `==` and `!=` compare lists by their contents, to any depth, so a list you built compares equal to one you wrote out:
 
 ```typescript
-print([1, 2] == [1, 2])          // >> true
-print([1, 2] + [1, 2] == [2, 4]) // >> true
-print([[1], [2]] == [[1], [2]])  // >> true
+console.log([1, 2] == [1, 2])          // >> true
+console.log([1, 2] + [1, 2] == [2, 4]) // >> true
+console.log([[1], [2]] == [[1], [2]])  // >> true
 ```
 
 Ordering two lists with `<` or `>` is not supported.
@@ -82,15 +84,27 @@ For the remainder of this documentation, we'll discuss each method available on 
 
 <Collection>
   <p>[concat](#concat)</p>
+  <p>[contains](#contains)</p>
+  <p>[each](#each)</p>
+  <p>[filter](#filter)</p>
   <p>[first](#first)</p>
   <p>[join](#join)</p>
   <p>[last](#last)</p>
   <p>[length](#length)</p>
+  <p>[map](#map)</p>
   <p>[pop](#pop)</p>
   <p>[push](#push)</p>
+  <p>[reduce](#reduce)</p>
+  <p>[reverse](#reverse)</p>
+  <p>[shift](#shift)</p>
+  <p>[slice](#slice)</p>
+  <p>[sort](#sort)</p>
   <p>[tail](#tail)</p>
-  <p>[toString](#toString)</p>
+  <p>[toString](#tostring)</p>
+  <p>[unique](#unique)</p>
 </Collection>
+
+Most of these return a **new** list and leave the receiver alone. The four that mutate in place — `push`, `pop`, `shift`, and `set`-style assignment through `[]` — say so below.
 
 ### `concat()`
 The `concat` method joins two lists end to end, returning a new list and leaving both alone:
@@ -102,6 +116,44 @@ The `concat` method joins two lists end to end, returning a new list and leaving
 ```
 
 Unlike the arithmetic operators, `concat` works on lists of anything, not just numbers. Use [`push()`](#push) to add a single element instead of a whole list.
+
+### `contains()`
+The `contains` method reports whether a value is somewhere in the list. Values are compared the same way `==` compares them, so lists match by contents rather than by identity:
+
+```typescript
+[1, 2, 3].contains(2)
+
+// true
+
+[[1], [2]].contains([2])
+
+// true
+```
+
+### `each()`
+The `each` method calls a function once per element, for its side effects, and returns the list itself so the call can be chained. The function receives the element and its index:
+
+```typescript
+["a", "b"].each(function (value, index) {
+  console.log(index, value)
+})
+
+// 0 a
+// 1 b
+```
+
+If the function returns an error, `each` stops there and hands the error back.
+
+### `filter()`
+The `filter` method builds a new list of the elements a function accepts. The function receives the element and its index, and anything [truthy](/docs/values#truthiness) it returns keeps the element:
+
+```typescript
+[1, 2, 3, 4].filter(function (value, index) {
+  return value > 2
+})
+
+// [3, 4]
+```
 
 ### `first()`
 The `first` method returns the first element in the list. If the list is empty, it returns `null`:
@@ -131,7 +183,7 @@ The `last` method returns the last element in the list. If the list is empty, it
 ```
 
 ### `length()`
-The `length` method returns the number of elements in the list:
+The `length` method returns how many elements the list holds:
 
 ```typescript
 [1, 2, 3, 4].length()
@@ -139,36 +191,115 @@ The `length` method returns the number of elements in the list:
 // 4
 ```
 
-### `pop()`
-The `pop` method removes the **first** element from the list and returns it. The list is modified in place. On an empty list it returns `null`.
+### `map()`
+The `map` method builds a new list by running every element through a function. The function receives the element and its index:
 
 ```typescript
-list = [1, 2, 3, 4]
+[1, 2, 3].map(function (value, index) {
+  return value * 2
+})
 
-list.pop()
-
-// 1
-
-print(list)
-
-// [2, 3, 4]
+// [2, 4, 6]
 ```
 
-<callout>Despite the name, `pop()` takes from the front of the list, not the back — it is a shift, not a pop.</callout>
+For arithmetic specifically, the [operators](#arithmetic) already broadcast — `[1, 2, 3] * 2` is the same list without the function.
 
-### `push()`
-The `push` method adds an element to the end of the list and returns the list's new length:
+### `pop()`
+The `pop` method removes the **last** element from the list and returns it. It mutates the list. On an empty list it returns `null`:
 
 ```typescript
 list = [1, 2, 3, 4]
 
-list.push(5)
+console.log(list.pop()) // >> 4
+console.log(list)       // >> [1, 2, 3]
+```
 
-// 5
+Use [`shift()`](#shift) to take from the front instead.
 
-print(list)
+### `push()`
+The `push` method adds an element to the end of the list and returns the list's new length. It mutates the list:
 
-// [1, 2, 3, 4, 5]
+```typescript
+list = [1, 2, 3, 4]
+
+console.log(list.push(5)) // >> 5
+console.log(list)         // >> [1, 2, 3, 4, 5]
+```
+
+### `reduce()`
+The `reduce` method folds the list down to a single value. The function receives the accumulator, the element, and the index:
+
+```typescript
+[1, 2, 3].reduce(function (total, value, index) {
+  return total + value
+})
+
+// 6
+```
+
+An optional second argument seeds the accumulator. Without one, the first element seeds it — and reducing an empty list with no seed is an argument error, since there is nothing to answer with:
+
+```typescript
+[1, 2, 3].reduce(function (total, value, index) {
+  return total + value
+}, 10)
+
+// 16
+```
+
+### `reverse()`
+The `reverse` method returns a new list with the elements in the opposite order:
+
+```typescript
+[1, 2, 3].reverse()
+
+// [3, 2, 1]
+```
+
+### `shift()`
+The `shift` method removes the **first** element from the list and returns it. It mutates the list. On an empty list it returns `null`:
+
+```typescript
+list = [1, 2, 3]
+
+console.log(list.shift()) // >> 1
+console.log(list)         // >> [2, 3]
+```
+
+### `slice()`
+The `slice` method returns a new list holding the elements from `start` up to but not including `end`. `end` defaults to the length of the list:
+
+```typescript
+[1, 2, 3, 4].slice(1)
+
+// [2, 3, 4]
+
+[1, 2, 3, 4].slice(1, 3)
+
+// [2, 3]
+```
+
+<callout>Unlike `[]` indexing, which answers `null` for an index outside the list, `slice()` raises an [index error](/docs/error-handling#kinds-of-error) for bounds outside the list. A read that names a *position* is lenient; an operation that names a *range* validates it.</callout>
+
+### `sort()`
+The `sort` method returns a new list in order, leaving the original alone. The sort is stable.
+
+With no argument, it sorts a list that is entirely numbers or entirely strings into natural order:
+
+```typescript
+[3, 1, 2].sort()
+
+// [1, 2, 3]
+```
+
+Anything else needs a comparator: a function of two elements returning a negative number, zero, or a positive number. Calling `sort()` with no comparator on a mixed list is an argument error explaining why.
+
+```typescript
+[3, 1, 2].sort(function (a, b) {
+  return b - a
+})
+
+// [3, 2, 1]
 ```
 
 ### `tail()`
@@ -189,4 +320,13 @@ The `toString` method returns a string representation of the list:
 // [1, 2, 3, 4]
 ```
 
-<callout>Ghost lists have no removal, insertion, or sort method yet. Removing an element means building a new list without it, and sorting means writing the sort by hand.</callout>
+### `unique()`
+The `unique` method returns a new list with repeats dropped, keeping the order each value was first seen in. Values are compared the same way [`contains()`](#contains) compares them:
+
+```typescript
+[3, 1, 2, 1].unique()
+
+// [3, 1, 2]
+```
+
+<callout>Ghost lists have no insertion or removal at an arbitrary index yet, and no `indexOf`. Removing an element means [filtering](#filter) a new list without it.</callout>

@@ -3,37 +3,47 @@ title: "Globals"
 section: "Standard Library"
 ---
 
-Two functions are available everywhere without a module in front of them.
-
-## Methods
-
-### `print()`
-
-Writes its arguments to standard output followed by a newline. Multiple arguments are joined with a single space, and each is converted to its string form first — unlike the `+` operator, `print()` is happy to mix types.
+Ghost's standard library is **import-only**. Two names are the exception: `console` and `type` are reachable from any script with no `import` at all. Everything else — `math`, `date`, `random`, `os`, `file`, `path`, `json`, `http`, `ghost` — has to be [imported by name](/docs/modules#importing-the-standard-library) before a script can use it.
 
 ```typescript
-print("Hello, world!")     // >> Hello, world!
-print("count:", 3, true)   // >> count: 3 true
-print()                    // >> (a blank line)
+console.log(type(3.14)) // >> number — both available with no import
+
+import "ghost:math"
+
+console.log(math.sqrt(16)) // >> 4
 ```
 
-Inside an [`http.handle()`](/docs/http#httphandle) callback, `print()` writes to the response body rather than the terminal.
+<callout>A script says what it uses. `console` and `type` are global because they are reached for constantly and are small enough in surface to earn it — not because "frequently used" is a standing invitation to add a third.</callout>
 
-For output with a label, or output without the trailing newline, see the [`console`](/docs/console) module.
+## `console`
 
-### `type()`
-
-Returns the type of the given value as a lowercase string.
+The [`console`](/docs/console) module writes to and reads from the terminal. `console.log()` is how a Ghost program writes a line of output.
 
 ```typescript
-print(type(1))          // >> number
-print(type(3.14))       // >> number
-print(type("Ghost"))    // >> string
-print(type(true))       // >> boolean
-print(type(null))       // >> null
-print(type([1, 2]))     // >> list
-print(type({ a: 1 }))   // >> map
-print(type(print))      // >> library_function
+console.log("Hello, world!")     // >> Hello, world!
+console.log("count:", 3, true)   // >> count: 3 true
+console.log()                    // >> (a blank line)
+```
+
+Multiple arguments are joined with a single space and each is converted to its string form first, so — unlike the `+` operator — `console.log()` is happy to mix types.
+
+Inside an [`http.handle()`](/docs/http#httphandle) callback, `console.log()` writes to the response body rather than the terminal.
+
+See [Console](/docs/console) for the rest of the module: labelled output, output without a trailing newline, and reading a line of input.
+
+## `type()`
+
+Returns the type of the given value as a lowercase string. The name it answers with is the same one every error message uses.
+
+```typescript
+console.log(type(1))          // >> number
+console.log(type(3.14))       // >> number
+console.log(type("Ghost"))    // >> string
+console.log(type(true))       // >> boolean
+console.log(type(null))       // >> null
+console.log(type([1, 2]))     // >> list
+console.log(type({ a: 1 }))   // >> map
+console.log(type(console))    // >> library_module
 ```
 
 Functions report `function`, classes report `class`, and an instance of any class reports `instance` — `type()` names the kind of value, not the class it came from.
@@ -41,6 +51,8 @@ Functions report `function`, classes report `class`, and an instance of any clas
 ```typescript
 class Dog {}
 
-print(type(Dog))         // >> class
-print(type(new Dog()))   // >> instance
+console.log(type(Dog))         // >> class
+console.log(type(new Dog()))   // >> instance
 ```
+
+`type()` takes exactly one argument.

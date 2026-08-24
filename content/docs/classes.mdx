@@ -5,7 +5,7 @@ section: "Language"
 
 Classes define an object's _behavior_ and _state_. Behavior is defined by [methods](/docs/method-calls) which live in the class. Every object of the same class supports the same methods. State is defined in fields, whose values are stored in each instance.
 
-Ghost's class syntax follows JavaScript and TypeScript conventions: methods are declared by name with no `function` keyword, and instances are created with `new`.
+Methods are declared by name with no `function` keyword, and instances are created with `new`.
 
 ## Defining A Class
 
@@ -26,7 +26,7 @@ To add functionality to our coffee maker class, we need to give it methods. A me
 ```typescript
 class CoffeeMaker {
   brew() {
-    print("Your coffee is now brewing.")
+    console.log("Your coffee is now brewing.")
   }
 }
 ```
@@ -36,7 +36,7 @@ This defines a `brew` method that takes no arguments. To add parameters, put the
 ```typescript
 class CoffeeMaker {
   brew(dosage, temperature) {
-    print("Your %s of coffee is now brewing at %s degrees.".format(dosage, temperature))
+    console.log("Your %s of coffee is now brewing at %s degrees.".format(dosage, temperature))
   }
 }
 ```
@@ -52,7 +52,7 @@ class CoffeeMaker {
   }
 
   heat() {
-    print("Heating...")
+    console.log("Heating...")
   }
 }
 ```
@@ -64,8 +64,8 @@ To create _instances_ of a class, we need a _constructor_. It is an ordinary met
 ```typescript
 class CoffeeMaker {
   constructor(grind, temperature) {
-    print("Grind set to: %s".format(grind))
-    print("Temperature set to: %s".format(temperature))
+    console.log("Grind set to: %s".format(grind))
+    console.log("Temperature set to: %s".format(temperature))
   }
 }
 ```
@@ -95,8 +95,8 @@ class CoffeeMaker {
   }
 
   printSettings() {
-    print("Grind set to: %s".format(this.grind))
-    print("Temperature set to: %s".format(this.temperature))
+    console.log("Grind set to: %s".format(this.grind))
+    console.log("Temperature set to: %s".format(this.temperature))
   }
 }
 ```
@@ -109,14 +109,14 @@ class Animal {
   name = "unnamed"
 }
 
-print(new Animal().legs) // >> 4
+console.log(new Animal().legs) // >> 4
 ```
 
 These declarations are **initializers, not shared class state**. They are re-evaluated for every instance — ancestors first, then the class itself — before the constructor runs, so two instances never share a field's value.
 
 ## Method Scope
 
-Up to this point, "[scope](/docs/variables#scope)" has been used to talk exclusively about [variables](/docs/variables). In a procedural language like C, or a functional one like Scheme, that's the only kind of scope there is. But object-oriented languages like Ghost introduce another kind of scope: _object scope_. It contains the methods that are available on an object. When you write:
+Up to this point, "[scope](/docs/variables#scope)" has been used to talk exclusively about [variables](/docs/variables). Classes introduce a second kind: _object scope_, which contains the methods available on an object. When you write:
 
 ```typescript
 coffee.brew()
@@ -137,7 +137,7 @@ class CoffeeMaker {
   printGrind() {
     this.setGrind("coarse")
 
-    print(this.grind)
+    console.log(this.grind)
   }
 }
 ```
@@ -156,13 +156,13 @@ class CoffeeMaker {
     this.setGrind("coarse")
 
     for (i in 1 .. 3) {
-      print(this.grind)
+      console.log(this.grind)
     }
   }
 }
 ```
 
-This is unlike Lua and Dart which can "forget" `this` when you create a callback inside a method. Ghost does what you want here and retains the reference to the original object.
+A callback created inside a method keeps hold of the instance it was created in, so `this` still means what it meant where the callback was written.
 
 (In technical terms, a function's closure includes `this`. Ghost can do this because it makes a distinction between methods and functions.)
 
@@ -205,7 +205,7 @@ class Dog extends Animal {
   }
 }
 
-print(new Dog("Fido").speak()) // >> ... woof
+console.log(new Dog("Fido").speak()) // >> ... woof
 ```
 
 A subclass constructor that doesn't call `super.constructor()` simply doesn't run the parent's — field declarations from ancestors are still applied either way.
@@ -217,7 +217,7 @@ In addition to class inheritance, Ghost supports _traits_. Traits are like class
 ```typescript
 trait Brewable {
   brew() {
-    print("Your coffee is now brewing.")
+    console.log("Your coffee is now brewing.")
   }
 }
 ```
@@ -235,7 +235,7 @@ It's as if you had written:
 ```typescript
 class CoffeeMaker {
   brew() {
-    print("Your coffee is now brewing.")
+    console.log("Your coffee is now brewing.")
   }
 }
 ```
@@ -265,9 +265,39 @@ class Dog {
   }
 }
 
-print(new Dog().shout()) // >> WOOF
+console.log(new Dog().shout()) // >> WOOF
 ```
 
 ## Comparing Instances
 
 Instances compare by identity. Two instances of the same class holding equal fields are still two different objects, so `==` between them is `false` unless they are literally the same object.
+
+## Classes From Modules
+
+A class can come from somewhere other than the file you are in. A [module](/docs/modules) exports its top-level classes like any other name, and a Go program [embedding Ghost](/docs/embedding#registering-a-class) can register one whose instances it builds itself. Either way, `new` works identically:
+
+```typescript
+import { Image } from "lumen:image"
+
+sprite = new Image('player.png')
+```
+
+The class name in a `new` may also be dotted, and calls chain straight off the result:
+
+```typescript
+import "helpers" as m
+
+point = new m.Point(1, 2).add(3).toString()
+```
+
+## What Ghost's Classes Don't Have
+
+Deliberately small, and unlikely to grow:
+
+- **No static members**, and no way to attach state to the class rather than an instance.
+- **No access modifiers.** Every field and method is public.
+- **No `interface` or `abstract`.** Traits cover what those are usually reached for.
+- **No getter/setter syntax.** A field is read and written directly; a method is a method.
+- **Single inheritance only.** One `extends`, plus as many traits as you like.
+
+Two mistakes get their own message rather than failing obscurely. `ClassName.new()` is a syntax error pointing at `new ClassName()`, and declaring a *field* called `constructor` is a syntax error telling you to write it as a method.

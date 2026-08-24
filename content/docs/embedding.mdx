@@ -52,11 +52,11 @@ vm.SetDirectory(filepath.Dir(executable))
 The next step is to set the source code that you want to execute. This can be done by calling the `SetSource` method on the Ghost VM.
 
 ```go
-vm.SetSource(`print('Hello, universe!')`)
+vm.SetSource(`console.log('Hello, universe!')`)
 ```
 
 ### Setting the File Name
-`SetFile` names the file the source came from. It has no effect on execution — it is what error messages report, so setting it turns `1:7: runtime error` into `1:7:game.ghost: runtime error`.
+`SetFile` names the file the source came from. It has no effect on execution — it is what [error reports](/docs/error-handling) quote and point at, so setting it is what turns an anonymous report into one naming `game.ghost` and the line inside it.
 
 ```go
 vm.SetFile("game.ghost")
@@ -73,7 +73,7 @@ The result will be a Ghost object. If the execution was successful, the result w
 
 ```go
 // Check if the result is an error
-if _, ok := result.(*object.Error); ok {
+if object.IsError(result) {
   // Handle the error
   os.Exit(1)
 }
@@ -94,23 +94,82 @@ result := vm.Call("update", []object.Object{object.NewFloat(0.016)})
 This is how a host program drives a script — a game loop calling `update` and `draw` every frame, for example. Calling a name the script never defined returns an error object rather than panicking.
 
 ## Extending Ghost From Go
-Your program can add its own functions and modules to the language before running any code. Both registration functions live on the `ghost` package rather than on an instance, so what you register is available to every instance.
+Your program can add its own functions, modules, and classes to the language. Every registration function lives on the `ghost` package rather than on an instance, so what you register is available to every instance in the process.
 
 ```go
-// A single global function, callable as `greet("world")`
+// A function, reached with `import "ghost:greet"`
 ghost.RegisterFunction("greet", func(scope *object.Scope, tok token.Token, args ...object.Object) object.Object {
 	return &object.String{Value: "Hello, " + args[0].String()}
 })
 
-// A module of methods and properties, callable as `example.ping()`
+// A module of methods and properties, reached with `import "ghost:example"`
 ghost.RegisterModule("example", ExampleMethods, ExampleProperties)
 ```
 
 A module's methods and properties are `map[string]*object.LibraryFunction` and `map[string]*object.LibraryProperty`, built with the `RegisterMethod` and `RegisterProperty` helpers in `ghostlang.org/x/ghost/library/modules`. This is exactly how Ghost's own standard library is written, and how [Lumen](/docs/lumen) adds `canvas`, `image`, `audio`, and the rest — the standard library's source is the best reference to work from.
 
-Register everything before calling `Execute`: Ghost's optimizer resolves module and function names ahead of evaluation, so a name registered afterwards will not be found.
+<callout>What you register is **not** global to scripts. Nothing is, apart from `console` and `type`. A registered name becomes reachable the same way every built-in module does: through an [import](/docs/modules). `RegisterFunction` and `RegisterModule` put their names under Ghost's own `ghost:` scheme.</callout>
+
+Registration does not have to happen before `Execute`. `import` resolves at the point it runs, so a module registered while a script is already running — by a [plugin the script loaded itself](/docs/ghost#ghostextend) — is importable from the next line on.
+
+## Claiming a Scheme
+`ghost:` is not special-cased. It is simply the scheme Ghost's own standard library registers under, and your program can claim one of its own so its modules read as *yours* rather than as Ghost's. This is what Lumen does:
+
+```go
+ghost.RegisterModuleForScheme("lumen", "canvas", CanvasMethods, CanvasProperties)
+ghost.RegisterFunctionForScheme("lumen", "measure", measureFunc)
+```
+
+```typescript
+import "lumen:canvas"
+import { setColor } from "lumen:canvas"
+```
+
+There is one registry per scheme and one `scheme:` import mechanism under all of them, so there is no second convention to learn — only which call to make. The unscoped `RegisterFunction`/`RegisterModule` target `ghost:`; a host that wants a namespace reading as its own reaches for the `ForScheme` pair.
+
+A scheme nothing has ever registered under is a distinct import error from a misspelled name inside a real one, so a typo in the prefix tells you it is the prefix that is wrong.
+
+## Registering a Class
+`RegisterClass` and `RegisterClassForScheme` add a class to a module whose instances are built and driven entirely by Go. A script `new`s one exactly as it would a class declared in Ghost.
+
+```go
+ghost.RegisterClassForScheme("lumen", "audio", "Audio", audioConstructor)
+```
+
+```typescript
+import { Audio } from "lumen:audio"
+
+sound = new Audio("hit.wav")
+sound.play()
+```
+
+The constructor has the same signature every registered function has — `func(scope *object.Scope, tok token.Token, args ...object.Object) object.Object` — and returns whatever value an instance should be. That value's own `Method()` implementation decides what calling something on an instance does, entirely on your side; Ghost does not prescribe an instance shape beyond "is an `object.Object`".
+
+Reading a property or calling a method on the *class* value rather than an instance is refused with the same wording a Ghost-declared class gives, so a script has no way to tell — and no reason to need to tell — which kind of class it is holding.
+
+This is a Go-level extension point only. There is still exactly one way to declare a class in `.ghost` source, and nothing here adds a second. It is the right tool when the class wraps a genuinely native operation with no Ghost-level logic around it — opening a file handle, decoding audio — where tree-walking a method that only calls straight back into Go would buy nothing.
 
 <callout>Ghost cannot expose properties on objects your program defines — only methods. An embedded object's state has to be read through getter methods.</callout>
+
+## Reporting Errors
+By default a failed `Execute` prints its own report to standard error. Two settings change that:
+
+```go
+vm.SetQuiet(true)         // do not print anything; just hand back the error object
+vm.SetReportWriter(w)     // print the report somewhere other than stderr
+```
+
+`object.IsError(result)` is the tidiest way to test the result:
+
+```go
+if object.IsError(result) {
+	os.Exit(1)
+}
+```
+
+A Go panic anywhere below `Execute` — including one caused by a bug in Ghost itself — is recovered at this boundary and returned as an internal error rather than taking your program down with it.
+
+<callout>Registration is process-global, so a single Go process cannot host two independently-configured Ghost setups. A host that needs isolated configurations runs separate processes.</callout>
 
 ## A Complete Example
 Below is a complete example of what we have covered so far. It's a simple program that creates a Ghost VM, loads a script, and executes it.
@@ -141,7 +200,7 @@ func main() {
 	vm.SetDirectory(filepath.Dir(executable))
 
 	// Set the source code to execute, and the name errors should report
-	vm.SetSource(`print('Hello, universe!')`)
+	vm.SetSource(`console.log('Hello, universe!')`)
 	vm.SetFile("main.ghost")
 
 	// Execute the source code
@@ -149,7 +208,7 @@ func main() {
 	result := vm.Execute()
 
 	// Check if the result is an error
-	if _, ok := result.(*object.Error); ok {
+	if object.IsError(result) {
 		os.Exit(1)
 	}
 }
