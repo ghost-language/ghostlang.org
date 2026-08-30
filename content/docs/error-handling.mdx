@@ -128,7 +128,7 @@ console.log(`Ghost ${count}`)
 
 ## Argument errors
 
-Every call checks its arity, and library methods check their argument types too, so a miscall is reported as a call rather than as a crash somewhere inside it:
+Every library method checks its own arity and argument types, so a miscall is reported as a call rather than as a crash somewhere inside it:
 
 ```
 argument error: `math.sqrt()` expects 1 argument, got 0
@@ -138,7 +138,7 @@ argument error: `math.sqrt()` expects 1 argument, got 0
   |      ^^^^
 ```
 
-[Functions and methods you define yourself](/docs/functions#argument-count) are checked the same way. The error is raised before the body runs, so no frame for the call appears in the trace — it never started.
+[Functions and methods you define yourself](/docs/functions#argument-count) are checked for a minimum but have no maximum, so the wording differs — `expects at least 2 arguments, got 1`. Either way the error is raised before the body runs, so no frame for the call appears in the trace — it never started.
 
 ## Nothing can crash the host
 

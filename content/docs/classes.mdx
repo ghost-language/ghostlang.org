@@ -41,10 +41,10 @@ class Player {
 }
 ```
 
-Methods take [default parameter values](/docs/functions#default-parameters) and [rest parameters](/docs/functions#rest-parameters) just like functions do, and their [argument counts are checked the same way](/docs/functions#argument-count) — the error names the class and the method:
+Methods take [default parameter values](/docs/functions#default-parameters) and [rest parameters](/docs/functions#rest-parameters) just like functions do, and their [argument counts work the same way](/docs/functions#argument-count) — a required parameter left unbound is an error, extra arguments are dropped. The error names the class and the method:
 
 ```
-argument error: `Player.move()` expects 2 arguments, got 1
+argument error: `Player.move()` expects at least 2 arguments, got 1
 ```
 
 A method body's scope is the class itself, so a method can call a sibling method by bare name:

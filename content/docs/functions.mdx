@@ -50,7 +50,7 @@ The default expression is evaluated when the function is called, not when it is 
 
 ## Argument Count
 
-Calling a function with the wrong number of arguments is an [argument error](/docs/error-handling#argument-errors) naming the call — too many and too few alike:
+A function has a **minimum** but no maximum. Leaving a required parameter unbound is an [argument error](/docs/error-handling#argument-errors) naming the call:
 
 ```typescript
 function sum(a, b) {
@@ -58,17 +58,30 @@ function sum(a, b) {
 }
 
 sum(1)
-// argument error: `sum()` expects 2 arguments, got 1
-
-sum(1, 2, 3)
-// argument error: `sum()` expects 2 arguments, got 3
+// argument error: `sum()` expects at least 2 arguments, got 1
 ```
 
 The error is raised before the body runs, so a miscall never half-executes, and no call frame is added to the report — the call never got started.
 
-A parameter with a default is optional and does not count toward the minimum. A rest parameter has no upper bound at all.
+Extra arguments, on the other hand, are simply dropped:
 
-<callout>Functions you define get exactly the same treatment as the ones in the standard library. There is one rule for argument counts, not one for your code and a laxer one for Ghost's.</callout>
+```typescript
+console.log(sum(1, 2, 3, 4)) // >> 3
+```
+
+That is what lets a function name only the parameters its body actually uses. A [`map()`](/docs/lists#map) callback is handed both the element and its index, but a callback that only wants the element can just say so:
+
+```typescript
+console.log([1, 2, 3].map(function (item) {
+  return item * 2
+}))
+
+// >> [2, 4, 6]
+```
+
+A parameter with a default is optional and does not count toward the minimum. A [rest parameter](#rest-parameters) collects whatever is left and does not count either.
+
+<callout>Standard library functions are stricter: they enforce a maximum as well, so `math.sqrt(16, 2)` is an argument error rather than a silently ignored second argument. A library call has one known shape; a function you write is often a callback whose caller decides what to pass.</callout>
 
 ## Rest Parameters
 
