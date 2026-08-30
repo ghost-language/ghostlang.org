@@ -24,7 +24,7 @@ Each instance carries its own scope, so variables defined by one script are visi
 From here we need to configure and set a couple of things before we can execute any Ghost code.
 
 ### Setting the Root Directory
-The root directory is the directory that Ghost will use to resolve relative imports from your code. For example, if you have a file called `foo.ghost` in the root directory, you can import it like this anywhere in your code:
+The root directory is the directory that Ghost will use to resolve relative imports from your code. For example, if you have a file called `foo.gs` in the root directory, you can import it like this anywhere in your code:
 
 ```typescript
 import Foo from 'foo'
@@ -56,10 +56,10 @@ vm.SetSource(`console.log('Hello, universe!')`)
 ```
 
 ### Setting the File Name
-`SetFile` names the file the source came from. It has no effect on execution — it is what [error reports](/docs/error-handling) quote and point at, so setting it is what turns an anonymous report into one naming `game.ghost` and the line inside it.
+`SetFile` names the file the source came from. It has no effect on execution — it is what [error reports](/docs/error-handling) quote and point at, so setting it is what turns an anonymous report into one naming `game.gs` and the line inside it.
 
 ```go
-vm.SetFile("game.ghost")
+vm.SetFile("game.gs")
 ```
 
 ## Executing Ghost Code
@@ -147,7 +147,7 @@ The constructor has the same signature every registered function has — `func(s
 
 Reading a property or calling a method on the *class* value rather than an instance is refused with the same wording a Ghost-declared class gives, so a script has no way to tell — and no reason to need to tell — which kind of class it is holding.
 
-This is a Go-level extension point only. There is still exactly one way to declare a class in `.ghost` source, and nothing here adds a second. It is the right tool when the class wraps a genuinely native operation with no Ghost-level logic around it — opening a file handle, decoding audio — where tree-walking a method that only calls straight back into Go would buy nothing.
+This is a Go-level extension point only. There is still exactly one way to declare a class in `.gs` source, and nothing here adds a second. It is the right tool when the class wraps a genuinely native operation with no Ghost-level logic around it — opening a file handle, decoding audio — where tree-walking a method that only calls straight back into Go would buy nothing.
 
 <callout>Ghost cannot expose properties on objects your program defines — only methods. An embedded object's state has to be read through getter methods.</callout>
 
@@ -201,7 +201,7 @@ func main() {
 
 	// Set the source code to execute, and the name errors should report
 	vm.SetSource(`console.log('Hello, universe!')`)
-	vm.SetFile("main.ghost")
+	vm.SetFile("main.gs")
 
 	// Execute the source code
 	// The result will be a ghost object

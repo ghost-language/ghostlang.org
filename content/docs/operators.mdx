@@ -154,18 +154,40 @@ if (result == null) {
 }
 ```
 
-Two class instances compare by _identity_: two instances of the same class holding equal fields are still two different objects, and `==` reports `false`.
+Every type answers `==` and `!=`. Which answer you get depends on the kind of value, and the split is between values defined by their _contents_ and values defined by _which one they are_:
 
-Lists compare by _contents_, to any depth, so a list you built compares equal to one you wrote out:
+| Both sides are | `==` compares |
+| --- | --- |
+| number, string, boolean | value |
+| `list` | contents, to any depth |
+| `map` | contents, to any depth — same keys, each with an equal value |
+| `date` | the instant, whatever time zone each is attached to |
+| `duration` | its six components |
+| `instance` | identity |
+| function, class, trait, module | identity |
+
+Lists and maps compare by _contents_, so one you built compares equal to one you wrote out:
 
 ```typescript
 console.log([1, 2] + [1, 2] == [2, 4])       // >> true
 console.log([[1], [2]] == [[1], [2]])        // >> true
+console.log({name: "Ghost"} == {name: "Ghost"}) // >> true
 ```
 
-Ordering two lists with `<` or `>` is not supported: neither an elementwise nor a lexicographic reading is obviously the right one, so Ghost refuses rather than picking.
+Class instances compare by _identity_: two instances of the same class holding equal fields are still two different objects, and `==` reports `false`. Functions, classes, and traits work the same way — a value is equal to itself and to nothing else.
 
-<callout>`==` does not yet reach every type. Two **maps** — and two functions, classes, or traits — cannot be compared at all today, not even against themselves: `a == a` on a map is a type error rather than `true`. Compare the keys or values you actually care about until that gap closes.</callout>
+```typescript
+class Point {
+  constructor(x) { this.x = x }
+}
+
+console.log(new Point(1) == new Point(1)) // >> false
+
+p = new Point(1)
+console.log(p == p)                       // >> true
+```
+
+Ordering two lists with `<` or `>` is not supported: neither an elementwise nor a lexicographic reading is obviously the right one, so Ghost refuses rather than picking. Two durations are the same — "which span is longer" has no answer without a reference date, since a month is a different number of days depending on which month it starts from.
 
 Dates compare as instants, with `==`, `!=`, and all four ordering operators. See [Date](/docs/date).
 

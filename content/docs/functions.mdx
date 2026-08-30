@@ -48,15 +48,77 @@ console.log(greet("Ghost", "Hi")) // >> Hi, Ghost
 
 The default expression is evaluated when the function is called, not when it is defined, and it is evaluated in the function's own scope — so a default can reference an earlier parameter or a name from the enclosing scope.
 
-## Extra and Missing Arguments
+## Argument Count
 
-Passing more arguments than a function declares is fine — the extras are dropped.
+Calling a function with the wrong number of arguments is an [argument error](/docs/error-handling#argument-errors) naming the call — too many and too few alike:
 
-Passing fewer is not. A parameter with no argument and no default is simply never defined, and the first line that reads it fails with a [name error](/docs/error-handling#name-errors-and-did-you-mean) — not a dedicated "wrong number of arguments" message. Give an optional parameter a default value.
+```typescript
+function sum(a, b) {
+  return a + b
+}
 
-<callout>Library functions are strict about this: calling one with the wrong number of arguments is an [argument error](/docs/error-handling#argument-errors) naming the call. Functions you define yourself are not checked that way yet.</callout>
+sum(1)
+// argument error: `sum()` expects 2 arguments, got 1
 
-Ghost has no rest parameters (`...args`) and no spread, at a call site or in a list literal.
+sum(1, 2, 3)
+// argument error: `sum()` expects 2 arguments, got 3
+```
+
+The error is raised before the body runs, so a miscall never half-executes, and no call frame is added to the report — the call never got started.
+
+A parameter with a default is optional and does not count toward the minimum. A rest parameter has no upper bound at all.
+
+<callout>Functions you define get exactly the same treatment as the ones in the standard library. There is one rule for argument counts, not one for your code and a laxer one for Ghost's.</callout>
+
+## Rest Parameters
+
+The **last** parameter may be written `...name`, which collects every remaining argument into a list:
+
+```typescript
+function sum(...numbers) {
+  total = 0
+
+  for (n in numbers) {
+    total = total + n
+  }
+
+  return total
+}
+
+console.log(sum(1, 2, 3)) // >> 6
+console.log(sum())        // >> 0
+```
+
+It is always a list, even when there was nothing left to collect — an empty one, never `null`. A rest parameter cannot have a default, since it is already optional, and writing `...` anywhere but last is a syntax error.
+
+Ordinary parameters may come before it:
+
+```typescript
+function tag(label, ...values) {
+  return `${label}: ${values.join(", ")}`
+}
+
+console.log(tag("scores", 1, 2, 3)) // >> scores: 1, 2, 3
+```
+
+## Spread
+
+`...` in front of a list at a **call site** expands it into separate arguments:
+
+```typescript
+numbers = [1, 2, 3]
+
+console.log(sum(...numbers))     // >> 6
+console.log(sum(0, ...numbers))  // >> 6
+```
+
+The same works inside a list literal, which is the tidy way to build one list out of others:
+
+```typescript
+console.log([0, ...[1, 2], 3]) // >> [0, 1, 2, 3]
+```
+
+What you spread has to be a list; spreading anything else is a type error. `...` is only meaningful in those two places — written anywhere else, such as `x = ...list`, it is a syntax error rather than a value.
 
 ## Anonymous Functions
 

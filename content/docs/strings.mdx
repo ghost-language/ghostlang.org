@@ -89,13 +89,23 @@ spans two lines."
 ## Methods
 
 <Collection>
+  <p>[charAt](#charat)</p>
+  <p>[contains](#contains)</p>
   <p>[find](#find)</p>
   <p>[findAll](#findall)</p>
   <p>[format](#format)</p>
   <p>[endsWith](#endswith)</p>
+  <p>[indexOf](#indexof)</p>
+  <p>[isEmpty](#isempty)</p>
+  <p>[lastIndexOf](#lastindexof)</p>
   <p>[length](#length)</p>
   <p>[matches](#matches)</p>
+  <p>[padEnd](#padend)</p>
+  <p>[padStart](#padstart)</p>
+  <p>[repeat](#repeat)</p>
   <p>[replace](#replace)</p>
+  <p>[reverse](#reverse)</p>
+  <p>[slice](#slice)</p>
   <p>[split](#split)</p>
   <p>[startsWith](#startswith)</p>
   <p>[toLowerCase](#tolowercase)</p>
@@ -107,33 +117,127 @@ spans two lines."
   <p>[trimStart](#trimstart)</p>
 </Collection>
 
-### `find()`
+Every method that counts or addresses a position works in **characters, not bytes**, so multi-byte text behaves the way it looks.
 
-The `find()` method matches a regular expression against a string and returns the matched text. The receiver is the **pattern**, and the argument is the string being searched. When nothing matches, it returns an empty string.
+### `charAt()`
+
+The `charAt()` method returns the one-character string at a position. A position outside the string answers `""` rather than erroring.
 
 ```typescript
-pattern = "I need (.*)"
-input = "I need coffee"
-
-found = pattern.find(input)
-
-// expected value: "I need coffee"
+console.log("Ghost".charAt(0))  // >> G
+console.log("Ghost".charAt(99)) // >> (empty string)
+console.log("こんにちは".charAt(1)) // >> ん
 ```
 
-Patterns use [RE2 syntax](https://github.com/google/re2/wiki/Syntax).
+### `contains()`
+
+The `contains()` method reports whether a substring appears anywhere in the string. This is a plain substring search, not a pattern — use [`matches()`](#matches) for a regular expression.
+
+```typescript
+result = "Ghost".contains("host")
+
+// expected value: true
+```
+
+### `indexOf()`
+
+The `indexOf()` method returns the position of the first occurrence of a substring, or `-1` if it never occurs.
+
+```typescript
+console.log("banana".indexOf("an")) // >> 1
+console.log("banana".indexOf("zz")) // >> -1
+```
+
+### `isEmpty()`
+
+The `isEmpty()` method reports whether the string has no characters — the same as `length() == 0`.
+
+```typescript
+console.log("".isEmpty())      // >> true
+console.log("Ghost".isEmpty()) // >> false
+```
+
+### `lastIndexOf()`
+
+The `lastIndexOf()` method returns the position of the **last** occurrence of a substring, or `-1` if it never occurs.
+
+```typescript
+console.log("banana".lastIndexOf("an")) // >> 3
+```
+
+### `padEnd()`
+
+The `padEnd()` method grows the string to a given length by repeating a pad string on the right. The pad defaults to a space, and is truncated to fit exactly.
+
+```typescript
+console.log("7".padEnd(3))      // >> "7  "
+console.log("ab".padEnd(5, ".")) // >> ab...
+```
+
+A string already at or past the requested length comes back unchanged.
+
+### `padStart()`
+
+The `padStart()` method is `padEnd()` from the other side — the usual way to line numbers up.
+
+```typescript
+console.log("7".padStart(3, "0")) // >> 007
+console.log("abc".padStart(2))    // >> abc
+```
+
+### `repeat()`
+
+The `repeat()` method returns the string joined to itself a given number of times. A negative count is a value error.
+
+```typescript
+console.log("ab".repeat(3)) // >> ababab
+```
+
+### `reverse()`
+
+The `reverse()` method returns a new string with its characters in the opposite order.
+
+```typescript
+console.log("Ghost".reverse())     // >> tsohG
+console.log("こんにちは".reverse()) // >> はちにんこ
+```
+
+### `slice()`
+
+The `slice()` method returns the characters from `start` up to, but not including, `end`. Leaving `end` off runs to the end of the string.
+
+```typescript
+console.log("Ghost".slice(1))    // >> host
+console.log("Ghost".slice(1, 3)) // >> ho
+```
+
+<callout>Unlike [`charAt()`](#charat), which is lenient, `slice()` **validates both ends** and raises an index error when either falls outside the string. That is the rule across Ghost: reading a single position answers `null` or `""` when it is out of range, while reading a *range* checks its bounds.</callout>
+
+### `find()`
+
+The `find()` method searches the string for a regular expression and returns the text that matched. **The receiver is the string being searched, and the argument is the pattern** — the same way round as JavaScript, PHP, and Python. When nothing matches, it returns an empty string.
+
+```typescript
+found = "I need coffee".find("need (.*)")
+
+// expected value: "need coffee"
+```
+
+Patterns use [RE2 syntax](https://github.com/google/re2/wiki/Syntax). An invalid pattern is a value error naming the problem.
+
+<callout>`find()`, `findAll()`, and `matches()` all read `subject.method(pattern)`. Earlier versions of Ghost had the receiver and argument the other way around; code written against those needs the two swapped.</callout>
 
 ### `findAll()`
 
-The `findAll()` method matches a regular expression against a string and returns a list holding the whole match followed by each of its capture groups. An unmatched pattern gives an empty list.
+The `findAll()` method returns a [list](/docs/lists) of **every** match in the string, in order. A pattern that matches nothing gives an empty list.
 
 ```typescript
-pattern = "I need (.*)"
-input = "I need coffee"
+found = "a1 b2 c3".findAll("[a-z][0-9]")
 
-found = pattern.findAll(input)
-
-// expected value: ["I need coffee", "coffee"]
+// expected value: ["a1", "b2", "c3"]
 ```
+
+Each entry is a whole match. `findAll()` does not report capture groups.
 
 ### `format()`
 
@@ -181,10 +285,10 @@ length = "こんにちは".length()
 
 ### `matches()`
 
-The `matches()` method reports whether a regular expression matches anywhere in a string. As with `find()`, the receiver is the pattern.
+The `matches()` method reports whether a regular expression matches anywhere in the string. As with `find()`, the receiver is the string and the argument is the pattern.
 
 ```typescript
-result = "^Gh".matches("Ghost")
+result = "Ghost".matches("^Gh")
 
 // expected value: true
 ```
@@ -293,4 +397,4 @@ value = "  Ghost  ".trimStart()
 // expected value: "Ghost  "
 ```
 
-<callout>Ghost has no substring or slicing method yet. Taking part of a string means indexing it a character at a time, or splitting it and rebuilding.</callout>
+<callout>Where another language offers two names for one operation, Ghost picks one. There is no `includes` (use [`contains`](#contains)), no `at` (use [`charAt`](#charat)), and no `substring` (use [`slice`](#slice)) — the spellings chosen are the ones [lists](/docs/lists) already use.</callout>

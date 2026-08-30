@@ -6,7 +6,7 @@ section: "Language"
 Ghost has one `import` statement, and two things can appear on the right of it: a **file** on disk, or a **module behind a scheme** — a standard library module under `ghost:`, or a module an embedding host registered under a scheme of its own.
 
 ```typescript
-import "helpers"          // a .ghost file sitting next to this one
+import "helpers"          // a .gs file sitting next to this one
 import "ghost:math"       // the standard library's math module
 import "lumen:canvas"     // a module Lumen registered under its own scheme
 ```
@@ -15,7 +15,7 @@ Ghost tells the two apart by the string alone: anything matching `scheme:` — t
 
 ## Importing files
 
-Every Ghost file is its own module with its own scope. Paths are written without the `.ghost` extension and are resolved **relative to the file doing the importing** — there is no project root, no search path, and no package registry.
+Every Ghost file is its own module with its own scope. Paths are written without the `.gs` extension and are resolved **relative to the file doing the importing** — there is no project root, no search path, and no package registry.
 
 Importing a file into another does not merge its scope. Two modules can define the same top-level variable without colliding.
 
@@ -129,20 +129,20 @@ Ghost keeps track of every module it imports. A module is read, parsed, and eval
 Because Ghost memoizes imports, a cycle short-circuits rather than recursing forever:
 
 ```typescript
-// main.ghost
+// main.gs
 import "a"
 
-// a.ghost
+// a.gs
 console.log("start a")
 import "b"
 console.log("end a")
 
-// b.ghost
+// b.gs
 console.log("start b")
 import "c"
 console.log("end b")
 
-// c.ghost
+// c.gs
 console.log("start c")
 import "a"
 console.log("end c")
@@ -162,13 +162,13 @@ A cycle that cannot be resolved this way is reported as an import error naming t
 ## A worked example
 
 ```
-main.ghost
+main.gs
 modules/
-    functions.ghost
-    variables.ghost
+    functions.gs
+    variables.gs
 ```
 
-### `main.ghost`
+### `main.gs`
 
 ```typescript
 import * from "modules/functions"
@@ -180,7 +180,7 @@ add(one, two)
 greet(hello)
 ```
 
-### `functions.ghost`
+### `functions.gs`
 
 ```typescript
 function add(a, b) {
@@ -192,7 +192,7 @@ function greet(message) {
 }
 ```
 
-### `variables.ghost`
+### `variables.gs`
 
 ```typescript
 one = 1

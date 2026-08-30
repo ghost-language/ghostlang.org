@@ -61,23 +61,32 @@ Hello, world!
 
 ### Running a File
 
-Ghost source files use the `.ghost` extension. Pass one to `ghost` and it is executed, then control returns to your terminal.
+Ghost source files use the `.gs` extension. Pass one to `ghost` and it is executed, then control returns to your terminal.
 
 ```bash
-ghost example.ghost
+ghost example.gs
 ```
 
 Anything after the filename is passed through to your script, where [`os.args()`](/docs/os#osargs) can read it.
 
 ### Flags
 
-| Flag | Description                             |
-| ---- | --------------------------------------- |
-| `-h` | Show help.                              |
-| `-v` | Show the version and exit.              |
-| `-t` | Report how long the program took to run.|
+| Flag | Description                                                          |
+| ---- | -------------------------------------------------------------------- |
+| `-h` | Show help.                                                            |
+| `-v` | Show the version and exit.                                            |
+| `-t` | Report how long the program took to run.                              |
+| `-i` | Run the file, then stay in the REPL with the script's variables intact.|
 
 A file that fails exits with status 1, so a script's success can be tested from a shell or a build.
+
+`-i` is the one worth knowing about. It runs a file and then hands you the prompt with that script's environment still loaded, so everything it defined is there to poke at — including bindings made before a failure partway through:
+
+```bash
+ghost -i example.gs
+```
+
+It composes with `-t` (the timing prints before the prompt appears), and does nothing on its own without a file.
 
 ## Hello, World
 
