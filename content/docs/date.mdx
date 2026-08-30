@@ -14,7 +14,7 @@ Two things shape the whole module:
 
 **Every date is immutable.** Nothing here changes a date in place. Every function takes a date and returns a *new* one, which is why the operations are functions in this module rather than methods on the value.
 
-**Every date is UTC.** Ghost does not model time zones at all, so a date built once compares the same everywhere the program runs.
+**A date is an instant plus a time zone.** The instant is what comparisons look at, so it never depends on where the program runs. The zone only decides what reading a *calendar* position back out — the year, the hour, the weekday — answers. New dates are UTC unless you say otherwise. See [Time zones](#time-zones).
 
 ```typescript
 import "ghost:date"
@@ -37,7 +37,7 @@ console.log(date.of(2024, 1, 31))
 
 ## Comparing dates
 
-Dates support `==`, `!=`, `<`, `<=`, `>`, and `>=` directly, comparing instants:
+Dates support `==`, `!=`, `<`, `<=`, `>`, and `>=` directly, comparing instants. Which [time zone](#time-zones) each date is attached to makes no difference — two dates naming the same moment are equal even when they read it in different zones:
 
 ```typescript
 if (date.now() > deadline) {
@@ -53,8 +53,9 @@ Arithmetic operators do **not** work on dates — `a + b` on two dates is a type
 | --- | --- |
 | `now()` | The current instant. |
 | `today()` | Midnight UTC today. |
-| `of(year, month, day, [hour, minute, second])` | A date from its parts. The month is 1–12. |
-| `parseISO(text)` | Parses RFC3339, or a bare `YYYY-MM-DD`. |
+| `of(year, month, day, [hour, minute, second])` | A date from its parts, read as UTC. The month is 1–12. |
+| `ofInZone(year, month, day, [hour, minute, second], zone)` | `of()` with a required trailing zone — the parts are read as local time *in that zone*. |
+| `parseISO(text)` | Parses RFC3339, or a bare `YYYY-MM-DD`. An explicit offset in the text is kept rather than normalized away. |
 | `fromUnix(seconds)` | A date from a Unix timestamp. |
 | `toUnix(date)` | Seconds since the Unix epoch. |
 | `toUnixNano(date)` | Nanoseconds since the Unix epoch. |
@@ -70,6 +71,35 @@ console.log(date.parseISO("2024-03-01"))
 // >> 2024-03-01T00:00:00Z
 ```
 
+## Time zones
+
+A date carries the zone it should be read in. Moving it to another one changes nothing about the instant — only what the calendar reads answer from then on.
+
+| Method | What it does |
+| --- | --- |
+| `inTimeZone(date, zone)` | The same instant, read in a different zone. |
+| `timeZone(date)` | The zone's IANA name, or `""` for a date built from a bare numeric offset. |
+| `zoneOffset(date)` | The offset from UTC in seconds, east positive, at that exact instant — so it accounts for daylight saving. |
+
+```typescript
+import "ghost:date"
+
+meeting = date.of(2024, 7, 15, 9, 0, 0)
+
+console.log(meeting)          // >> 2024-07-15T09:00:00Z
+console.log(date.hour(meeting)) // >> 9
+
+local = date.inTimeZone(meeting, "America/New_York")
+
+console.log(local)              // >> 2024-07-15T05:00:00-04:00
+console.log(date.hour(local))   // >> 5
+console.log(date.timeZone(local)) // >> America/New_York
+```
+
+Zones are always named explicitly, using [IANA identifiers](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) like `America/New_York`. Ghost embeds the zone database in its own binary, so the same name resolves the same way on every machine — there is deliberately no `date.local()` reading the host's configured zone, which would make a script's output depend on where it ran. An unrecognized name is a value error.
+
+<callout>`ofInZone()` and `inTimeZone()` are not the same operation. `ofInZone(2024, 7, 15, 9, 0, 0, "America/New_York")` builds the instant that **is** 9am in New York. `inTimeZone(of(2024, 7, 15, 9, 0, 0), "America/New_York")` takes 9am UTC and reads it in New York, giving 5am. Build with the first, re-read with the second.</callout>
+
 ## Arithmetic
 
 Each takes a date and a count, and returns a new date.
@@ -80,13 +110,13 @@ Each takes a date and a count, and returns a new date.
 | `addWeeks(date, n)` / `subWeeks(date, n)` | |
 | `addMonths(date, n)` / `subMonths(date, n)` | |
 | `addYears(date, n)` / `subYears(date, n)` | |
-| `addHours(date, n)` | |
-| `addMinutes(date, n)` | |
-| `addSeconds(date, n)` | |
+| `addHours(date, n)` / `subHours(date, n)` | |
+| `addMinutes(date, n)` / `subMinutes(date, n)` | |
+| `addSeconds(date, n)` / `subSeconds(date, n)` | |
 
 <callout>Adding months **clamps** to the target month's last day rather than rolling over. January 31 plus one month is February 28 — or the 29th in a leap year — not March 2. That is almost always what a calendar-shaped calculation means.</callout>
 
-There is no `subHours`, `subMinutes`, or `subSeconds` yet; pass a negative count to the matching `add`.
+The calendar units — days, weeks, months, years — keep the wall-clock reading in the date's own zone across a daylight-saving change, the way a calendar app's "same time next month" does. The clock units — hours, minutes, seconds — shift by a fixed real duration regardless of zone, so "add 3 hours" always means three real hours.
 
 ## Differences
 
@@ -99,26 +129,75 @@ console.log(date.differenceInDays(date.of(2024, 3, 1), date.of(2024, 1, 31)))
 // >> 30
 ```
 
+## Durations
+
+A `duration` is a calendar-and-clock span, kept as six separate components rather than one number of seconds — because "one month" has no fixed length in days.
+
+| Method | What it does |
+| --- | --- |
+| `duration(years, months, days, [hours, minutes, seconds])` | Builds one directly. |
+| `durationBetween(a, b)` | The full calendar breakdown of `a - b`. |
+| `addDuration(date, duration)` | Applies one to a date. |
+| `subDuration(date, duration)` | Applies one backwards. |
+
+Every component you give `duration()` has to point the same way — all positive or all negative, with zeroes not counting either way — or it is a value error.
+
+A duration reads its own fields with **methods**, which is the one place this module departs from "everything is a free function": `years()`, `months()`, `days()`, `hours()`, `minutes()`, `seconds()`, and `toString()`.
+
+```typescript
+import "ghost:date"
+
+span = date.durationBetween(date.of(2024, 3, 15), date.of(2023, 1, 10))
+
+console.log(span)          // >> P1Y2M5D
+console.log(span.years())  // >> 1
+console.log(span.months()) // >> 2
+console.log(span.days())   // >> 5
+```
+
+`toString()` gives an ISO 8601 duration — `PT0S` for an empty one.
+
+`addDuration()` and `durationBetween()` are exact inverses, so a span taken between two dates puts one back on the other:
+
+```typescript
+start = date.of(2023, 1, 10)
+end = date.of(2024, 3, 15)
+
+console.log(date.addDuration(start, date.durationBetween(end, start)))
+// >> 2024-03-15T00:00:00Z
+```
+
+This sits alongside the `differenceInX` functions rather than replacing them — "how many whole days apart" and "the full calendar breakdown" are different questions.
+
+Two durations compare with `==` and `!=`, component by component. Ordering them with `<` or `>` is not supported: which of two spans is longer has no answer without a reference date.
+
 ## Components
 
 `year(date)`, `month(date)`, `day(date)`, `hour(date)`, `minute(date)`, `second(date)`, `weekday(date)`.
 
 `weekday()` counts from `0` for Sunday.
 
+Each reads the date's own [time zone](#time-zones), so the same instant can answer a different day, hour, or weekday depending on where it was last moved to.
+
 ## Predicates
 
 `isSameDay(a, b)`, `isWeekend(date)`, `isLeapYear(date)`.
 
+These read the date's own zone too — an instant that is Saturday in UTC but already Sunday in Tokyo answers for Tokyo once moved there.
+
 ## Period boundaries
 
-`startOfDay(date)`, `endOfDay(date)`, `startOfMonth(date)`, `endOfMonth(date)`.
+`startOfDay(date)`, `endOfDay(date)`, `startOfWeek(date)`, `endOfWeek(date)`, `startOfMonth(date)`, `endOfMonth(date)`, `startOfYear(date)`, `endOfYear(date)`.
 
 ```typescript
 console.log(date.endOfMonth(date.of(2024, 1, 31)))
 // >> 2024-01-31T23:59:59Z
+
+console.log(date.endOfYear(date.of(2024, 7, 15)))
+// >> 2024-12-31T23:59:59Z
 ```
 
-There is no `startOfWeek`, `endOfWeek`, `startOfYear`, or `endOfYear` yet.
+Each is computed in the date's own zone — midnight in Tokyo for a date moved there, not midnight UTC. `startOfWeek()` and `endOfWeek()` treat **Sunday** as the first day of the week, matching `weekday()`'s own numbering.
 
 ## Formatting
 

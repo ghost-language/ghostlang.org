@@ -5,7 +5,7 @@ section: "Language"
 
 Ghost's syntax is designed to be simple and predictable: curly braces for blocks, parentheses around conditions, and as few special cases as the language can get away with.
 
-Scripts are stored in plain text files with a `.ghost` file extension. Ghost does not compile ahead of time: programs are run directly from source, from top to bottom like any other scripting language.
+Scripts are stored in plain text files with a `.gs` file extension. Ghost does not compile ahead of time: programs are run directly from source, from top to bottom like any other scripting language.
 
 ## Comments
 
@@ -27,7 +27,7 @@ Comments behave like whitespace and are discarded during execution. While single
 
 ## Statements
 
-A statement simply ends where its grammar says it ends. Ghost has no significant-newline rule and no automatic semicolon insertion to reason about; a trailing `;` is optional and consumed when it is there.
+A statement simply ends where its grammar says it ends. Ghost has no significant-newline rule and no automatic semicolon insertion to reason about; a trailing `;` is optional, and accepted after every kind of statement.
 
 ```typescript
 name = "Ghost"
@@ -36,7 +36,33 @@ console.log(name)
 name = "Ghost";      // also fine
 ```
 
-The one place `;` is required is between the three clauses of a [`for` loop](/docs/control-flow#for-statement) header.
+`;` is required between the three clauses of a [`for` loop](/docs/control-flow#for-statement) header.
+
+### When a line break is not a separator
+
+Because a newline means nothing to the parser, two statements on separate lines can still be read as one when the second line **opens with a token the first can continue into** — `[`, `(`, `.`, `++`, `--`, or a binary operator:
+
+```typescript
+x = 1
+[10, 20, 30]
+```
+
+That is not an assignment followed by a list. The `[` after `1` reads as an index, so Ghost tries to parse `x = 1[10, 20, 30]` as a single statement and reports a syntax error on the first comma. When the continuation happens to be valid, you get no error at all — just a statement that quietly did something other than what the layout suggests.
+
+Ending the first line with `;` settles it:
+
+```typescript
+x = 1;
+[10, 20, 30]
+```
+
+This comes up most with [destructuring](/docs/variables#destructuring), which begins with `[` or `{`. It is worth the semicolon whenever the next line starts with one of those tokens. Ghost keeps the rule rather than making newlines significant because a statement that can span lines is what lets a method chain break across them:
+
+```typescript
+result = values
+  .filter(isReady)
+  .map(toLabel)
+```
 
 ## Strings
 
@@ -89,7 +115,7 @@ ALL_CAPS
 
 ## Blocks
 
-Ghost uses curly braces to define _blocks_. You can use a block anywhere a statement is allowed, like in control flow statements.
+Ghost uses curly braces to define _blocks_. A block is the body of a control flow statement, a function, a class, or a trait — it is always attached to one of those, never written on its own.
 
 ```typescript
 pressure = 3.6
@@ -99,4 +125,6 @@ if (pressure > 3.4) {
 }
 ```
 
-Blocks group statements; they do not introduce a new scope. See [Variables](/docs/variables#scope) for what does.
+Braces standing alone are a [map](/docs/maps) literal, not a block, so there is no bare-block form for grouping statements or introducing a scope.
+
+Blocks group statements; they do not introduce a new scope. A variable first assigned inside an `if`, `while`, or `for` body belongs to the scope around it and outlives the block. See [Variables](/docs/variables#scope) for what does introduce a scope.

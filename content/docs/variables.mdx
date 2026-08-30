@@ -23,6 +23,40 @@ Reading a name that has never been defined is an error, and Ghost reports it as 
 console.log(mystery) // name error: `mystery` is not defined
 ```
 
+## Destructuring
+
+One statement can bind several names at once. A list pattern binds by position:
+
+```typescript
+[first, second] = [10, 20]
+
+console.log(first)  // >> 10
+console.log(second) // >> 20
+```
+
+Asking for more names than the list has is not an error — the extras are `null`, the same leniency [indexing](/docs/operators#subscript-and-property-access) out of range already has.
+
+A map pattern binds by key. Naming a key on its own binds it to a variable of that name:
+
+```typescript
+{name, version} = {name: "Ghost", version: "0.30.0"}
+
+console.log(name)    // >> Ghost
+console.log(version) // >> 0.30.0
+```
+
+`key: local` binds that key to a different name instead:
+
+```typescript
+{name: title} = {name: "Ghost"}
+
+console.log(title) // >> Ghost
+```
+
+Destructuring is a statement, not an expression — it cannot be used as a call argument. The patterns bind plain names only: no nesting, and no `obj.x` or `list[0]` on the left. The right-hand side has to already be a list for a `[...]` pattern, and a map for a `{...}` one, or it is a type error.
+
+<callout>A statement that opens with `[` can be read as a continuation of the line above it, since Ghost has no significant newlines. If the previous line ends in something indexable, end it with a `;` — see [Statements](/docs/syntax#statements).</callout>
+
 ## Scope
 
 **Functions introduce a scope. Blocks do not.** A variable first assigned inside an `if`, `while`, or `for` body belongs to the scope that surrounds the loop or branch, and is still there after it ends:

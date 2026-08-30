@@ -12,47 +12,51 @@ Methods are declared by name with no `function` keyword, and instances are creat
 Classes are created using the `class` keyword, unsurprisingly:
 
 ```typescript
-class CoffeeMaker {
+class Player {
   //
 }
 ```
 
-This creates a class named `CoffeeMaker` with no methods or fields.
+This creates a class named `Player` with no methods or fields.
 
 ## Methods
 
-To add functionality to our coffee maker class, we need to give it methods. A method is a name, a parameter list, and a body:
+To give the class something to do, we give it methods. A method is a name, a parameter list, and a body:
 
 ```typescript
-class CoffeeMaker {
-  brew() {
-    console.log("Your coffee is now brewing.")
+class Player {
+  spawn() {
+    console.log("Ready.")
   }
 }
 ```
 
-This defines a `brew` method that takes no arguments. To add parameters, put their names inside the parentheses:
+This defines a `spawn` method that takes no arguments. To add parameters, put their names inside the parentheses:
 
 ```typescript
-class CoffeeMaker {
-  brew(dosage, temperature) {
-    console.log("Your %s of coffee is now brewing at %s degrees.".format(dosage, temperature))
+class Player {
+  move(x, y) {
+    console.log(`Moving to ${x}, ${y}.`)
   }
 }
 ```
 
-Methods take [default parameter values](/docs/functions#default-parameters) just like functions do.
+Methods take [default parameter values](/docs/functions#default-parameters) and [rest parameters](/docs/functions#rest-parameters) just like functions do, and their [argument counts work the same way](/docs/functions#argument-count) — a required parameter left unbound is an error, extra arguments are dropped. The error names the class and the method:
+
+```
+argument error: `Player.move()` expects at least 2 arguments, got 1
+```
 
 A method body's scope is the class itself, so a method can call a sibling method by bare name:
 
 ```typescript
-class CoffeeMaker {
-  brew() {
-    heat()
+class Player {
+  spawn() {
+    move(0, 0)
   }
 
-  heat() {
-    console.log("Heating...")
+  move(x, y) {
+    console.log(`Moving to ${x}, ${y}.`)
   }
 }
 ```
@@ -62,10 +66,9 @@ class CoffeeMaker {
 To create _instances_ of a class, we need a _constructor_. It is an ordinary method with the reserved name `constructor`:
 
 ```typescript
-class CoffeeMaker {
-  constructor(grind, temperature) {
-    console.log("Grind set to: %s".format(grind))
-    console.log("Temperature set to: %s".format(temperature))
+class Player {
+  constructor(name, health) {
+    console.log(`${name} enters with ${health} health.`)
   }
 }
 ```
@@ -73,10 +76,8 @@ class CoffeeMaker {
 Instances are built with the `new` keyword:
 
 ```typescript
-drip = new CoffeeMaker("flat", "200")
-chemex = new CoffeeMaker("coarse", "202")
-pourOver = new CoffeeMaker("fine", "202")
-frenchPress = new CoffeeMaker("very coarse", "202")
+hero = new Player("Artemis", 100)
+rival = new Player("Orion", 80)
 ```
 
 Note that we didn't call the `constructor` method directly. `new` creates the instance first, then invokes the constructor on it. That distinction matters, because inside the constructor body you can already use `this`, assign fields, and call other methods.
@@ -86,30 +87,31 @@ Note that we didn't call the `constructor` method directly. `new` creates the in
 State lives in _fields_. Each field has a name, is reached through `this`, and behaves like a variable.
 
 ```typescript
-class CoffeeMaker {
-  constructor(grind, temperature) {
-    this.grind = grind
-    this.temperature = temperature
+class Player {
+  constructor(name, health) {
+    this.name = name
+    this.health = health
 
-    this.printSettings()
+    this.describe()
   }
 
-  printSettings() {
-    console.log("Grind set to: %s".format(this.grind))
-    console.log("Temperature set to: %s".format(this.temperature))
+  describe() {
+    console.log(`${this.name}: ${this.health} health`)
   }
 }
+
+new Player("Artemis", 100) // >> Artemis: 100 health
 ```
 
 A field can also be declared directly in the class body, with an initial value:
 
 ```typescript
-class Animal {
-  legs = 4
+class Character {
+  health = 100
   name = "unnamed"
 }
 
-console.log(new Animal().legs) // >> 4
+console.log(new Character().health) // >> 100
 ```
 
 These declarations are **initializers, not shared class state**. They are re-evaluated for every instance — ancestors first, then the class itself — before the constructor runs, so two instances never share a field's value.
@@ -119,25 +121,25 @@ These declarations are **initializers, not shared class state**. They are re-eva
 Up to this point, "[scope](/docs/variables#scope)" has been used to talk exclusively about [variables](/docs/variables). Classes introduce a second kind: _object scope_, which contains the methods available on an object. When you write:
 
 ```typescript
-coffee.brew()
+hero.move(3, 4)
 ```
 
-you're saying "look up the method `brew` in the scope of the object `coffee`". That's what `.` does, and the object to the left of the period is the object you want to look up the method on.
+you're saying "look up the method `move` in the scope of the object `hero`". That's what `.` does, and the object to the left of the period is the object you want to look up the method on.
 
 ### `this`
 
 Things get more interesting when you're inside the body of a method. When the method is called on some object and the body is being executed, you often need to access that object itself. You can do that using `this`.
 
 ```typescript
-class CoffeeMaker {
-  setGrind(grind) {
-    this.grind = grind
+class Player {
+  setHealth(health) {
+    this.health = health
   }
 
-  printGrind() {
-    this.setGrind("coarse")
+  restore() {
+    this.setHealth(100)
 
-    console.log(this.grind)
+    console.log(this.health)
   }
 }
 ```
@@ -146,17 +148,19 @@ The `this` keyword works sort of like a variable, but has special behavior. It a
 
 It's an error to refer to `this` outside of a method.
 
+`this` keeps meaning the same instance inside a nested block, so a loop or a branch does not change what it refers to:
+
 ```typescript
-class CoffeeMaker {
-  setGrind(grind) {
-    this.grind = grind
+class Player {
+  setHealth(health) {
+    this.health = health
   }
 
-  printGrindThrice() {
-    this.setGrind("coarse")
+  countdown() {
+    this.setHealth(3)
 
     for (i in 1 .. 3) {
-      console.log(this.grind)
+      console.log(this.health)
     }
   }
 }
@@ -173,39 +177,39 @@ A class can inherit from a "parent" or _superclass_. When you invoke a method on
 To inherit another class, use `extends` when you declare your class:
 
 ```typescript
-class Bar extends Foo {
+class Enemy extends Character {
   //
 }
 ```
 
-This declares a new class `Bar` that inherits from `Foo`.
+This declares a new class `Enemy` that inherits from `Character` — every method and field `Character` defines is available on an `Enemy` without repeating it.
 
 ### `super`
 
 `super` reaches the version of a member defined by the superclass of the class the running method was declared in. It is how an overriding method calls the one it overrode, and how a subclass constructor runs its parent's:
 
 ```typescript
-class Animal {
+class Character {
   constructor(name) {
     this.name = name
   }
 
-  speak() {
-    return "..."
+  describe() {
+    return this.name
   }
 }
 
-class Dog extends Animal {
+class Enemy extends Character {
   constructor(name) {
     super.constructor(name)
   }
 
-  speak() {
-    return super.speak() + " woof"
+  describe() {
+    return super.describe() + " (hostile)"
   }
 }
 
-console.log(new Dog("Fido").speak()) // >> ... woof
+console.log(new Enemy("Grendel").describe()) // >> Grendel (hostile)
 ```
 
 A subclass constructor that doesn't call `super.constructor()` simply doesn't run the parent's — field declarations from ancestors are still applied either way.
@@ -214,28 +218,34 @@ A subclass constructor that doesn't call `super.constructor()` simply doesn't ru
 
 In addition to class inheritance, Ghost supports _traits_. Traits are like classes, but they can't be instantiated. Instead, they're used to share methods and fields between classes.
 
+Inheritance is for what something **is**; a trait is for what something **can do**. Taking damage is not the sort of thing that belongs to one branch of a hierarchy — a player, an enemy, and a destructible crate all do it, without being the same kind of thing.
+
 ```typescript
-trait Brewable {
-  brew() {
-    console.log("Your coffee is now brewing.")
+trait Damageable {
+  hurt(amount) {
+    this.health = this.health - amount
   }
 }
 ```
 
-This defines a trait named `Brewable` with a `brew` method. To use it, you use the `use` keyword inside the class body:
+This defines a trait named `Damageable` with a `hurt` method. To use it, you use the `use` keyword inside the class body:
 
 ```typescript
-class CoffeeMaker {
-  use Brewable
+class Player {
+  use Damageable
+
+  health = 100
 }
 ```
 
 It's as if you had written:
 
 ```typescript
-class CoffeeMaker {
-  brew() {
-    console.log("Your coffee is now brewing.")
+class Player {
+  health = 100
+
+  hurt(amount) {
+    this.health = this.health - amount
   }
 }
 ```
@@ -243,34 +253,54 @@ class CoffeeMaker {
 You can use multiple traits by separating them with commas:
 
 ```typescript
-class CoffeeMaker {
-  use Brewable, Cleanable
+class Player {
+  use Damageable, Healable
+
+  health = 100
 }
 ```
 
-A trait's methods can call methods the using class provides, which is the usual way to build one:
+A trait's methods can call methods the using class provides, which is the usual way to build one. The trait supplies the behavior and leaves a hole for the class to fill:
 
 ```typescript
-trait Loud {
-  shout() {
+trait Shouts {
+  taunt() {
     return this.speak().toUpperCase()
   }
 }
 
-class Dog {
-  use Loud
+class Ogre {
+  use Shouts
 
   speak() {
-    return "woof"
+    return "grrr"
   }
 }
 
-console.log(new Dog().shout()) // >> WOOF
+console.log(new Ogre().taunt()) // >> GRRR
 ```
+
+`Shouts` knows nothing about ogres. Any class that can `speak()` can `use` it.
 
 ## Comparing Instances
 
 Instances compare by identity. Two instances of the same class holding equal fields are still two different objects, so `==` between them is `false` unless they are literally the same object.
+
+```typescript
+class Player {
+  constructor(name) {
+    this.name = name
+  }
+}
+
+a = new Player("Artemis")
+b = new Player("Artemis")
+
+console.log(a == b) // >> false
+console.log(a == a) // >> true
+```
+
+This is the one place classes differ from [lists and maps](/docs/operators#comparison-operators), which compare by their contents. To compare two instances by what they hold, compare the fields you care about.
 
 ## Classes From Modules
 

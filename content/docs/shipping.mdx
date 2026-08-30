@@ -3,7 +3,7 @@ title: "Shipping a Game"
 section: "Lumen"
 ---
 
-A game is a folder with a `main.ghost` in it. To hand it to someone who does not have Lumen, build it.
+A game is a folder with a `main.gs` in it. To hand it to someone who does not have Lumen, build it.
 
 ```bash
 lumen build mygame -o mygame         # a standalone executable; players just run it
@@ -24,7 +24,7 @@ That needs `codesign`, which arrives with the Xcode command line tools. Shipping
 
 ## `lumen package`
 
-Produces a `.lumen` file: a zip of the game's sources and assets with `main.ghost` at the root. It is much smaller than a built executable, but players need Lumen installed to run it.
+Produces a `.lumen` file: a zip of the game's sources and assets with `main.gs` at the root. It is much smaller than a built executable, but players need Lumen installed to run it.
 
 ```bash
 lumen mygame.lumen

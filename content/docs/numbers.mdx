@@ -68,10 +68,56 @@ Numeric values can be represented in scientific notation by using `e`. This retu
 ## Methods
 
 <Collection>
+  <p>[abs](#abs)</p>
+  <p>[ceil](#ceil)</p>
+  <p>[clamp](#clamp)</p>
   <p>[floor](#floor)</p>
+  <p>[isEven](#iseven)</p>
+  <p>[isFinite](#isfinite)</p>
+  <p>[isInfinite](#isinfinite)</p>
+  <p>[isInteger](#isinteger)</p>
+  <p>[isNaN](#isnan)</p>
+  <p>[isNegative](#isnegative)</p>
+  <p>[isOdd](#isodd)</p>
+  <p>[isPositive](#ispositive)</p>
+  <p>[isZero](#iszero)</p>
+  <p>[pow](#pow)</p>
   <p>[round](#round)</p>
   <p>[toString](#tostring)</p>
 </Collection>
+
+Each of these mirrors its counterpart on the [`math`](/docs/math) module exactly, so `n.pow(2)` and `math.pow(n, 2)` agree for every input. Use whichever reads better where you are.
+
+### `abs()`
+
+The `abs()` method returns the number's distance from zero. A whole number stays whole.
+
+```typescript
+value = (-5).abs()
+
+// expected value: 5
+```
+
+### `ceil()`
+
+The `ceil()` method returns the smallest whole number greater than or equal to the given number.
+
+```typescript
+value = 3.2.ceil()
+
+// expected value: 4
+```
+
+### `clamp()`
+
+The `clamp()` method pulls the number inside a range, returning the nearest of the two bounds when it falls outside.
+
+```typescript
+console.log(7.clamp(1, 5))  // >> 5
+console.log(3.clamp(1, 5))  // >> 3
+```
+
+It answers with one of the three values you gave it rather than a computed one, so clamping whole numbers leaves them whole. A low bound above the high bound is a value error.
 
 ### `floor()`
 
@@ -82,6 +128,78 @@ value = 3.7.floor()
 
 // expected value: 3
 ```
+
+### `isEven()`
+
+The `isEven()` method reports whether the number is a whole, even one. A number with a fractional part is neither even nor odd.
+
+```typescript
+console.log(4.isEven())   // >> true
+```
+
+### `isFinite()`
+
+The `isFinite()` method reports whether the number is neither infinite nor `NaN`. A whole number always is.
+
+### `isInfinite()`
+
+The `isInfinite()` method reports whether the number is positive or negative infinity.
+
+```typescript
+import "ghost:math"
+
+console.log(math.infinity.isInfinite()) // >> true
+```
+
+### `isInteger()`
+
+The `isInteger()` method reports whether the number has no fractional part — true for every whole number, and for a decimal that happens to land on one.
+
+```typescript
+console.log(4.isInteger())   // >> true
+console.log(4.5.isInteger()) // >> false
+```
+
+### `isNaN()`
+
+The `isNaN()` method reports whether the number is the "not a number" value. Only a decimal can be.
+
+```typescript
+import "ghost:math"
+
+console.log(math.nan.isNaN()) // >> true
+```
+
+### `isNegative()`
+
+The `isNegative()` method reports whether the number is below zero.
+
+### `isOdd()`
+
+The `isOdd()` method reports whether the number is a whole, odd one.
+
+### `isPositive()`
+
+The `isPositive()` method reports whether the number is above zero.
+
+### `isZero()`
+
+The `isZero()` method reports whether the number is exactly zero. Worth reaching for given that `0` is [truthy](/docs/values#truthiness) in Ghost, so `if (n)` does not test this.
+
+```typescript
+console.log(0.isZero()) // >> true
+```
+
+### `pow()`
+
+The `pow()` method raises the number to an exponent.
+
+```typescript
+console.log(2.pow(10))  // >> 1024
+console.log(2.5.pow(2)) // >> 6.25
+```
+
+A whole number raised to a whole, non-negative exponent stays exact and whole, so the result can be used as a list index.
 
 ### `round()`
 
@@ -121,4 +239,4 @@ console.log(`pi is ${3.14}`)
 // >> pi is 3.14
 ```
 
-<callout>Only these three are methods on a number itself. Everything else — `ceil`, `abs`, `sqrt`, `pow`, `clamp`, and the `isX` predicates — lives on the [`math`](/docs/math) module, which has to be imported: `math.ceil(3.2)`, not `3.2.ceil()`.</callout>
+<callout>The methods above are the ones with a natural "call this on the number" reading. The rest of the numeric toolkit — `sqrt`, `lerp`, the trigonometric functions, the statistics — lives on the [`math`](/docs/math) module and has to be imported: `math.sqrt(16)`, with no `16.sqrt()` counterpart.</callout>

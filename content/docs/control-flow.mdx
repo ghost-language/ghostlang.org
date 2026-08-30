@@ -162,6 +162,20 @@ switch (value) {
 
 Regardless of whether or not a `default` case is provided, execution will continue after the `switch` statement per normal. If a `default` case is not provided, and no other cases match, the `switch` statement will do nothing.
 
+At most one `default` is allowed; a second is a parse error.
+
+A case matches using the same rule [`==`](/docs/operators#comparison-operators) uses, so lists and maps match on their contents rather than on being the same value:
+
+```typescript
+switch (point) {
+  case [0, 0] {
+    console.log("origin")
+  }
+}
+```
+
+And because matching is ordinary evaluation, an error in the subject or in a case value is reported where it happened rather than being swallowed.
+
 ## Looping Statements
 
 A looping statement offers a quick and easy way to do something repeatedly. In this section, we'll introduce the different looping statements available in Ghost.
@@ -236,7 +250,13 @@ for (i = 0; i < 5; i++) {
 }
 ```
 
-The three clauses are separated by semicolons — the only place a semicolon appears in Ghost. The increment clause may be an assignment (`i = i + 1`), a compound assignment (`i += 1`), or an increment or decrement (`i++`, `i--`).
+The three clauses are separated by semicolons — the one place a semicolon is required rather than optional. The increment clause may be an assignment (`i = i + 1`), a compound assignment (`i += 1`), or an increment or decrement (`i++`, `i--`), and it can target anything an assignment can reach, not just a plain variable:
+
+```typescript
+for (i = 0; i < items.length(); state.seen++) {
+  i++
+}
+```
 
 The counter belongs to the loop: once the loop ends, the name is gone again.
 
@@ -262,7 +282,7 @@ for (key, value in { name: "Ghost", type: "language" }) {
 }
 ```
 
-Maps have no defined order, so the pairs come out in whatever order they come out in.
+Maps keep their insertion order, so the pairs come out in the order they were added — the same order [`keys()`](/docs/maps#keys) and [`values()`](/docs/maps#values) report.
 
 Combined with the [range operator](/docs/operators#range-operator), `for ... in` also counts:
 

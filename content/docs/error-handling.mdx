@@ -13,19 +13,19 @@ Every failure Ghost reports carries the same five things: what sort of mistake i
 
 ```
 name error: `mesage` is not defined
- --> example.ghost:4:22
+ --> example.gs:4:22
   |
 4 |   return "Hello, " + mesage
   |                      ^^^^^^
   |
-  = in greet(), called at example.ghost:7:1
+  = in greet(), called at example.gs:7:1
   = help: did you mean `message`?
 ```
 
 Reading it top to bottom:
 
 - **`name error`** — the *kind* of mistake, named below. Ghost never reports a generic "runtime error".
-- **`example.ghost:4:22`** — the file, line, and column.
+- **`example.gs:4:22`** — the file, line, and column.
 - **The quoted line** — the source itself, with `^` under exactly the text that failed.
 - **`= in greet(), called at ...`** — the call trace, recorded as the error unwinds. Deep traces are capped at eight frames, with a count of the rest.
 - **`= help:`** — what to do next, rather than a restatement of the problem.
@@ -70,7 +70,7 @@ console.log(mesage)
 
 ```
 name error: `mesage` is not defined
- --> example.ghost:2:13
+ --> example.gs:2:13
   |
 2 | console.log(mesage)
   |             ^^^^^^
@@ -82,7 +82,7 @@ The suggestion is a real edit-distance search over the names actually in scope �
 
 ```
 property error: module `math` has no property `pii`
- --> example.ghost:2:18
+ --> example.gs:2:18
   |
 2 | console.log(math.pii)
   |                  ^^^
@@ -94,7 +94,7 @@ Reaching for a standard library module you have not [imported](/docs/modules#imp
 
 ```
 name error: `math` is not defined
- --> example.ghost:1:1
+ --> example.gs:1:1
   |
 1 | math.sqrt(16)
   | ^^^^
@@ -112,7 +112,7 @@ console.log("Ghost " + 1)
 
 ```
 type error: cannot use `+` between string and number
- --> example.ghost:1:22
+ --> example.gs:1:22
   |
 1 | console.log("Ghost " + 1)
   |                      ^
@@ -132,11 +132,13 @@ Every library method checks its own arity and argument types, so a miscall is re
 
 ```
 argument error: `math.sqrt()` expects 1 argument, got 0
- --> example.ghost:2:6
+ --> example.gs:2:6
   |
 2 | math.sqrt()
   |      ^^^^
 ```
+
+[Functions and methods you define yourself](/docs/functions#argument-count) are checked for a minimum but have no maximum, so the wording differs — `expects at least 2 arguments, got 1`. Either way the error is raised before the body runs, so no frame for the call appears in the trace — it never started.
 
 ## Nothing can crash the host
 

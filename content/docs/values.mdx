@@ -98,13 +98,30 @@ See [Strings](/docs/strings).
 
 ## Dates
 
-A `date` is a single instant in time, always normalized to UTC. Dates are never written as a literal — they come out of the [`date`](/docs/date) module, and every operation on one is a function in that module rather than a method on the value, which keeps a date immutable.
+A `date` is a single instant in time, together with the time zone it should be read in — UTC unless you say otherwise. Dates are never written as a literal — they come out of the [`date`](/docs/date) module, and every operation on one is a function in that module rather than a method on the value, which keeps a date immutable.
 
 ```typescript
 import "ghost:date"
 
 console.log(type(date.now())) // >> date
 ```
+
+Comparisons look at the instant, so they do not depend on which zone either date carries. The zone decides what reading a *calendar* position back out — the year, the hour, the weekday — answers. See [Date](/docs/date#time-zones).
+
+## Durations
+
+A `duration` is a calendar-and-clock span: years, months, days, hours, minutes, and seconds kept as separate components rather than collapsed into one number, because "one month" has no fixed length in days. Like a date, it comes from the [`date`](/docs/date#durations) module.
+
+```typescript
+import "ghost:date"
+
+span = date.duration(1, 2, 3)
+
+console.log(type(span)) // >> duration
+console.log(span)       // >> P1Y2M3D
+```
+
+Unlike a date, a duration reads its own fields with methods — `span.years()`, `span.months()`, and so on.
 
 ## Functions
 

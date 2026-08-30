@@ -118,10 +118,10 @@ y = math.sin(angle) * speed
 Arithmetic on lists is elementwise, and the operators say so directly:
 
 ```typescript
-[1, 2, 3] + 10                // [11, 12, 13]
-[1, 2, 3] * 2                 // [2, 4, 6]
-[1, 2, 3] + [10, 20, 30]      // [11, 22, 33]
-[[1, 2], [3, 4]] + [10, 20]   // [[11, 22], [13, 24]]
+[1, 2, 3] + 10;                // [11, 12, 13]
+[1, 2, 3] * 2;                 // [2, 4, 6]
+[1, 2, 3] + [10, 20, 30];      // [11, 22, 33]
+[[1, 2], [3, 4]] + [10, 20];   // [[11, 22], [13, 24]]
 ```
 
 The methods below are the same operations under a name, broadcasting identically — `a + b` and `math.add(a, b)` are one operation reached two ways. Reach for whichever reads better: the operators for arithmetic in the middle of an expression, the methods where a name carries more.

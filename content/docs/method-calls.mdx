@@ -32,9 +32,9 @@ Ghost executes a method call like so:
 Methods aren't only for class instances. Every built-in type carries its own set, and they're called the same way:
 
 ```typescript
-"ghost".toUpperCase()  // >> GHOST
-[3, 1, 2].length()     // >> 3
-3.14159.round(2)       // >> 3.14
+"ghost".toUpperCase();  // >> GHOST
+[3, 1, 2].length();     // >> 3
+3.14159.round(2)        // >> 3.14
 ```
 
 See [Strings](/docs/strings), [Lists](/docs/lists), and [Numbers](/docs/numbers) for what each type offers.
@@ -65,7 +65,7 @@ Calling a method a value doesn't have is a [property error](/docs/error-handling
 
 ```
 property error: class `Foo` has no method `spek`
- --> example.ghost:7:5
+ --> example.gs:7:5
   |
 7 | foo.spek()
   |     ^^^^

@@ -22,6 +22,31 @@ A key written as a bare identifier is taken as a string, so these two are the sa
 
 Strings, numbers, and booleans can all be used as keys.
 
+When a value is already in a variable of the same name as the key, the key can be left off entirely — the **shorthand** form:
+
+```typescript
+name = "Ghost"
+version = "0.30.0"
+
+console.log({ name, version })
+// >> {name: Ghost, version: 0.30.0}
+```
+
+Shorthand and ordinary pairs mix freely in one literal: `{ name, count: 2 }`. The same shorthand works in reverse when [destructuring](/docs/variables#destructuring) a map.
+
+## Order
+
+A map remembers the order its keys were **first inserted**, and every operation that walks it — [`for ... in`](/docs/control-flow#for--in-statement), [`keys()`](#keys), [`values()`](#values), [`entries()`](#entries) — reports that order.
+
+```typescript
+scores = { zebra: 1, apple: 2 }
+scores.set("mango", 3)
+
+console.log(scores.keys()) // >> [zebra, apple, mango]
+```
+
+Assigning to a key that already exists updates its value and leaves its position alone. [`remove()`](#remove) drops a key out of the order entirely, leaving no gap behind.
+
 ## Accessing Elements
 
 You can access any element in a map by calling the subscript operator on it with the _key_ of the element you want.
@@ -98,14 +123,25 @@ console.log(config.window.width) // >> 1280
 ## Methods
 
 <Collection>
+  <p>[entries](#entries)</p>
   <p>[get](#get)</p>
   <p>[has](#has)</p>
   <p>[keys](#keys)</p>
   <p>[length](#length)</p>
   <p>[merge](#merge)</p>
+  <p>[remove](#remove)</p>
   <p>[set](#set)</p>
   <p>[values](#values)</p>
 </Collection>
+
+### `entries()`
+The `entries` method returns the map as a [list](/docs/lists) of `[key, value]` pairs, in insertion order — the counterpart to `keys()` and `values()` when you want both at once:
+
+```typescript
+{ a: 1, b: 2 }.entries()
+
+// [[a, 1], [b, 2]]
+```
 
 ### `get()`
 The `get` method reads a key, and takes an optional fallback for when the key is absent. Without one, a missing key answers `null` — the same as `[]` indexing.
@@ -158,6 +194,19 @@ defaults.merge({ width: 1280 })
 // { width: 1280, height: 600 }
 ```
 
+### `remove()`
+The `remove` method deletes a key and answers the value that was stored under it. A key that was not there answers `null` rather than erroring — the same leniency reading a missing key has. It mutates the map:
+
+```typescript
+scores = { a: 1, b: 2 }
+
+console.log(scores.remove("a")) // >> 1
+console.log(scores.remove("z")) // >> null
+console.log(scores.keys())      // >> [b]
+```
+
+The removed key leaves no gap in the map's [order](#order).
+
 ### `set()`
 The `set` method assigns a key and returns the map itself, so calls can be chained. It mutates the map, exactly as assigning through `[]` or `.` does:
 
@@ -178,4 +227,6 @@ The `values` method returns the map's values as a [list](/docs/lists):
 // [1, 2]
 ```
 
-<callout>Ghost maps have no way to remove a key yet. Building a new map without it — walking the original with `for ... in` — is the way around it for now.</callout>
+A map's `values()` line up with its [`keys()`](#keys) — both report insertion order, so the same position in each refers to the same pair.
+
+<callout>There is no `forEach` on a map. Use [`for ... in`](/docs/control-flow#for--in-statement), which gives you the key and the value together.</callout>
