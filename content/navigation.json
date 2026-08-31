@@ -1,7 +1,8 @@
 {
   "links": {
     "Introduction": {
-      "Getting Started": "/docs"
+      "Getting Started": "/docs",
+      "Download": "/download"
     },
     "Language": {
       "Syntax": "/docs/syntax",

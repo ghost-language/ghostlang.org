@@ -39,6 +39,7 @@ export function Footer() {
             </h3>
 
             <ul className="mt-4 space-y-4">
+              <li><Link href="/download" className="text-background/80 hover:text-background">Download</Link></li>
               <li><Link href="/blog" className="text-background/80 hover:text-background">Blog</Link></li>
               <li><Link href="/docs" className="text-background/80 hover:text-background">Documentation</Link></li>
               {/* <li><Link href="#" className="text-background/80 hover:text-background">Style Guide</Link></li>

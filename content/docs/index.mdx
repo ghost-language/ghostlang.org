@@ -9,14 +9,26 @@ Ghost is a small scripting language that supports both functional and object-ori
 
 ## Installing Ghost
 
-### Brew
+### Homebrew
 
-If you're on Mac, you may use `homebrew`:
+On a Mac, Homebrew is the shortest way in. Ghost lives in the project's own tap, alongside [Lumen](/docs/lumen) and anything else the project ships:
 
 ```bash
-brew tap ghost-language/ghost
-brew install ghost-language/ghost/ghost
+brew tap ghost-language/tap
+brew install --cask ghost-language/tap/ghost
 ```
+
+Homebrew asks you to trust a tap outside its own before it will load anything from it. Trusting this one covers every cask in it, now and later:
+
+```bash
+brew trust --tap ghost-language/tap
+```
+
+Upgrading later is `brew upgrade --cask ghost`.
+
+Ghost is a **cask** rather than a formula because it ships pre-built binaries rather than building from source, which is what Homebrew asks a cask to be used for. That also makes it macOS-only — on Linux and Windows, take a build from the [download page](/download).
+
+<callout>**The `ghost-language/ghost` tap has moved.** Ghost, Lumen, and everything else now share one tap, `ghost-language/tap`. The old one is frozen at `1.0.0-beta.3` and will not be updated again — it still installs, so nothing breaks if you stay, but you will not see new releases until you re-tap. Run `brew untap ghost-language/ghost`, then tap the new one as above.</callout>
 
 ### Go Install
 
@@ -28,7 +40,9 @@ go install ghostlang.org/x/ghost
 
 ### Direct Download
 
-You may download the compiled binaries for your platform from our GitHub [releases](https://github.com/ghost-language/ghost/releases) page.
+Builds for macOS, Linux, and Windows are on the [download page](/download), which lists everything attached to the latest release and picks out your platform. They come from Ghost's GitHub [releases](https://github.com/ghost-language/ghost/releases) page, which you can also browse directly.
+
+A downloaded archive is quarantined by macOS and refused on first run, since the binaries are not notarised. Clear it with `xattr -dr com.apple.quarantine ghost`, or install the cask above, which does it for you.
 
 ## Building Ghost
 
