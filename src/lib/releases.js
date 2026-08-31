@@ -44,9 +44,9 @@ const FORMATS = {
 
 // Splits an asset filename into the pieces a platform and an architecture can
 // be read out of. Both projects name their archives the same way even though
-// only one of them uses GoReleaser — `<project>_<version>_<os>_<arch><ext>`,
-// with `-` instead of `_` between os and arch in Lumen's case — so tokenising
-// on every separator covers both without either being special-cased.
+// only one of them uses GoReleaser: `<project>_<version>_<os>_<arch><ext>`,
+// with `-` instead of `_` between os and arch in Lumen's case. Tokenising on
+// every separator covers both without either being special-cased.
 function tokenize(filename) {
   const lowered = filename.toLowerCase()
   const extension = EXTENSIONS.find(candidate => lowered.endsWith(candidate)) ?? ''
@@ -104,8 +104,8 @@ function describeAsset(asset) {
 }
 
 // Turns a release's flat list of assets into the platform sections the
-// download page renders. Anything that names no platform — checksums, a
-// signature, an installer nobody thought to put an OS in the name of — is kept
+// download page renders. Anything that names no platform (checksums, a
+// signature, an installer nobody thought to put an OS in the name of) is kept
 // aside rather than dropped, so a new kind of asset shows up on the page the
 // release after it is added rather than needing this file changed.
 function groupAssets(assets) {
@@ -157,9 +157,9 @@ export async function fetchLatestRelease(repository) {
     'X-GitHub-Api-Version': '2022-11-28',
   }
 
-  // Unauthenticated requests are rate limited per IP. A token is not required
-  // — the page revalidates hourly, which stays well inside the anonymous
-  // budget — but it is used when one is configured.
+  // Unauthenticated requests are rate limited per IP. A token is not required,
+  // since the page revalidates hourly and stays well inside the anonymous
+  // budget, but it is used when one is configured.
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`
   }

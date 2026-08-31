@@ -157,20 +157,9 @@ export default async function Download() {
 
           <p>
             Both are casks rather than formulae, because both ship pre-built
-            binaries rather than building from source — which is what Homebrew
+            binaries rather than building from source, which is what Homebrew
             asks a cask to be used for. Casks are macOS-only; on Linux and
             Windows, take the archives below.
-          </p>
-
-          <p className="rounded-lg border-l-2 border-foreground/20 pl-4 text-muted-foreground">
-            <strong className="font-semibold text-foreground">
-              The old <code className="font-mono">ghost-language/ghost</code> tap has moved.
-            </strong>{' '}
-            It is frozen at <code className="font-mono">1.0.0-beta.3</code> and
-            will not be updated again. Run{' '}
-            <code className="font-mono">brew untap ghost-language/ghost</code>,
-            then tap <code className="font-mono">ghost-language/tap</code> as
-            above.
           </p>
         </div>
       </Section>
@@ -210,7 +199,7 @@ export default async function Download() {
             <p className="mb-4 text-sm text-foreground/80">
               Ghost builds with <code className="font-mono">make</code>. Lumen
               links SDL2 through cgo, so it needs the SDL development libraries
-              first — see{' '}
+              first. See{' '}
               <Link href="/docs/lumen" className="underline underline-offset-4 hover:text-foreground">
                 Lumen&rsquo;s getting started guide
               </Link>

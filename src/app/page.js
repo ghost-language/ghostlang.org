@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { Label } from '@/components/ui/label'
 import { Title } from '@/components/ui/title'
 import { CommandBlock } from '@/components/command-block'
+import { CodePreview } from '@/components/code-preview'
+import { getCodeExamples } from '@/lib/code-examples'
 import { MostRecentPosts } from '@/components/most-recent-posts'
 import { BoxIcon, FilterIcon, SquareDashedBottomCode } from 'lucide-react'
 
@@ -87,9 +89,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="border p-6 rounded-lg flex items-center justify-center bg-foreground text-background font-mono text-sm">
-            example code <span className="ml-2 cursor-default animate-pulse">▍</span>
-          </div>
+          <CodePreview projects={getCodeExamples()} />
         </div>
       </section>
 

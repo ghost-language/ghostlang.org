@@ -28,8 +28,6 @@ Upgrading later is `brew upgrade --cask ghost`.
 
 Ghost is a **cask** rather than a formula because it ships pre-built binaries rather than building from source, which is what Homebrew asks a cask to be used for. That also makes it macOS-only — on Linux and Windows, take a build from the [download page](/download).
 
-<callout>**The `ghost-language/ghost` tap has moved.** Ghost, Lumen, and everything else now share one tap, `ghost-language/tap`. The old one is frozen at `1.0.0-beta.3` and will not be updated again — it still installs, so nothing breaks if you stay, but you will not see new releases until you re-tap. Run `brew untap ghost-language/ghost`, then tap the new one as above.</callout>
-
 ### Go Install
 
 If you have Go installed, you may use `go install`:
