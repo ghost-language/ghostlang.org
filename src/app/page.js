@@ -1,5 +1,9 @@
+import Link from 'next/link'
 import { Label } from '@/components/ui/label'
 import { Title } from '@/components/ui/title'
+import { CommandBlock } from '@/components/command-block'
+import { CodePreview } from '@/components/code-preview'
+import { getCodeExamples } from '@/lib/code-examples'
 import { MostRecentPosts } from '@/components/most-recent-posts'
 import { BoxIcon, FilterIcon, SquareDashedBottomCode } from 'lucide-react'
 
@@ -8,7 +12,7 @@ export default function Home() {
     <>
       <section className="py-12">
         <div className="grid lg:grid-cols-2 gap-8">
-          <div>
+          <div className="min-w-0">
             <Label className="mb-3">
               <span>🌸</span>
               <span>Currently in Development</span>
@@ -62,11 +66,30 @@ export default function Home() {
                 </div>
               </li>
             </ul>
+
+            <div className="mt-10">
+              <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-foreground/60">
+                Install on macOS
+              </h4>
+
+              <CommandBlock
+                commands={[
+                  'brew tap ghost-language/tap',
+                  'brew install --cask ghost-language/tap/ghost',
+                ]}
+              />
+
+              <p className="mt-3 text-sm text-foreground/80">
+                On Linux or Windows?{' '}
+                <Link href="/download" className="font-medium underline underline-offset-4">
+                  Every build is on the download page
+                </Link>
+                .
+              </p>
+            </div>
           </div>
 
-          <div className="border p-6 rounded-lg flex items-center justify-center bg-foreground text-background font-mono text-sm">
-            example code <span className="ml-2 cursor-default animate-pulse">▍</span>
-          </div>
+          <CodePreview projects={getCodeExamples()} />
         </div>
       </section>
 

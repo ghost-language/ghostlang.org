@@ -26,10 +26,10 @@ When a value is already in a variable of the same name as the key, the key can b
 
 ```typescript
 name = "Ghost"
-version = "0.30.0"
+version = "1.0.0-beta.3"
 
 console.log({ name, version })
-// >> {name: Ghost, version: 0.30.0}
+// >> {name: Ghost, version: 1.0.0-beta.3}
 ```
 
 Shorthand and ordinary pairs mix freely in one literal: `{ name, count: 2 }`. The same shorthand works in reverse when [destructuring](/docs/variables#destructuring) a map.
@@ -45,7 +45,12 @@ scores.set("mango", 3)
 console.log(scores.keys()) // >> [zebra, apple, mango]
 ```
 
-Assigning to a key that already exists updates its value and leaves its position alone. [`remove()`](#remove) drops a key out of the order entirely, leaving no gap behind.
+Assigning to a key that already exists updates its value and leaves its position alone. [`remove()`](#remove) drops a key out of the order entirely, leaving no gap behind. A key written twice in one literal keeps the position of its first appearance and the value of its last, the same rule assignment follows.
+
+Two things cannot carry an order through, because there is none for them to carry:
+
+- [`json.encode()`](/docs/json#encode) writes a map's keys alphabetically whatever order they went in, and [`json.decode()`](/docs/json#decode) cannot recover the order a JSON text was written in. A decoded map still has a fixed, repeatable order, just not the document's.
+- A map built by a Go program [embedding Ghost](/docs/embedding) starts life as a Go map, which has no order of its own. It settles into one and keeps it from then on.
 
 ## Accessing Elements
 
@@ -97,9 +102,9 @@ for (name, age in people) {
 }
 ```
 
-<callout>**Maps are unordered.** The pairs come back in no particular order, and that order can differ between two runs of the identical program — for `for ... in`, for [`keys()`](#keys) and [`values()`](#values), and for printing the map. Do not write a program, or a test, that depends on it.</callout>
+Both forms walk the map in the order its keys were [first inserted](#order), the same order [`keys()`](#keys), [`values()`](#values), and [`entries()`](#entries) report.
 
-Sort the keys yourself when the order matters:
+To walk it in some other order, sort the keys yourself:
 
 ```typescript
 for (name in people.keys().sort()) {
@@ -184,7 +189,7 @@ The `length` method returns how many pairs the map holds:
 ```
 
 ### `merge()`
-The `merge` method returns a **new** map holding both maps' pairs, leaving each alone. Where both have the same key, the argument's value wins — the same rule a later assignment to that key would follow:
+The `merge` method returns a **new** map holding both maps' pairs, leaving each alone. Where both have the same key, the argument's value wins, the same rule a later assignment to that key would follow, but the key keeps the position it had in the receiver. The receiver's pairs come first, then whatever the argument adds:
 
 ```typescript
 defaults = { width: 800, height: 600 }

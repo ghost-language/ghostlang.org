@@ -30,9 +30,38 @@ function draw() {
 }
 ```
 
-## Requirements
+## Installing Lumen
 
-Lumen links against SDL2 through cgo, so the SDL development libraries have to be present to build it:
+### Homebrew
+
+On a Mac, Lumen installs from the project's own tap — the same one [Ghost](/docs) lives in:
+
+```bash
+brew tap ghost-language/tap
+brew install --cask ghost-language/tap/lumen
+```
+
+Homebrew asks you to trust a tap outside its own before it will load anything from it. Trusting it once covers every cask in it, so if you already did this for Ghost there is nothing to do:
+
+```bash
+brew trust --tap ghost-language/tap
+```
+
+Ghost is compiled into the Lumen binary and SDL2 travels alongside it inside the cask, with the libraries' install names rewritten to point beside the executable. So there is nothing else to install, and nothing to build. Upgrading later is `brew upgrade --cask lumen`.
+
+### Other platforms
+
+Casks are macOS-only. Builds for Linux and Windows are on the [download page](/download), which lists everything attached to the latest release and picks out your platform.
+
+On Windows the SDL2 DLLs are in the archive beside `lumen.exe`; keep the folder together. On Linux, SDL2 is linked dynamically and comes from your distribution, so the runtime libraries have to be installed:
+
+```bash
+apt install libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-ttf-2.0-0 libsdl2-mixer-2.0-0
+```
+
+## Building from Source
+
+Lumen links against SDL2 through cgo, so building it needs the SDL **development** libraries — the headers, not just the runtime libraries a downloaded build asks for:
 
 - SDL2
 - SDL2_image
@@ -51,9 +80,7 @@ On Debian or Ubuntu:
 apt install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev
 ```
 
-## Building Lumen
-
-Lumen is under active development. Download and build the source from [GitHub](https://github.com/ghost-language/lumen):
+With those in place, clone and build it from [GitHub](https://github.com/ghost-language/lumen):
 
 ```bash
 git clone https://github.com/ghost-language/lumen

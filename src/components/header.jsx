@@ -7,7 +7,7 @@ import { ConstructionIcon, TriangleIcon, PanelLeftIcon } from 'lucide-react'
 export function Header() {
   const navigation = [
     { name: 'Documentation', href: '/docs' },
-    // { name: 'Download', href: '/download' },
+    { name: 'Download', href: '/download' },
     { name: 'Blog', href: '/blog' },
   ]
 

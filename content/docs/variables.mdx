@@ -39,10 +39,10 @@ Asking for more names than the list has is not an error — the extras are `null
 A map pattern binds by key. Naming a key on its own binds it to a variable of that name:
 
 ```typescript
-{name, version} = {name: "Ghost", version: "0.30.0"}
+{name, version} = {name: "Ghost", version: "1.0.0-beta.3"}
 
 console.log(name)    // >> Ghost
-console.log(version) // >> 0.30.0
+console.log(version) // >> 1.0.0-beta.3
 ```
 
 `key: local` binds that key to a different name instead:
