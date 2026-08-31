@@ -1,0 +1,195 @@
+---
+title: "Catching Up: Ghost 1.0 And A Game Engine Called Lumen"
+date: 2026-08-31 00:00:00
+summary: "It has been a while. Ghost now has a written specification and a 1.0 beta, the language picked up template literals, real classes, and errors that teach, and there is a whole 2D game engine we never got around to announcing."
+version: v1.0.0-beta.3
+---
+
+The last post here was `v0.28.0`, back in November 2023. It added traits, fixed a bug in class bodies, and then the blog went quiet for nearly three years.
+
+The project did not. This post is the catch up, and there is a lot of it, so it is organized by what actually changed rather than by release. If you only read one section, make it [Lumen](#lumen-a-2d-game-engine-for-ghost), because we somehow shipped an entire game engine without ever mentioning it here.
+
+## Ghost Is Going To 1.0
+
+The biggest change is not a feature. It is that Ghost now has a written specification.
+
+`SPEC.md` in the repository says what Ghost 1.0 is meant to be: the language and standard library you can write a script against and keep relying on for the rest of the 1.x line. It was produced by reading the implementation end to end, package by package, rather than by writing down what we remembered being true. Where the code did not match the goal, the gap got a number and a section instead of being quietly folded in as though it already worked.
+
+Then we spent August closing those numbered gaps one at a time. The current release is `v1.0.0-beta.3`.
+
+The spec builds 1.0 around three commitments, in priority order:
+
+1. **Expressive, fluent surface syntax.** Method chains should read as sentences. Classes should look like classes. You should never have to hold Ghost's quirks in your head on top of the problem you are actually trying to solve.
+2. **A standard library that anticipates what you reach for**, covers it completely, and never leaves you stranded in a half finished corner.
+3. **Errors that teach rather than dump.** Every failure is a structured fault with a location, an underlined snippet, a call trace, and where we have one, a suggested fix.
+
+## The Language Got Its Edges Filed Down
+
+A fair amount of this is breaking. Ghost has been in beta the whole time and we would rather fix the shape now than carry it through 1.x, but if you have scripts lying around, this is the section to read.
+
+### Classes Look Like Classes
+
+Instances are built with `new`, and methods are declared by name without the `function` keyword:
+
+```typescript
+class Player {
+  constructor(name, health) {
+    this.name = name
+    this.health = health
+  }
+
+  describe() {
+    console.log(`${this.name}: ${this.health} health`)
+  }
+}
+
+hero = new Player("Artemis", 100)
+```
+
+`Example.new()` is gone, and using it now gets you a syntax error pointing at `new` rather than something baffling. `super` actually works, having previously been scanned by the lexer and then evaluated into nothing. Field initializers run per instance, so `class C { items = [] }` no longer hands every instance the same list. See [Classes](/docs/classes).
+
+### Template Literals
+
+Backticks and `${}`, the way you already expect:
+
+```typescript
+console.log(`${this.name} has ${this.health} health`)
+```
+
+This matters more in Ghost than in most languages, because Ghost never converts types for you. `"count: " + 1` is a type error, not `"count: 1"`. Before template literals, building a string out of mixed values was genuinely annoying. See [Strings](/docs/strings#template-literals).
+
+### The Standard Library Is Import Only
+
+`console` and `type` are the only names available without an import. Everything else you ask for by name, under the `ghost:` scheme:
+
+```typescript
+import "ghost:math"
+import { sqrt } from "ghost:math"
+import math, { pi } from "ghost:math"
+```
+
+Using a module you have not imported is an error that names the exact import to add, so this is not something to memorize. `io` was renamed to `file`, and `path` is new. See [Modules](/docs/modules).
+
+### Destructuring, Rest, And Spread
+
+```typescript
+{name, version} = {name: "Ghost", version: "1.0.0-beta.3"}
+
+function tally(first, ...rest) {
+  return rest.length()
+}
+```
+
+See [Variables](/docs/variables#destructuring) and [Functions](/docs/functions#rest-parameters).
+
+### Source Files Are `.gs`
+
+`.ghost` is gone. Import resolution, error messages, the REPL, and every example now use `.gs`. It is a smaller extension for a language you type a lot.
+
+### And A Pile Of Smaller Ones
+
+`string.find` and friends flipped to read as `subject.find(pattern)`. `==` and `!=` now answer for every type instead of erroring on a mismatch. Maps are backed by an insertion ordered structure, so `for ... in`, `keys()`, `values()`, and `entries()` all walk them in the order the keys went in. Postfix `++` and `--` work on properties and indexes. The `-i` flag runs a file and then drops you into the REPL with that script's environment still loaded, which is the one flag worth committing to memory.
+
+## Numbers Got A Lot Faster
+
+Ghost used to represent every number as an arbitrary precision decimal. It was correct and it was extremely slow, because every loop counter and every array index allocated.
+
+Numbers are now a dual `int64`/`float64` representation, Lua 5.3 style: integer operations stay integers, float operations use floats, and division always promotes to float. Alongside that, `list.push` stopped reallocating and copying the whole backing array on every call, and small integers in the range -128 to 1024 are interned so the common ones never allocate at all.
+
+Building a ten thousand element list went from 470ms and 837MB to 11ms and 2.2MB.
+
+That was not an abstract exercise. Allocation overhead in hot loops was the single thing standing between Ghost and being usable for a game running at sixty frames a second, which brings us to the part we never announced.
+
+## Lumen: A 2D Game Engine For Ghost
+
+Lumen is a lightweight 2D game engine that runs Ghost. It gives Ghost a game loop, a renderer, input, audio, and file access, so an entire game can be written in Ghost and nothing else. It is built on SDL2, and Ghost is compiled into the binary.
+
+```typescript
+import "lumen:canvas"
+import "lumen:color"
+import "lumen:keyboard"
+
+game = { x: 100, y: 100, speed: 180 }
+
+function update(dt) {
+  if (keyboard.isDown('right', 'd')) { game.x = game.x + game.speed * dt }
+  if (keyboard.isDown('left', 'a'))  { game.x = game.x - game.speed * dt }
+}
+
+function draw() {
+  canvas.setColor(color.white)
+  canvas.filledRectangle(game.x, game.y, 32, 32)
+}
+```
+
+The shape will be familiar if you have used LÖVE. You define `load()`, `update(dt)`, and `draw()`, and the engine calls them. Drawing methods live on the thing being drawn, so it is `sprite.draw(x, y)` rather than a graphics call that takes the sprite as an argument, which is the shape the rest of Ghost already has.
+
+It started in October 2023 and picked up most of its surface this year: an affine transform stack applied to every primitive, delta time, audio with panning, gamepads, text measurement, a filesystem module that knows where saves go, spritesheets and animations as native classes, and a `lumen:` import scheme of its own. Sprite draws that share a texture are batched automatically as they are made, and off screen ones are dropped before they reach SDL.
+
+The repository ships sixteen examples. The one to read is `60_rpg`, a complete top down RPG with a Tiled map and per layer collision, a smoothed camera with bounds and screen shake, NPCs and typewriter dialogue, weighted random encounters, front view turn based battles with spells and items, levelling, a party with equipment and a shared pack, saving and loading, and gamepad support.
+
+When you are ready to hand a game to someone, `lumen build` appends your game to a copy of the engine so the result is a single executable, and `lumen package` produces a much smaller `.lumen` file for players who already have Lumen. See [Shipping a Game](/docs/shipping).
+
+Some honest limits, so you find out here rather than halfway through a project. Lumen links SDL2 through cgo, so builds do not cross compile and shipping to three platforms means building on three platforms. There are no shaders and no particle system. There is no physics engine. Assets do not hot reload. [The Lumen docs](/docs/lumen) spell all of this out in more detail.
+
+## Errors That Teach
+
+Every failure in Ghost is now a structured fault rendered by exactly one renderer, and it tells you what happened, where, and what to do about it:
+
+```
+argument error: `canvas.print()` expects argument 1 to be a string, got number
+ --> main.gs:12:5
+   |
+12 |     canvas.print(score, 10, 10)
+   |     ^^^^^^^^^^^^
+   |
+   = in drawScore(), called at main.gs:30:3
+   = in draw()
+   = help: did you mean `text(score)`?
+```
+
+A Ghost program cannot take the host process down with a raw Go panic. Every failure, including a bug in Ghost itself, comes back as a value the embedding program or a human at a REPL can read.
+
+Lumen takes this further, because a game usually runs in its own window on a machine nobody started it from a terminal on. Every failure is reported twice, once to the console and once onto an error screen in the window, and the game holds still on it. A failure inside `update()` or `draw()` offers to carry on, because one bad frame is worth watching past. A failure in `load()` does not, because nothing after it ever built the state the later frames read. Run headlessly, it writes to the console and exits non zero instead of holding open a window nobody can close.
+
+## The Standard Library Filled Out
+
+`math` grew from a handful of functions into a full library, including elementwise operations that broadcast across lists the way numpy does. `date` gained time zone support and a `Duration` type. Numbers picked up instance methods. Lists, maps, and strings picked up the methods you keep reaching for and finding absent: `filter`, `reduce`, `flatMap`, `chunk`, `unique`, `entries`, `remove`, and quite a few more.
+
+The full reference is in [the docs](/docs), which have been rewritten alongside all of this.
+
+## Installing
+
+Ghost and Lumen now ship from one Homebrew tap, as casks:
+
+```bash
+brew tap ghost-language/tap
+brew install --cask ghost-language/tap/ghost
+brew install --cask ghost-language/tap/lumen
+```
+
+Homebrew asks you to trust a tap outside its own before it will load anything from it, and trusting it once covers both:
+
+```bash
+brew trust --tap ghost-language/tap
+```
+
+If you used the old `ghost-language/ghost` tap, run `brew untap ghost-language/ghost` and tap the new one. The old tap is frozen and will not see new releases.
+
+Casks are macOS only. There is now a [download page](/download) that lists every build attached to the latest release of both projects, straight from GitHub, and picks out your platform for you.
+
+## A Note On Claude
+
+A good deal of the pace above came from working with Claude, and it would be strange to publish a post this size without saying so. It is in the commit history either way.
+
+What it changed was not really the ideas. It was the distance between having an idea and having it implemented, tested, and documented. Reading the entire interpreter end to end to produce `SPEC.md` is exactly the sort of thorough, unglamorous work that had been sitting on the list for two years, and the same goes for closing thirty numbered gaps one at a time, or writing an engine's worth of reference documentation.
+
+It is not magic and it does not remove the need to have opinions about your own language. Every decision in the spec is still a decision somebody had to make. But Ghost went from a project that got touched a few times a year to one that moved further in a month than in the two years before it, and that is worth being straightforward about.
+
+## What's Next
+
+The remaining work is closing the last distance between `SPEC.md` and the implementation, and then cutting 1.0. After that the point of a 1.0 is that scripts written against it keep working, so the interesting work moves to Lumen and to whatever people build with it.
+
+If you want to follow along, everything is on [GitHub](https://github.com/ghost-language), and the [docs](/docs) are current as of this post.
+
+Thanks for sticking around through the quiet part ✌️
